@@ -79,3 +79,55 @@ review, first independent documentation reconstruction run against a
 deliberately restricted evidence set, and first Phase 1 closeout
 assessment — which recommends **leaving Phase 1 open**, not marking it
 complete, on two named, real, external blockers.
+
+### Changed
+
+- Corrective amendment (`planning/prompts/003-phase-1-corrective-amendment.md`,
+  `decisions/0005`): **Phase 1's independent-Codex-review requirement is
+  now native Codex GitHub PR review**, not the API-backed
+  `openai/codex-action@v1` workflow — `OPENAI_API_KEY` and GitHub
+  required-status-check configuration are no longer Phase 1 blockers.
+  `.github/workflows/codex-review.yml` moved to
+  `.github/deferred/codex-review.yml` (preserved, not deleted);
+  `.github/scripts/policy_evaluator.py` and its tests are unaffected and
+  now also run in CI alongside the validator's own suite.
+- Documentation drift corrected: `AGENTS.md` §8, `CONTRIBUTING.md`
+  ("Making a change" §5), `docs/knowledge-placement.md` (Enforcement
+  classes rewritten to a six-level distinction; Placement table's
+  "Historical narrative" row corrected to name one destination),
+  `docs/axiom-validator.md` (three claims corrected after independent
+  semantic review found them contradicted by the actual code — including
+  one real code defect, not just a documentation error: see below),
+  `docs/development-lifecycle.md` (actor-naming added to all 5
+  phase-acceptance steps, not just one), `planning/CONTEXT.md` (was
+  missed in this pass's first draft, caught by independent review,
+  fixed).
+- `src/axiom_validator/validate_file` now resolves `repo_root`
+  internally — fixes a real latent defect (present identically in the
+  pre-refactor monolith) that made the component's own documented usage
+  example reproducibly fail.
+
+### Added
+
+- `contracts/documentation-schema-validator.md` rules 10–15 (field
+  type/non-emptiness checks; a minimal governed-documents manifest,
+  `docs/governed-documents.txt`), implemented in
+  `src/axiom_validator/rules.py` and `__init__.py`, with 6 new fixtures
+  and a new, separate test file (`tests/test_axiom_validator_schema_content.py`,
+  9 tests) that does not touch the checksum-protected Stage 1.4 baseline
+  — re-confirmed byte-identical after this change.
+- `decisions/0005` (native Codex review decision; partially supersedes
+  `decisions/0004`'s live-integration expectation).
+- `.github/workflows/deterministic-checks.yml` gained
+  `axiom-validator-tests` and `validate-governed-documentation` jobs —
+  the validator's own test suite and every governed document now run on
+  every push/PR, with no secret required.
+- `evidence/schema-value-assessment.md` (prompt 003 Amendment G): three
+  paired schema-vs-document examples, finding that the schema's
+  mechanical layer caught none of the eleven real defects this pass's
+  semantic review found — all eleven were semantic/editorial-class
+  issues, which the schema's own design says it cannot mechanically
+  catch.
+- `planning/phase-01-foundation.md` §17–§20 (corrective-amendment plan
+  amendment, revised Definition of Done, independent review record, and
+  batch status).

@@ -2,7 +2,11 @@
 
 ## Status
 
-Accepted — 2026-11-21
+Accepted — 2026-11-21. **Partially superseded by `decisions/0005`** (the
+Stage 1.3 live-integration expectation under Amendment B below is
+replaced by native Codex GitHub PR review for Phase 1; the
+anti-circularity mechanics, measurement, and acceptance-demonstration
+content below are unaffected and remain in force).
 
 ## Context
 

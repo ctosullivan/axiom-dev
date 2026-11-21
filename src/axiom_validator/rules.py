@@ -46,6 +46,54 @@ def check_required_fields(data: dict) -> list[str]:
     return []
 
 
+NON_EMPTY_STRING_FIELDS = ("audience", "purpose")
+LIST_OF_STRINGS_FIELDS = ("required_sections", "authoritative_sources", "acceptance_criteria")
+
+GOVERNED_MANIFEST_PATH = "docs/governed-documents.txt"
+
+
+def check_field_types_and_content(data: dict) -> list[str]:
+    """Contract rules 10-13 (prompt 003 Amendment C).
+
+    Assumes check_required_fields(data) already returned no errors, i.e.
+    every field in NON_EMPTY_STRING_FIELDS/LIST_OF_STRINGS_FIELDS is
+    present. Called before rules 4-7, which assume well-typed data.
+    """
+    errors: list[str] = []
+
+    for field in NON_EMPTY_STRING_FIELDS:
+        value = data[field]
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{field} must be a non-empty string, got {value!r}")
+
+    for field in LIST_OF_STRINGS_FIELDS:
+        value = data[field]
+        if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+            errors.append(f"{field} must be a list of strings, got {value!r}")
+            continue
+        if field in ("required_sections", "acceptance_criteria") and not value:
+            errors.append(f"{field} must not be empty")
+        if field == "acceptance_criteria" and any(not v.strip() for v in value):
+            errors.append("acceptance_criteria entries must be non-empty strings")
+
+    return errors
+
+
+def load_governed_manifest(repo_root: Path) -> set[str]:
+    """Contract rule 15: repository-relative paths that must carry a
+    passing schema. Missing manifest file => empty set (nothing governed),
+    not an error."""
+    manifest_path = repo_root / GOVERNED_MANIFEST_PATH
+    if not manifest_path.exists():
+        return set()
+    lines = manifest_path.read_text(encoding="utf-8").splitlines()
+    return {
+        stripped
+        for line in lines
+        if (stripped := line.strip()) and not stripped.startswith("#")
+    }
+
+
 def check_required_sections(data: dict, present_headings: set[str]) -> list[str]:
     """Contract rule 4."""
     missing_headings = [

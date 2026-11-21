@@ -88,19 +88,28 @@ This is the concrete answer to "how does a stage actually get marked
 Completed in `planning/ROADMAP.md`" (`planning/phase-01-foundation.md`
 §4, Stage 1.2 scope):
 
-1. The stage's own plan (in `planning/phase-01-foundation.md` or a
-   dedicated stage plan) states its completion criteria in advance — not
-   invented retroactively to match whatever got built.
-2. An independent review runs against the actual artifacts (not the
-   implementer's summary), at the isolation level actually available,
-   named explicitly (`docs/agent-isolation.md`).
-3. Material findings are resolved — fixed, or explicitly accepted with
-   reasoning recorded (as in `planning/phase-01-foundation.md` §6, §11).
-4. Only after 1–3: `planning/ROADMAP.md`'s status for that stage changes
-   to Completed, and `planning/CONTEXT.md`'s "next concrete action" moves
-   to the next stage. This edit is itself a human-approval-boundary action
+1. **Who: whoever authors the stage's plan** (the implementing agent or
+   session, same actor §2 "Plan before implementation" names) — the
+   stage's own plan (in `planning/phase-01-foundation.md` or a dedicated
+   stage plan) states its completion criteria in advance, not invented
+   retroactively to match whatever got built.
+2. **Who: an independent reviewer** — a fresh-context agent (or a human,
+   if one is reviewing directly) — runs against the actual artifacts
+   (not the implementer's summary), at the isolation level actually
+   available, named explicitly (`docs/agent-isolation.md`). Never the
+   same actor as step 1 for the same stage, even under best-effort
+   isolation.
+3. **Who: the implementing agent/session** — resolves material findings:
+   fixed, or explicitly accepted with reasoning recorded (as in
+   `planning/phase-01-foundation.md` §6, §11), before anyone acts on
+   step 4.
+4. **Who: an agent prepares; a human confirms.** Only after 1–3:
+   `planning/ROADMAP.md`'s status for that stage changes to Completed,
+   and `planning/CONTEXT.md`'s "next concrete action" moves to the next
+   stage. This edit is itself a human-approval-boundary action
    (`AGENTS.md` §11) — an agent can prepare the edit and point to the
    evidence; a human confirms it.
-5. If a stage's acceptance criteria are not fully met, the roadmap says so
-   honestly (Blocked, or still In progress with the open item named) —
-   never Completed with a caveat buried in prose.
+5. **Who: whoever is updating the roadmap** (same actor as step 4) — if
+   a stage's acceptance criteria are not fully met, states so honestly
+   (Blocked, or still In progress with the open item named) — never
+   Completed with a caveat buried in prose.

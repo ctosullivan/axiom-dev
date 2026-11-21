@@ -154,8 +154,7 @@ Stage 1.0 placement policy only.
 
 ## 8. Testing and verification requirements
 
-Once Axiom Dev has source code (Stage 1.4 onward), every behavioural change
-needs:
+Every behavioural change needs:
 
 - A deterministic test demonstrating the intended behaviour.
 - For contract-governed behaviour, a test demonstrating the contract still
@@ -163,9 +162,21 @@ needs:
 - Evidence attached to the plan's completion record, not just a claim that
   "tests pass."
 
-Nothing in this repository yet requires this in practice — it is recorded
-here now so the first substantive component (Stage 1.4) is built against a
-known bar, not a bar invented after the fact.
+This stopped being forward-looking once Stage 1.4 shipped the first real
+component: `src/axiom_validator/` (a knowledge/documentation schema
+validator) is covered by `tests/test_axiom_validator.py` and
+`tests/test_axiom_validator_schema_content.py`
+(`PYTHONPATH=src python3 -m unittest discover -s tests -v`), and
+`.github/scripts/policy_evaluator.py` is covered by
+`.github/scripts/tests/test_policy_evaluator.py`
+(`PYTHONPATH=.github/scripts python3 -m unittest discover -s
+.github/scripts/tests -v`). Both suites, plus a check of the governed
+documentation manifest (`docs/governed-documents.txt`), run in
+`.github/workflows/deterministic-checks.yml` on every push and PR — see
+`docs/knowledge-placement.md`'s "Enforcement classes" for exactly which
+level (implemented / locally tested / executed by CI / a required merge
+check) each of those is actually at; this section states the rule, that
+document states the current enforcement level honestly.
 
 ## 9. Commit and pull request conventions
 

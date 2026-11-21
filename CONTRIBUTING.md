@@ -28,11 +28,14 @@ not repeat its reasoning, only the mechanics.
 4. Record a new ADR under `decisions/` only if the change involves a
    genuinely non-obvious decision (`AGENTS.md` §3). Never edit an accepted
    ADR's decision in place — add a superseding ADR instead.
-5. Attach verification evidence appropriate to the change — for now
-   (pre-Stage-1.4, no source code yet) that means: internal consistency
-   checks, cross-reference checks, and an independent review pass; once
-   Axiom Dev has source code, deterministic tests are required
-   (`AGENTS.md` §8).
+5. Attach verification evidence appropriate to the change. For a change to
+   `src/axiom_validator/` or `.github/scripts/policy_evaluator.py`, that
+   means deterministic tests (`AGENTS.md` §8) — see "Testing requirements"
+   below for the real, already-running suites. For a documentation-only or
+   governance change, that means internal consistency checks,
+   cross-reference checks (ideally run through the validator itself if the
+   document carries a schema — `docs/documentation-schema.md`), and an
+   independent review pass.
 
 ## Commit conventions
 

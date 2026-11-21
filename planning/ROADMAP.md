@@ -28,7 +28,13 @@ Full stage detail, dependencies and acceptance criteria:
 
 Amended 2026-11-21 per `planning/prompts/002-phase-1-amend-and-implement.md`
 and `decisions/0004` — see `planning/phase-01-foundation.md` §0 for what
-changed.
+changed. Further amended the same day by a corrective pass per
+`planning/prompts/003-phase-1-corrective-amendment.md` and `decisions/0005`
+(documentation-drift fixes, validator schema strengthening, deterministic
+CI completion, and replacing the API-backed Codex gate requirement with
+native Codex GitHub PR review) — see `planning/phase-01-foundation.md`
+§17/§18 for what changed and §19/§20 for its independent review and
+status.
 
 **Phase 1 as a whole is not Completed.** An independent closeout
 assessment (`evidence/phase-1-closeout.md`,
@@ -61,19 +67,27 @@ covered by 16 passing tests
 required scenarios from `planning/prompts/002-...md` §6. The
 `.github/workflows/deterministic-checks.yml` workflow runs this suite on
 every push/PR with no secrets required.
-`.github/workflows/codex-review.yml` and `.github/codex/prompts/review.md`
-implement the live integration to spec (researched against current
-OpenAI documentation — citations in the workflow file) but it is
-**blocked**: no `OPENAI_API_KEY` exists in this environment, and enabling
-it is a cost/billing decision for a human, not this session, to make. The
-workflow is written to fail safely (skip, not false-pass) without that
-secret. **A second, separately-blocking gap** (flagged by independent
-review as previously unmentioned): even with the secret, making either
-workflow an actual GitHub "required status check" needs repository-admin
-API access this session doesn't have. This stage's exit criterion ("real
-GitHub PR evidence demonstrates both successful and blocked outcomes") is
-**not met** for the live piece — recorded open on both counts, not
-papered over.
+**Superseded by `decisions/0005` (2026-11-21, prompt 003 Amendment A):**
+the API-backed live piece described below is no longer Phase 1's
+required mechanism for independent Codex review — it is deferred, not
+secretly satisfied. `.github/workflows/codex-review.yml` and
+`.github/codex/prompts/review.md` implemented that live integration to
+spec (researched against current OpenAI documentation — citations in the
+workflow file) but remained blocked: no `OPENAI_API_KEY` in this
+environment (a human cost/billing decision), and no repository-admin API
+access to make either workflow an actual GitHub "required status check."
+The workflow file is preserved, moved to
+`.github/deferred/codex-review.yml` so it no longer appears in GitHub
+Actions' run list (where its gated skip could be misread as part of
+normal CI status); `.github/scripts/policy_evaluator.py` and its tests
+remain active and are now also run in
+`.github/workflows/deterministic-checks.yml`'s `axiom-validator-tests`
+sibling jobs. **Phase 1's independent-review requirement is now native
+Codex GitHub PR review** on an actual opened PR — not yet performed, since
+no PR has ever been opened (no `gh`/token; see `planning/phase-01-foundation.md`
+§17/§18). The original automated-merge-gate requirement stays recorded as
+superseded and deferred, with reconsideration conditions in
+`decisions/0005`, not dropped silently.
 
 An independent review of this stage's code also found and fixed, before
 commit: a vacuous staleness check (the comparison was tautological

@@ -49,7 +49,10 @@ buildable and testable without live credentials
    GitHub API query for the PR's current head), so a replayed/re-run of a
    stale trigger is actually caught. `evaluate()` itself cannot enforce
    this — it only compares the two strings it's given — so this is a
-   documented obligation on the integration (`.github/workflows/codex-review.yml`),
+   documented obligation on the integration
+   (`.github/deferred/codex-review.yml` — deferred per `decisions/0005`
+   and preserved as reusable material; this rule's logic is unaffected
+   by where that workflow file lives),
    not something a unit test of the pure function alone can verify.
 6. **`findings` is not a list, or any entry is not an object with a
    `severity` field** → `FAIL_CLOSED`, naming the bad entry. *(Covers

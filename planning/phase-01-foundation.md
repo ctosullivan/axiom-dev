@@ -2,14 +2,20 @@
 
 Authorising prompts:
 [`planning/prompts/001-phase-1-bootstrap.md`](prompts/001-phase-1-bootstrap.md)
-(original bootstrap) and
+(original bootstrap),
 [`planning/prompts/002-phase-1-amend-and-implement.md`](prompts/002-phase-1-amend-and-implement.md)
 (amendment, supersedes the bootstrap-only restriction and authorises full
-Stage 1.0–1.5 implementation).
+Stage 1.0–1.5 implementation), and
+[`planning/prompts/003-phase-1-corrective-amendment.md`](prompts/003-phase-1-corrective-amendment.md)
+(corrective amendment: documentation-drift fixes, validator schema
+strengthening, deterministic CI completion, native-Codex-review strategy
+change, independent semantic review — see §17 below).
 Related ADRs: [`decisions/0001`](../decisions/0001-development-governance.md),
 [`decisions/0002`](../decisions/0002-knowledge-architecture.md),
 [`decisions/0003`](../decisions/0003-independent-verification.md),
-[`decisions/0004`](../decisions/0004-phase-1-amendment-verification-measurement-and-acceptance.md).
+[`decisions/0004`](../decisions/0004-phase-1-amendment-verification-measurement-and-acceptance.md)
+(partially superseded — see `decisions/0005`),
+[`decisions/0005`](../decisions/0005-native-codex-review-and-deferred-automated-gate.md).
 
 This is the implementation-ready Phase 1 plan, amended per prompt 002.
 **Completing Stage 1.0 does not complete Phase 1.** Phase 1 closes
@@ -599,7 +605,7 @@ honest default, not a gap to hide.
 |---|---|---|---|
 | 1 | A fresh agent resumes development using repository knowledge alone | `evidence/phase-1-log.md` 2026-11-21 entry | **Demonstrated** — correctly reconstructed project/methodology/ADRs/status from repo contents alone, and caught a real transient CONTEXT.md/ROADMAP.md staleness mid-session (fixed in the same commit as this row) |
 | 2 | One requirement traced: instruction → plan → decision → implementation → verification | The "reject a document missing a required section" requirement: `planning/prompts/001-...md` §5 → `decisions/0002` → this plan's Stage 1.4 → `contracts/documentation-schema-validator.md` rule 4 → `src/axiom_validator/rules.py`'s `check_required_sections` → `tests/test_axiom_validator.py`'s `TestMissingSection` (passing) → `evidence/stage-1.4-baseline.md`/`stage-1.4-refactor.md` | **Demonstrated** — full chain, every link a real file, not asserted |
-| 3 | A deliberately defective PR is rejected by the required CI gate | Stage 1.3, live integration piece | Not yet demonstrated — depends on Stage 1.3's live-integration blocker status (§4) |
+| 3 | ~~A deliberately defective PR is rejected by the required CI gate~~ — **requirement changed by `decisions/0005`**: Phase 1 no longer requires an enforceable automated gate; it requires a real native Codex GitHub PR review on an actual PR, with findings dispositioned | Stage 1.3 (deterministic piece, done); native-review piece, §17 below | Not yet demonstrated — depends on a human opening the PR this session cannot open (no `gh`/token) and triggering native Codex review on it; see §17 |
 | 4 | A meaningful refactor preserves independently established behaviour | Stage 1.4 (`evidence/stage-1.4-refactor.md`) | **Demonstrated** — real structural split, identical before/after test results, independently verified |
 | 5 | Knowledge placement and documentation consistency evaluated against real changes | §11 (Stage 1.1 format fix), Stage 1.4 dogfooding (real ADR-citation defect), Stage 1.5 reconstruction (missing-doc gap + 2 Limitations fixes) | **Demonstrated** — four independent, real (non-synthetic) instances across three different stages |
 | 6 | Documentation independently reconstructed from permitted evidence | Stage 1.5 (`evidence/stage-1.5-reconstruction.md`) | **Demonstrated** — restricted-evidence reconstruction, compared, 2 real findings fixed, 1 correctly accepted as out-of-scope-for-the-evidence-given |
@@ -888,3 +894,352 @@ claim for what is actually procedural.
 Per `AGENTS.md` §11, this record documents the evidence for a human to
 decide what to mark Completed — it does not self-certify, and
 `planning/ROADMAP.md` is not changed to say "Completed" by this session.
+
+## 17. Corrective amendment (prompt 003, 2026-11-21)
+
+Authorising prompt:
+[`planning/prompts/003-phase-1-corrective-amendment.md`](prompts/003-phase-1-corrective-amendment.md).
+This section amends — does not replace — §0 and §9/§10 above, per
+`AGENTS.md` §3's append-and-supersede convention applied to plans as well
+as ADRs. Prompt 003 required seven lettered amendments (also labelled
+A–G, in a **separate sequence from `decisions/0004`'s Amendments A–D** —
+the two are not the same list; this section always writes "prompt 003
+Amendment X" or "prompt 002 Amendment X" where the letter alone would be
+ambiguous).
+
+**Prompt 003 Amendment A — Codex review strategy.** Resolved by
+`decisions/0005`: Phase 1's independent-Codex-review requirement is now
+satisfied by a **native Codex GitHub PR review** of an actual opened PR
+(no `OpenAI API key, no self-hosted Action), not the API-backed workflow
+`decisions/0004` originally specified. That workflow
+(`.github/workflows/codex-review.yml`) is moved to
+`.github/deferred/codex-review.yml` so GitHub Actions no longer lists its
+gated skip as part of normal CI status for new commits; its policy
+evaluator and contract (`.github/scripts/policy_evaluator.py`,
+`contracts/codex-gate-policy-evaluator.md`, both independently reviewed
+and locally tested — `evidence/phase-1-log.md`) are preserved unmodified
+as reusable material, not deleted. **This session still cannot open a
+GitHub PR** (`gh` confirmed not installed, no passwordless `sudo` to
+install it, no token) — re-verified directly in this session, not
+assumed from the prior one. The acceptance criterion therefore stays
+open: this amendment changes *what* would satisfy it, not whether it is
+currently satisfied. See §18 for the exact human hand-off this produces.
+
+**Prompt 003 Amendment B — documentation drift.** Re-inspected directly
+(not assumed from the prior closeout) and confirmed still present:
+
+- **B1** — `AGENTS.md` §8 still read "Nothing in this repository yet
+  requires this in practice," false since Stage 1.4 shipped. Corrected to
+  describe the actual, already-enforced requirement with real file
+  references (`AGENTS.md` §8, this change).
+- **B2** — `CONTRIBUTING.md`'s "Making a change" §5 still read "for now
+  (pre-Stage-1.4, no source code yet)," even though that same document's
+  own "Testing requirements" section (further down) had already been
+  corrected in the Phase 1 closeout — a real instance of the exact
+  partial-reconciliation risk prompt 003 names. Corrected in this change.
+- **B3** — `docs/knowledge-placement.md`'s "Enforcement classes" and
+  "Reconciliation hook" sections said "once Stage 1.4's validator
+  exists" / "checked by hand" as if the validator did not yet exist,
+  although it has existed and been dogfooded since Stage 1.4. Rewritten
+  to the six-level distinction prompt 003 B3 requires (policy defined /
+  mechanism implemented / locally tested / executed by CI / enforced as a
+  required merge condition / semantic-editorial manual review), stating
+  plainly which level each control in this project is actually at —
+  including that **sequential ADR numbering is not mechanically
+  enforced** by anything in this repository (a human/reviewer convention
+  only), which the prior wording never claimed but also never explicitly
+  ruled out.
+- **B4** — wider reconciliation pass across README, development-lifecycle,
+  agent-isolation, documentation-schema, knowledge-reconciliation,
+  axiom-validator docs, ROADMAP, CONTEXT, and both governance files:
+  performed by direct read of each file's current text against the
+  repository's current state (not a restatement of the prior closeout).
+  No further current-state drift found beyond B1–B3 in this pass; this is
+  recorded as what was actually inspected, not a blanket "reconciled"
+  claim — see the independent review record below for a second,
+  independent pass over the same files.
+
+**Prompt 003 Amendment C — strengthen validator schema validation.**
+`contracts/documentation-schema-validator.md` gained an explicit,
+clearly-marked contract amendment (new rules 10–14, appended — the
+original 9 rules are untouched) requiring: `audience`/`purpose` to be
+non-empty strings; `required_sections`, `authoritative_sources`,
+`acceptance_criteria` to be correctly typed (lists of strings);
+`required_sections` and `acceptance_criteria` to be non-empty;
+`authoritative_sources` may legitimately be an empty list (no placeholder
+entries required or accepted — an empty list already passes every
+existing per-entry check vacuously, which is the intended behaviour, not
+a gap); and a new, minimal **governed-documents manifest**
+(`docs/governed-documents.txt`) under which a listed path with no
+front-matter is `FAIL`, not `SKIPPED` — closing the "delete the schema to
+silently bypass its checks" gap named in the prompt. Implemented in
+`src/axiom_validator/rules.py` (`check_field_types_and_content`,
+`load_governed_manifest`) and wired into `validate_file` in
+`src/axiom_validator/__init__.py`, with new fixtures under
+`tests/fixtures/` and a **new, separate test file**
+(`tests/test_axiom_validator_schema_content.py`) rather than editing the
+checksum-protected `tests/test_axiom_validator.py` or any of its
+protected fixtures — those files and their recorded checksums in
+`evidence/stage-1.4-baseline.md` are confirmed unchanged (see §19
+"Independent review record — corrective amendment batch").
+
+**Prompt 003 Amendment D — semantic documentation review.** Performed
+against `docs/axiom-validator.md`, `docs/knowledge-placement.md`, and
+`docs/development-lifecycle.md`, following the exact seven-step
+VERIFIED/FAILED/UNCERTAIN procedure prompt 003 specifies, by a fresh,
+best-effort-isolated reviewer instructed to inspect the documents'
+declared authoritative sources directly rather than paraphrase the
+documents themselves. Full record: §19 below.
+
+**Prompt 003 Amendment E — deterministic CI completion.**
+`.github/workflows/deterministic-checks.yml` gained two new jobs:
+`axiom-validator-tests` (installs `requirements.txt`, runs
+`tests/test_axiom_validator.py` and the new
+`tests/test_axiom_validator_schema_content.py`) and
+`validate-governed-documentation` (runs the validator CLI against every
+path in `docs/governed-documents.txt`, failing the job on any
+`FAIL`/`INVALID_SCHEMA`). Neither requires a secret. Semantic findings
+(prompt 003 Amendment D) are explicitly **not** wired into CI — they are
+human/agent-judgement findings recorded in `evidence/`, not a mechanical
+check, per `docs/knowledge-placement.md`'s enforcement-class distinction.
+
+**Prompt 003 Amendment F — refactor re-confirmation.**
+`evidence/stage-1.4-refactor.md` was not rewritten; a second, independent
+re-confirmation pass re-derived its claims directly against git history
+and current checksums rather than trusting the prior review, and recorded
+the three required distinctions (tests/fixtures demonstrate equivalence
+under existing coverage, not universal semantic equivalence; the
+programmatic interface is preserved under that coverage; the CLI
+invocation shape changed and was never contract-protected) as an explicit
+addendum. Full record: §19 below.
+
+**Prompt 003 Amendment G — schema value assessment.** A focused,
+three-example assessment (`evidence/schema-value-assessment.md`) compares
+each named document's actual schema against its actual content, using
+the four-way distinction prompt 003 requires (schema-enforced /
+schema-encouraged-not-verified / general-planning-introduced /
+independent-review-corrected), and records the open research hypothesis
+verbatim as **not** a Phase 1 completion requirement. Written after, and
+using the real findings of, the Amendment D semantic review — not before
+it, since G explicitly depends on D's actual results, not a prediction of
+them.
+
+## 18. Revised Phase 1 Definition of Done (prompt 003 §12)
+
+This is the definition of done prompt 003 requires, tracked here as its
+own table rather than silently replacing §7/§8's prior criteria (which
+remain historically accurate for what Stage 1.0 alone required). Status
+below reflects §19/§20's findings after both independent dispatches
+(review + confirmation) completed — filled in once there was real
+evidence to assess, not asserted ahead of it. **Final tally: 10 of 16
+MET, 1 locally-verified-only, 5 open.**
+
+| # | Criterion | Status |
+|---|---|---|
+| 1 | Governance, roadmap, ADRs and preserved planning prompts are coherent | **Met** — §19's one real gap (`planning/CONTEXT.md`) fixed and independently re-confirmed |
+| 2 | Previously identified documentation drift has been corrected | **Met** — B1–B4 plus the additional items §19 found, all fixed and re-confirmed |
+| 3 | Documentation schemas are valid and meaningful for governed documents | **Met** — Amendment C implemented, independently stress-tested with 6 fresh counter-examples, zero survived |
+| 4 | Deterministic schema validation and tests operate in GitHub Actions | **Locally verified only** — the exact CI commands run correctly in this session (twice, by two independent dispatches); no actual GitHub Actions run has been triggered, since this session cannot push a commit through a live Actions run beyond what's already on `origin` |
+| 5 | Semantic documentation acceptance criteria evaluated against real source evidence | **Met** — all 3 named documents reviewed per the 7-step procedure; real gaps found and fixed, not a clean pass rubber-stamped |
+| 6 | Knowledge placement evaluated on actual project changes | **Met** — `docs/knowledge-placement.md` itself was evaluated and corrected against real repository state (B3, and §19's further findings) |
+| 7 | Validator refactoring evidence independently confirmed | **Met** — re-derived from git history independently, including a from-scratch re-run of the pre-refactor test suite |
+| 8 | Refactoring limitations and unprotected interfaces recorded | **Met** — CLI-invocation qualification and its contract-design implication recorded in §19 and `evidence/stage-1.4-refactor.md` |
+| 9 | Independent documentation reconstruction demonstrated, isolation limitations explicit | **Met** — Stage 1.5, unchanged by this amendment |
+| 10 | Native Codex GitHub review actually performed on the relevant PR | **Open — blocked.** No PR exists (no `gh`/token, re-confirmed); see `decisions/0005` and §20 |
+| 11 | Significant Codex findings resolved or dispositioned by the human | **Open** — depends on #10 |
+| 12 | Reviewed commit and review evidence recorded | **Open** — depends on #10 |
+| 13 | Automatic API-backed Codex CI gate explicitly deferred in accepted ADRs | **Met** — `decisions/0005` |
+| 14 | Process overhead and unresolved research hypotheses documented | **Met** — `evidence/phase-1-log.md`; hypothesis recorded verbatim in `evidence/schema-value-assessment.md` |
+| 15 | Independent closeout review supports Phase 1 acceptance | **Open** — the two dispatches in §19 were narrowly scoped (named checks; confirmation of named fixes), not a holistic closeout judging whether this batch deserves acceptance. The confirmation reviewer said so explicitly in its own report: it "does not itself constitute the separate, fully-independent closeout dispatch that §20 says is still outstanding." Not worked around — recorded open. |
+| 16 | Human approval obtained before marking Phase 1 complete or merging | **Open, deliberately not sought by this session** as a substitute for human action — remains a human action per `AGENTS.md` §11 |
+
+Items 10–12 cannot be met from inside this session without a human first
+opening the PR this session has no credentials to open. This is recorded
+as an open item, not worked around.
+
+## 19. Independent review record — corrective amendment batch (prompt 003)
+
+Dispatched: a fresh, non-forked `general-purpose` agent with no prior
+conversation context, given the repository directly and the exact
+four-check brief below (Amendment B documentation drift, Amendment C
+validator strengthening, Amendment D semantic review of three named
+docs, Amendment F refactor re-confirmation) — best-effort isolation,
+level 2 of `docs/agent-isolation.md`'s taxonomy (fresh context, same
+operator/session line), not mechanically enforced, named that way in the
+reviewer's own report rather than overclaimed. 60 tool uses, 187,061
+tokens, 602.2s — logged in `evidence/phase-1-log.md`.
+
+**This review's first pass caught a real, important process failure
+before anyone else did: §17/§18 of this plan and `evidence/schema-value-assessment.md`
+had been *written as if §19/§20 and that file already existed*, when
+they did not yet.** The reviewer flagged this explicitly as BLOCKING
+rather than treating the surrounding prose as adequate — exactly the
+"writing done language before doing the thing" failure mode this
+project's own Phase 1 retrospective (`planning/retros/phase-1-stages-1.0-through-1.5.md`,
+"Unexpected findings" §1) already named as its single most important
+finding, recurring a third time. This section and §20, and
+`evidence/schema-value-assessment.md`, are the fix — written after the
+review, from the review's own findings, not before it.
+
+**Findings and disposition** (condensed; the reviewer's full report is
+the primary record — this section states what was found and what this
+session did about it, not a restatement of methodology):
+
+- **BLOCKING — `planning/CONTEXT.md` was never touched in this
+  corrective pass** and had gone actively stale against `decisions/0005`
+  (framing `OPENAI_API_KEY` and branch-protection configuration as live
+  blockers, when Amendment A removed both as Phase 1 requirements; citing
+  `decisions/0001`–`0004` only, omitting `0005`; telling the reader to
+  next run the now-deferred live-gate test matrix). **Fixed**: rewritten
+  to reflect `decisions/0005` accurately — see the current file.
+- **BLOCKING — this plan cited `§19`/`§20` and `evidence/schema-value-assessment.md`
+  before they existed** (16 dangling cross-references, confirmed by the
+  reviewer via `grep`). **Fixed**: this section, §20, and that evidence
+  file now exist, written from the review's actual findings.
+- **ADVISORY — `decisions/0005` claimed `contracts/codex-gate-policy-evaluator.md`
+  was "preserved as-is"/"without modification," but it required one
+  real (trivial) path-reference edit.** **Fixed**: wording corrected in
+  `decisions/0005` to state precisely what changed and why.
+- **ADVISORY — contract rule 12 (`required_sections` non-empty) applies
+  to every document with front-matter, not only `docs/governed-documents.txt`
+  entries, which is broader than prompt 003's literal "governed
+  substantive documents" phrasing.** **Disposition: accepted as a
+  documented, deliberate generalisation, not a defect** — a scope note
+  explaining why (rule 3 already makes the field mandatory for any
+  front-matter-bearing document; narrowing rule 12 to the manifest would
+  make it weaker than rule 3) was added to
+  `contracts/documentation-schema-validator.md` rather than changing the
+  behaviour.
+- **No BLOCKING findings in Check 2** (validator strengthening): the
+  reviewer independently re-ran the full test suite (23/23 pass, matched
+  exactly), recomputed all 11 protected-baseline checksums (all matched
+  `evidence/stage-1.4-baseline.md` exactly — the historical baseline was
+  not altered), and constructed six of its own counter-examples beyond
+  this session's fixtures, none of which defeated rules 10–15.
+- **FAILED (Check 3, `docs/axiom-validator.md`) — three concrete,
+  code-contradicted claims**: (1) "no file-reading... lives here"
+  (rules.py) stated in the same bullet naming `load_governed_manifest`,
+  which reads a file; (2) the `__init__.py` call-order description
+  omitted the `check_field_types_and_content` step; (3) the documented
+  `validate_file(Path("README.md"), Path("."))` usage example
+  **reproducibly failed** (`FAIL` with 11 spurious "outside the
+  repository" errors) because `validate_file` required a pre-resolved
+  `repo_root` and the example didn't supply one. **All three fixed**:
+  the module-level claim corrected; the call-order description now names
+  the step; and — the substantive fix — `validate_file` now resolves
+  `repo_root` internally (`src/axiom_validator/__init__.py`), a real
+  latent defect present identically in the pre-refactor monolith (not a
+  refactor regression, confirmed via Check 4), fixed rather than merely
+  documented around. Re-verified: the exact documented example now
+  produces the documented output; full suite re-run, still 23/23;
+  protected checksums re-confirmed unchanged after the fix.
+- **FAILED/UNCERTAIN (Check 3, `docs/knowledge-placement.md`) —
+  two acceptance criteria not actually met as literally written**: the
+  Placement table's "Historical narrative" row named two destinations,
+  not one; enforcement levels 1–3 described what exists without stating
+  blocking/advisory; the "checked against `docs/documentation-schema.md`"
+  claim had no itemized record, unlike `docs/documentation-schema.md`'s
+  own worked example for `README.md`. **All three fixed**: the row now
+  names one primary location with an explanatory note; levels 1–3 each
+  state "Advisory only" explicitly; a "Manual validation record" section
+  was added, itemized per criterion, in the same style as
+  `docs/documentation-schema.md`'s.
+- **FAILED/partial (Check 3, `docs/development-lifecycle.md`) — the
+  phase-acceptance procedure named an actor for only 1 of its 5 steps.**
+  **Fixed**: each of the 5 steps now opens with an explicit "Who:"
+  statement.
+- **No BLOCKING findings in Check 4** (refactor re-confirmation): the
+  reviewer independently identified the pre-refactor commit (`07d5548`)
+  from `git log`, diffed it line-by-line against the current package,
+  confirmed the check ordering is unchanged and the only delta since the
+  refactor is the later Amendment C addition in exactly the position the
+  contract specifies, and — going beyond re-reading
+  `evidence/stage-1.4-refactor.md` — physically extracted the `07d5548`
+  monolith via `git show` into an isolated layout and re-ran
+  `tests/test_axiom_validator.py` against it directly, reproducing
+  14/14 pass independently rather than taking the recorded number on
+  trust. The three required distinctions (tests/fixtures demonstrate
+  equivalence under existing coverage, not universal semantic
+  equivalence; the programmatic interface is preserved under that
+  coverage, now with one later-added optional kwarg from Amendment C;
+  the CLI invocation shape changed and was never contract-protected,
+  with the explicit implication recorded: a contract that means to
+  protect a CLI shape must say so, since silence here let a real change
+  pass unflagged) are adopted into this record as the reviewer stated
+  them, not restated independently.
+
+**What this review did not need to re-litigate**: Amendment A
+(`decisions/0005`) and Amendment E (CI completion) were not separately
+re-verified by this dispatch beyond what Checks 1–2 already covered
+(the CI workflow's actual content, the deferred file's real location);
+no finding challenged either.
+
+**Confirmation dispatch (second independent pass, same day):** 71,421
+tokens, 17 tool uses, 77.5s. After the fixes above were made, a second
+fresh, non-forked agent — same best-effort isolation level as the first,
+explicit about not being a fully independent closeout (see §20) — was
+given the 8 specific fixes above and told to verify each by direct
+re-execution, not by reading the surrounding prose. Result: **all 8
+CONFIRMED** — `planning/CONTEXT.md`
+read in full and found consistent with `decisions/0005`; §19/§20 found
+to exist with coherent section numbering (`grep -n "^## "` through §20);
+`evidence/schema-value-assessment.md` confirmed to exist and `PASS` the
+validator; `docs/axiom-validator.md`'s three fixes confirmed, including
+re-running the exact documented usage example and getting the documented
+`PASS` output; `docs/knowledge-placement.md`'s Placement-table/
+enforcement-level/validation-record fixes confirmed by direct read;
+`docs/development-lifecycle.md`'s five `Who:` statements confirmed via
+`grep`; the full test suite re-run a third time (23/23); all 11 protected
+baseline checksums re-confirmed exactly matching; the governed-document
+CI command re-run directly with all 9 files `PASS`. One nuance recorded
+by the reviewer: the `__init__.py` call-order fix describes the
+`check_field_types_and_content` step in prose without quoting that exact
+identifier — the reviewer separately confirmed the identifier is real
+and the description matches it in substance and position, and counted
+the fix as real, not cosmetic.
+
+## 20. Corrective-amendment batch status (prompt 003)
+
+**Not yet independently closed out as a whole — this section records
+status, not a self-certified completion.** Every BLOCKING and FAILED
+finding from §19 has a recorded fix, re-verified by this session (re-run
+test suite, re-checked checksums, re-run the specific failing example)
+immediately after each fix — but per `AGENTS.md` §6, a phase/batch
+closeout needs its *own* independent check that the fixes actually hold,
+not just the fixing session's word that they do. That further check has
+not yet run as a separate dispatch; §18's DoD item 15 ("an independent
+closeout review supports Phase 1 acceptance") stays open for that reason,
+not only for the native-Codex-review gap.
+
+Status of this corrective batch's own objectives, honestly, against
+prompt 003 §13's reporting list:
+
+- **Plan/ADR amendments** (§17 above, `decisions/0005`): done.
+- **Documentation drift corrected** (Amendment B, B1–B4): done, including
+  one real instance (`planning/CONTEXT.md`) this session's own first pass
+  missed and the independent review caught.
+- **Schema-validation strengthening** (Amendment C): done, independently
+  verified against the protected baseline and six fresh counter-examples
+  with zero surviving defects.
+- **Deterministic CI completion** (Amendment E): done locally (new
+  workflow jobs run the exact commands they specify, verified by running
+  them directly in this session); **not independently verified against
+  an actual GitHub Actions run** — this session cannot trigger one. This
+  is DoD item 4's explicit limitation, not a claim that it has been.
+- **Semantic documentation review** (Amendment D): done against all
+  three named documents, and — unusually for this project's prior
+  reviews — it actually found and this session fixed real, reproducible
+  defects rather than confirming a clean draft; see `evidence/schema-value-assessment.md`
+  for what this implies about the schema's own demonstrated value
+  (Amendment G).
+- **Refactor re-confirmation** (Amendment F): done, independently,
+  including a from-scratch re-run of the pre-refactor test suite against
+  the actual extracted pre-refactor file.
+- **Native Codex GitHub PR review** (Amendment A's new requirement):
+  **not performed** — no PR exists; this session still cannot open one.
+  Stays open per `decisions/0005` and §18 items 10–12.
+- **Phase 1 acceptance**: **not recommended yet by this session** — a
+  human still needs to open the PR, trigger native Codex review,
+  disposition its findings, and decide what to mark Completed
+  (`AGENTS.md` §11). This corrective batch is ready for that human step;
+  it does not substitute for it.

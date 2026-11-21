@@ -1,5 +1,32 @@
 name: codex-review
 
+# DEFERRED — moved out of .github/workflows/ on 2026-11-21 per
+# decisions/0005 and planning/phase-01-foundation.md Sec 17 (prompt 003
+# Amendment A). This file sitting directly under .github/workflows/
+# would make GitHub Actions evaluate it on every push/PR; because its
+# only job is gated to SKIP without OPENAI_API_KEY, that skip could be
+# misread as part of normal CI status. Moving it here (a path GitHub
+# Actions does not scan) stops that confusion without deleting real,
+# independently-reviewed, locally-tested work.
+#
+# Phase 1's independent-Codex-review requirement is now satisfied by
+# NATIVE Codex GitHub PR review (an actual PR, reviewed by the connected
+# Codex GitHub integration/@codex review, not this self-hosted,
+# API-key-backed Action) — see decisions/0005 for the full rationale and
+# the conditions under which this deferred, automated, API-backed path
+# should be reconsidered. This file, .github/scripts/policy_evaluator.py,
+# its test suite, and contracts/codex-gate-policy-evaluator.md remain in
+# the repository, unmodified, as reusable material for that future
+# reconsideration — not because they are currently part of Phase 1's
+# active review path.
+#
+# To reactivate: move this file back to .github/workflows/codex-review.yml,
+# provision OPENAI_API_KEY as a repository secret, and re-verify the
+# `openai/codex-action@v1` input shape below against current OpenAI
+# documentation (it was never tested live — see the TODO below, still
+# accurate).
+#
+# Original header (superseded, preserved for context):
 # Independent PR review via OpenAI Codex, gated by the deterministic
 # policy evaluator (contracts/codex-gate-policy-evaluator.md). Safely
 # no-ops (job is skipped, not failed) when OPENAI_API_KEY isn't

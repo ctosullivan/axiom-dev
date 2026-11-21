@@ -279,15 +279,79 @@ could not be measured and why.
   writing this very log entry. Fixed before commit. Third real instance
   of this specific defect pattern across the phase.
 
+## 2026-11-21 — Corrective amendment batch (prompt 003)
+
+- **Development effort:** one orchestrating-session pass covering plan
+  amendment (`planning/phase-01-foundation.md` §17/§18), a new ADR
+  (`decisions/0005`), four documentation-drift fixes (B1–B4, including
+  one — `docs/axiom-validator.md`'s own staleness against this pass's
+  changes — found by this session's own re-reading, not by the
+  independent reviewer), validator schema strengthening (Amendment C: 2
+  new rules.py functions, 1 new `__init__.py` wiring point, 6 new
+  fixtures, 1 new test file with 9 tests, 1 new governed-documents
+  manifest), deterministic CI completion (Amendment E: 2 new workflow
+  jobs), and deferring the API-backed Codex workflow (Amendment A:
+  `.github/workflows/codex-review.yml` → `.github/deferred/codex-review.yml`).
+- **Agent usage:** 2 independent-review dispatches — the first, 187,061
+  tokens / 60 tool uses / 602.2s, covering drift (Amendment B), validator
+  strengthening (Amendment C), semantic review of 3 named docs (Amendment
+  D), and refactor re-confirmation (Amendment F); the second, 71,421
+  tokens / 17 tool uses / 77.5s, a focused confirmation pass that
+  independently re-ran all 8 of the first review's named fixes (not
+  re-reading the surrounding prose) and confirmed every one holds.
+- **Defects detected by independent review, not by self-check:** 3
+  BLOCKING (`planning/CONTEXT.md` never updated against `decisions/0005`;
+  `planning/phase-01-foundation.md` §17/§18 cited a `§19`/`§20` and an
+  `evidence/schema-value-assessment.md` that did not yet exist — this
+  review's own findings became that missing record), plus — within the
+  semantic review itself — 3 concrete FAILED claims in
+  `docs/axiom-validator.md` (one tracing to a real latent code defect,
+  not just a documentation error: `validate_file` failed to resolve an
+  unresolved `repo_root`, reproducibly breaking its own documented usage
+  example), 2 unmet acceptance criteria in `docs/knowledge-placement.md`,
+  and a partial gap (1 of 5 steps) in `docs/development-lifecycle.md`.
+  2 ADVISORY (`decisions/0005`'s "preserved as-is" overstated a trivial
+  real edit; contract rule 12 generalised beyond the prompt's literal
+  wording — accepted with a recorded rationale, not changed). All
+  BLOCKING and FAILED findings fixed in this session, re-verified
+  directly (re-ran the fixed usage example, re-ran the full test suite,
+  re-checked the protected baseline checksums) before being recorded as
+  fixed in `planning/phase-01-foundation.md` §19.
+- **Anti-circularity check held under a second round of changes:** the
+  Stage 1.4 protected baseline (10 fixtures + `tests/test_axiom_validator.py`)
+  was re-checksummed twice in this batch — once after the initial
+  Amendment C implementation, once again after the `validate_file`
+  `repo_root` fix — and matched `evidence/stage-1.4-baseline.md` exactly
+  both times.
+- **Real (non-synthetic) defect found in Axiom Dev's own code, not just
+  its documentation — a first for this project:** `validate_file`'s
+  failure to resolve `repo_root` was a real, reproducible bug (not a
+  documentation inaccuracy) present identically in the pre-refactor
+  monolith, surfaced only because independent review actually ran
+  `docs/axiom-validator.md`'s own documented usage example instead of
+  reading it as prose.
+- **Not measured:** real API/token cost for native Codex review (none
+  has run yet — no PR exists); wall-clock time for this session's own
+  non-dispatched work.
+- **Blocker, named honestly, unchanged in kind from before this batch but
+  narrower in scope:** no `gh` CLI, no GitHub token, no passwordless
+  `sudo` to install `gh` — re-confirmed directly in this session, not
+  assumed. No PR has ever been opened; native Codex GitHub PR review
+  (`decisions/0005`) cannot be performed until one is. `OPENAI_API_KEY`
+  provisioning and GitHub required-status-check configuration are
+  **no longer** blockers — `decisions/0005` removed both as Phase 1
+  requirements.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 9 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout |
-| Subagent tokens so far | 866,847 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 |
-| Blocking/real defects found by independent review (not self-caught) | 13 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout (CONTRIBUTING.md, CONTEXT.md staleness) — all fixed |
-| Advisory defects found and fixed or accepted | 8 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted) |
-| Real passing tests | 30 of 30 | 16 policy-evaluator + 14 axiom_validator, both re-run independently and confirmed (twice, for axiom_validator — before and after the refactor, identical) |
-| Real (non-synthetic) defects found in Axiom Dev's own documentation | 2 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout) |
-| Amendment-D demonstrations fully demonstrated with real evidence | 7 of 8 (rows 1, 2, 4, 5, 6, 7, 8) | See `planning/phase-01-foundation.md` §10; row 3 is the one genuine, externally-blocked gap |
-| Phase 1 Definition of Done (17 items, `planning/prompts/002-...md` §11) | 15 MET, 1 partially met, 1 not met | See `evidence/phase-1-closeout.md` |
+| Subagent dispatches so far | 11 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout, 2 prompt-003 corrective batch (review + confirmation) |
+| Subagent tokens so far | 1,125,329 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 + 187,061 + 71,421 |
+| Blocking/real defects found by independent review (not self-caught) | 17 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout, 4 prompt-003 corrective batch (`planning/CONTEXT.md` staleness; §19/§20/evidence file missing; 3 `docs/axiom-validator.md` claims incl. the `repo_root` code defect; counted together as one batch finding-set below — see `planning/phase-01-foundation.md` §19 for the itemised 4 BLOCKING/FAILED groups) — all fixed and independently re-confirmed |
+| Advisory defects found and fixed or accepted | 10 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted), 2 prompt-003 corrective batch (accepted with recorded rationale) |
+| Real passing tests | 39 of 39 | 16 policy-evaluator + 23 axiom_validator (14 original + 9 Amendment C), all re-run independently and confirmed — the 14 original axiom_validator tests three times now (pre-refactor, post-refactor, post-Amendment-C), identical each time |
+| Real (non-synthetic) defects found in Axiom Dev's own documentation or code | 4 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout); `planning/CONTEXT.md` staleness against `decisions/0005` (prompt-003 batch); `validate_file`'s unresolved-`repo_root` defect, a real code bug, not only documentation (prompt-003 batch, found by actually running a documented usage example) |
+| Amendment-D demonstrations fully demonstrated with real evidence | 7 of 8 (rows 1, 2, 4, 5, 6, 7, 8) | See `planning/phase-01-foundation.md` §10; row 3 is the one genuine, externally-blocked gap, now reframed by `decisions/0005` as "native Codex review on a real PR," not "automated gate rejection" |
+| Phase 1 Definition of Done (17 items, `planning/prompts/002-...md` §11) | 15 MET, 1 partially met, 1 not met | See `evidence/phase-1-closeout.md` (predates the prompt-003 corrective batch) |
+| Prompt 003's revised Definition of Done (16 items, `planning/phase-01-foundation.md` §18) | 10 MET, 1 locally-verified-only (CI not triggered on a real GitHub Actions run), 5 open (items 10–12: native Codex review, blocked on no `gh`/token; item 15: no holistic closeout dispatch has run yet, only narrowly-scoped checks and a confirmation pass; item 16: human approval, deliberately not sought by this session) | See `planning/phase-01-foundation.md` §18, §20 |

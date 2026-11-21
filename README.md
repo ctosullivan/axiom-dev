@@ -111,14 +111,16 @@ for how to propose and land a change.
 | `planning/retros/` | Phase retrospectives, created as phases complete. |
 | `decisions/` | Sequentially numbered Architecture Decision Records. |
 | `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema). |
+| `docs/governed-documents.txt` | The minimal manifest of documents that must carry a passing schema (contract rule 15). |
 | `contracts/` | Required behaviour, written and reviewed before the implementation it governs. |
 | `evidence/` | Verification outcomes and the Phase 1 measurement log. |
 | `.github/pull_request_template.md` | Checklist a PR description must address. |
-| `.github/workflows/` | Deterministic CI (tested, running) and the Codex review gate (written, blocked). |
-| `.github/scripts/` | The Stage 1.3 policy evaluator and its own test suite. |
-| `.github/codex/prompts/review.md` | The review instructions given to Codex once the live gate is enabled. |
-| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules, refactored from an initial single-file implementation). |
-| `tests/` | Fixtures (valid + deliberately invalid, one per contract rule) and tests for the validator. |
+| `.github/workflows/` | Deterministic CI: policy-evaluator tests, validator tests, governed-documentation check, doc hygiene — all tested and running, none a required merge check. |
+| `.github/deferred/` | The API-backed Codex review workflow, deferred (not deleted) in favour of native Codex GitHub PR review for Phase 1 — see `decisions/0005`. |
+| `.github/scripts/` | The Stage 1.3 policy evaluator and its own test suite — preserved, reusable if the deferred automated gate is reconsidered. |
+| `.github/codex/prompts/review.md` | The review instructions written for the deferred API-backed workflow. |
+| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules, refactored from an initial single-file implementation; schema field-type/content and governed-manifest checks added as a corrective amendment). |
+| `tests/` | Fixtures (valid + deliberately invalid, one per contract rule) and tests for the validator, across two test files — the original, checksum-protected `test_axiom_validator.py` and the newer `test_axiom_validator_schema_content.py`. |
 | `requirements.txt` | The one runtime dependency (PyYAML) the validator needs. |
 
 Every directory in the originally-proposed Stage 1.0 scaffold now has

@@ -45,19 +45,37 @@ behaviour-preserving refactor — `evidence/stage-1.4-refactor.md`) into:
   code spans). No rule logic lives here — just "what's in this text."
 - **`rules.py`** — the actual checks, each a small function taking
   already-parsed data and returning a list of error strings: required
-  fields, required sections, authoritative-source paths (including the
+  fields, field types and non-empty content (`audience`/`purpose` as
+  non-empty strings; `required_sections`/`authoritative_sources`/
+  `acceptance_criteria` as correctly-typed, and non-empty where the
+  contract requires it — added as a corrective-amendment contract
+  extension, `contracts/documentation-schema-validator.md` rules 10-14),
+  required sections, authoritative-source paths (including the
   repository-containment check — a path can't escape the repo via `../`
-  even if something happens to exist there), and body links (same
+  even if something happens to exist there), body links (same
   containment rule, plus ADR-specific error messages for
-  `decisions/NNNN-*.md` references). No file-reading or Markdown parsing
-  lives here — just "is this correct, given these parsed facts."
+  `decisions/NNNN-*.md` references), and the governed-documents manifest
+  (`load_governed_manifest`, rule 15 — see Limitations below for exactly
+  what this does and does not cover). `load_governed_manifest` is the one
+  exception to "no file-reading lives here": it reads
+  `docs/governed-documents.txt` directly, because the manifest is itself
+  a small, flat data file this module owns the shape of, not a document
+  under test — found imprecise by independent review (the module
+  docstring previously claimed no file-reading at all; corrected here).
 - **`reporting.py`** — turns a result into the dict shape
   (`file`/`result`/`errors`) everything else expects, and formats a batch
   for the CLI.
 - **`__init__.py`** — the one place that calls the other three in order:
-  parse, then check required fields (short-circuits on failure), then
-  sections/sources/links, then report. This is also where `validate_file`
-  and `main` live — the two names tests and the CLI actually import.
+  parse, then check required fields (short-circuits on `INVALID_SCHEMA`),
+  then check field types/non-empty content (rules 10-13, also
+  short-circuits on `INVALID_SCHEMA` — added by the prompt 003 Amendment
+  C corrective pass; a prior draft of this document omitted this step,
+  caught by independent semantic review), then sections/sources/links,
+  then report. This is also where `validate_file` and `main` live — the
+  two names tests and the CLI actually import. `validate_file` resolves
+  `repo_root` internally so callers don't have to pass an
+  already-resolved path themselves (also found necessary by independent
+  review — see Usage below).
 - **`__main__.py`** — lets `python3 -m axiom_validator <files>` work.
 
 Why split it this way: parsing, rule-checking, and reporting are
@@ -88,6 +106,15 @@ result = validate_file(Path("README.md"), Path("."))
 # {"file": "README.md", "result": "PASS", "errors": []}
 ```
 
+(`repo_root` does not need to be pre-resolved — `validate_file` resolves
+it internally. This example was found to reproducibly FAIL, not PASS, by
+independent semantic review before that fix: an unresolved `Path(".")`
+previously broke the repository-containment check for every
+`authoritative_sources` entry and body link, a latent defect present
+identically in the pre-refactor implementation, not a refactor
+regression — fixed in the same change that found it, verified by running
+this exact example.)
+
 ## Limitations
 
 Limitations of the validator's own behaviour (all from
@@ -96,8 +123,14 @@ document is required to stay consistent with as its own cited
 authoritative source — an independent reconstruction exercise found two
 of these four missing from an earlier draft of this section):
 
-- No enforcement of which documents must carry a schema — an unschema'd
-  document is `SKIPPED`, not flagged.
+- Enforcement of which documents must carry a schema is **narrow, not
+  general**: only paths listed in `docs/governed-documents.txt` (rule
+  15) are `FAIL` when unschema'd. Deliberately minimal, per
+  `planning/phase-01-foundation.md` §17 (prompt 003 Amendment C): any
+  document *not* on that short list is still `SKIPPED`, not flagged, if
+  it has no front-matter — this is an explicit scope choice, not an
+  oversight, but it does mean deleting a document's schema still goes
+  unnoticed for anything the manifest doesn't name.
 - Does not check whether `acceptance_criteria` statements are actually
   true, or whether `authoritative_sources` entries are genuinely
   consistent with the document's claims — both are semantic/editorial
@@ -117,10 +150,14 @@ of these four missing from an earlier draft of this section):
 
 ## Status in the broader methodology
 
-Separate from the validator's own limitations above: nothing currently
-wires this validator into `.github/workflows/` to run automatically on
-every PR (verified: no workflow file references `axiom_validator`).
-Stage 1.3's Codex-review gate is a different, independent piece of the
-same methodology — see `planning/phase-01-foundation.md` for how the
-two relate. CI-wiring this validator would be a reasonable future
-addition; this document doesn't claim it already exists.
+Separate from the validator's own limitations above: this validator's
+test suite and a check of every governed document now run automatically
+on every push/PR (`.github/workflows/deterministic-checks.yml`, jobs
+`axiom-validator-tests` and `validate-governed-documentation` — verified
+by grep, not assumed). That is enforcement **level 4** ("executed by
+CI") per `docs/knowledge-placement.md`'s "Enforcement classes" table —
+a red run here is visible, but nothing currently makes it a GitHub
+required status check (level 5), which needs repository-admin access
+this environment has never had. Native Codex GitHub PR review (a
+separate, independent-AI-review piece of the same methodology —
+`decisions/0005`) is unrelated to this validator and does not run it.

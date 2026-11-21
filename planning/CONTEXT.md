@@ -6,73 +6,71 @@ Keep this current, not historical. Historical narrative belongs in
 ## Current phase and status
 
 **Phase 1: Stages 1.0, 1.1, 1.2, 1.4, 1.5 done with evidence; Stage
-1.3's deterministic piece done with evidence; Stage 1.3's live piece
-genuinely blocked. An independent Phase 1 closeout assessment has run
-(`evidence/phase-1-closeout.md`) and recommends: partially complete,
-named gaps, do not mark Completed yet.** Everything is on
-`phase-1/stage-1.0-bootstrap`, pushed, unmerged (no PR opened — no
-`gh`/token).
-
-The closeout assessment independently re-verified evidence across all
-17 Definition-of-Done items (`planning/prompts/002-...md` §11) and all 8
-Amendment D demonstration rows (`planning/phase-01-foundation.md` §10)
-by re-running tests and re-checking files itself, not trusting prior
-claims. Verdict: 15 of 17 DoD items MET, 1 PARTIALLY MET (CI exists
-locally but nothing wires the validator's own tests into a workflow
-yet), 1 NOT MET (the live Codex gate — genuinely blocked, not
-glossed over). It also found two minor staleness issues no prior
-review's scope had covered (`CONTRIBUTING.md`'s testing-requirements
-section still read as a future-tense placeholder after Stage 1.4
-shipped; this file's own self-reference went stale the instant its
-commit landed) — both fixed in this same change.
+1.3's deterministic piece done with evidence, now also wired into CI.
+A corrective-amendment pass (`planning/prompts/003-...md`,
+`decisions/0005`) fixed documentation drift, strengthened the validator's
+schema checks, completed deterministic CI, and changed Phase 1's
+independent-Codex-review requirement to native Codex GitHub PR review —
+see `planning/phase-01-foundation.md` §17–§20. Phase 1 stays open, not
+marked Completed.** Everything is on `phase-1/stage-1.0-bootstrap`,
+pushed, unmerged (no PR opened — no `gh`/token, re-confirmed as part of
+the corrective pass, not merely carried forward from an earlier check).
 
 ## Relevant decisions
 
-`decisions/0001`–`0004`. `decisions/0004`'s full anti-circularity +
-measurement + demonstration framework has been exercised end-to-end
-across Stages 1.1–1.5, and the Phase 1 closeout assessment is itself the
-final link in that chain.
+`decisions/0001`–`0005`. `decisions/0005` **partially supersedes**
+`decisions/0004`'s Stage 1.3 live-integration expectation — read both;
+`decisions/0004`'s anti-circularity/measurement/demonstration content is
+otherwise unaffected and still governs Stages 1.1–1.5's evidence.
 
 ## Outstanding issues (the real, named blockers)
 
-1. **No `gh` CLI or GitHub token** — no PR has been opened for any work
-   on this branch. A human needs to open it from the URL below.
-2. **Stage 1.3's live Codex integration is blocked** — no
-   `OPENAI_API_KEY` in this environment, and enabling it is a
-   cost/billing decision for a human (`planning/prompts/002-...md` §9).
-3. **GitHub required-status-check configuration is blocked** —
-   needs repository-admin API access this session doesn't have.
-4. Because of (2) and (3), **no real GitHub PR has ever been run through
-   any gate** — DoD items 8/9 and Amendment D row 3 stay open. This is
-   the one genuine, currently-irresolvable-from-here gap in Phase 1.
+1. **No `gh` CLI or GitHub token** — no PR has ever been opened for any
+   work on this branch. A human needs to open it from the URL below.
+   This is now the blocker for native Codex GitHub PR review too (not
+   only for a human to read the diff) — see item 2.
+2. **Native Codex GitHub PR review (the current Phase 1 requirement,
+   per `decisions/0005`) has not been performed** — it needs an actual
+   opened PR to review, which this session cannot create (item 1). This
+   is a different, narrower gap than the one this file used to describe:
+   `decisions/0005` is explicit that an `OPENAI_API_KEY` and GitHub
+   required-status-check configuration are **no longer Phase 1
+   requirements at all** — do not treat provisioning either of those as
+   a remaining step.
+3. Because of (1)/(2), **no real GitHub PR has ever existed, let alone
+   been reviewed** — `planning/phase-01-foundation.md` §18's DoD items
+   10–12 and the corresponding Amendment D (`decisions/0004`) row stay
+   open. This is the one genuine, currently-irresolvable-from-here gap
+   in Phase 1.
 
 None of these are shortcuts taken — each is a named, verified-real
-external blocker, confirmed directly by the closeout assessment rather
-than taken on the repository's word.
+external blocker, re-confirmed directly in this corrective pass (not
+taken on a prior session's word).
 
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin`. Check
   `git log --oneline -1` for the exact current HEAD at read time — this
   file is updated same-commit as the work it describes, but always
-  verify against `git log` rather than trusting a SHA frozen in prose
-  (the project's own closeout assessment flagged this exact kind of
-  self-reference as a real, if trivial, risk).
+  verify against `git log` rather than trusting a SHA frozen in prose.
 - PR: still not opened. Creation URL:
   `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
+- Once opened, request native Codex review with `@codex review` as a PR
+  comment (or the connected Codex GitHub integration's equivalent
+  trigger) — see `decisions/0005` and
+  `planning/phase-01-foundation.md` §17 Amendment A.
 
 ## Next concrete action
 
-1. A human needs to: (a) open and review the PR covering everything on
-   `phase-1/stage-1.0-bootstrap`; (b) decide on `OPENAI_API_KEY`
-   provisioning and the cost of enabling Stage 1.3's live Codex review;
-   (c) configure branch protection/required status checks; (d) decide,
-   stage by stage, what to mark Completed in `planning/ROADMAP.md` given
-   the evidence — this is a human-approval action
+1. A human needs to: (a) open the PR from the URL above and request
+   native Codex review (`@codex review`); (b) disposition any P0/P1
+   Codex findings (resolve or explicitly accept/escalate) and record the
+   reviewed commit + findings in `planning/phase-01-foundation.md`;
+   (c) decide, stage by stage, what to mark Completed in
+   `planning/ROADMAP.md` given the evidence — a human-approval action
    (`AGENTS.md` §11), not something this session does unilaterally.
-2. If/when (b) and (c) are resolved: run Stage 1.3's live-gate test
-   matrix for real (valid PR, P0/P1 defect, advisory finding, malformed
-   output, missing/failed review, stale-commit review) against actual
-   GitHub PRs, closing DoD items 8/9 and Amendment D row 3.
-3. Only after that: Phase 1 can be reassessed for full completion.
+   **Provisioning `OPENAI_API_KEY` or configuring branch protection is
+   not part of this list** — `decisions/0005` removed both as Phase 1
+   requirements.
+2. Only after (a)/(b): Phase 1 can be reassessed for full completion.
    Everything else is already done with evidence.
