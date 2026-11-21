@@ -33,5 +33,21 @@ This project does not yet have a release; entries accumulate under
   `.github/workflows/codex-review.yml` (written to spec, gated to skip
   without `OPENAI_API_KEY`), `.github/codex/prompts/review.md`.
 
-First real software and first real passing tests in this project.
-Everything else is still process and documentation.
+- Stage 1.4 (initial implementation, pre-refactor): the first real Axiom
+  Dev component — `src/axiom_validator.py`, a knowledge/documentation
+  schema validator — against `contracts/documentation-schema-validator.md`,
+  with 10 fixtures and 14 passing tests
+  (`tests/test_axiom_validator.py`), `requirements.txt` (PyYAML), and a
+  locked pre-refactor baseline (`evidence/stage-1.4-baseline.md`).
+  Independent review before the baseline was locked found and this
+  session fixed two real defects (an unenforced
+  "no paths outside the repository" rule; a fenced-code-block false
+  positive in heading detection). Dogfooding this validator against
+  already-committed real documents (not just fixtures) found and fixed
+  one real documentation defect: shorthand ADR citations in
+  `docs/documentation-schema.md` and `docs/knowledge-placement.md` that
+  didn't resolve as real paths.
+
+First real software, first real passing tests, and first real
+(non-synthetic) defect found in this project's own documentation by its
+own tooling. The behaviour-preserving refactor has not started yet.

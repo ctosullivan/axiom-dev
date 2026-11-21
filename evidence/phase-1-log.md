@@ -114,13 +114,50 @@ could not be measured and why.
   the first defect in this project caught by independent review that
   required redesigning a mechanism, not just rewording a claim about it.
 
+## 2026-11-21 — Stage 1.4 initial implementation (pre-refactor)
+
+- **Development effort:** one orchestrating-session pass. Built
+  `src/axiom_validator.py` (initial, deliberately monolithic) against
+  the already-accepted contract, 8 fixtures (1 valid + 7 invalid, one
+  per contract rule), 12 initial tests, ran them (real, 12/12 pass
+  before the real-document check revealed a real defect — see below).
+- **Real dogfooding finding (not synthetic):** `TestRealRepositoryDocuments`
+  — testing the validator against already-committed real documents, not
+  only fixtures — genuinely failed on first run: `docs/documentation-schema.md`
+  and `docs/knowledge-placement.md` used shorthand ADR citations
+  (`decisions/0002`, `decisions/0004`) that don't resolve as real paths.
+  Fixed in the same pass. This is the first real (non-synthetic) defect
+  this project's own tooling has found in its own documentation —
+  Amendment D demonstration 5 now has real teeth, not just a
+  reviewer-found formatting inconsistency.
+- **Agent usage:** one independent-review dispatch of the initial
+  implementation (before any refactor), which re-ran the tests,
+  re-verified checksums, and verified the dogfooding finding against
+  `git diff` itself — 62,324 tokens, 25 tool uses, 104.1s duration.
+- **Defects detected by independent review, not by self-check:** 2
+  blocking (contract rule 5/6's "no paths outside repository" was
+  unenforced — demonstrated with a working counter-example; rule 4's
+  heading match had no fenced-code-block exclusion — also demonstrated),
+  2 advisory (narrow `§`-only bare-path check; rule 7 doesn't distinguish
+  wrong-ADR-number from right-number-wrong-slug). Both blocking findings
+  fixed with real regression fixtures and tests, not just prose
+  acknowledgement; both advisory findings left as documented limitations
+  — see `evidence/stage-1.4-baseline.md`.
+- **Rework:** two real code fixes (`_is_within()` containment check;
+  `FENCED_CODE_BLOCK_RE` exclusion), 2 new fixtures, 2 new tests. Suite
+  grew from 12 to 14 tests, all passing on re-run.
+- **Baseline locked:** `evidence/stage-1.4-baseline.md` records the
+  final (post-fix) checksums and test output as the pre-refactor
+  comparison point for the refactor about to follow.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 4 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3 |
-| Subagent tokens so far | 436,662 | 209,592 (Stage 1.0) + 128,322 (amendment/1.1) + 98,748 (Stage 1.2/1.3) |
-| Blocking defects found by independent review (not self-caught) | 7 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3 — all fixed |
-| Advisory defects found and fixed | 5 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3 |
-| Real passing tests | 16 of 16 | `.github/scripts/tests/test_policy_evaluator.py`, re-run independently and confirmed |
-| Stages with a recorded, real (non-synthetic) Amendment-D demonstration | 0 fully, 2 partially (rows 2, 5) | See `planning/phase-01-foundation.md` §10 |
+| Subagent dispatches so far | 5 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 1 Stage 1.4 initial |
+| Subagent tokens so far | 498,986 | 209,592 + 128,322 + 98,748 + 62,324 |
+| Blocking defects found by independent review (not self-caught) | 9 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial — all fixed |
+| Advisory defects found and fixed or accepted | 7 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 (accepted as documented limitations) |
+| Real passing tests | 30 of 30 | 16 policy-evaluator + 14 axiom_validator, both re-run independently and confirmed |
+| Real (non-synthetic) defects found in Axiom Dev's own documentation | 1 | shorthand ADR citations in docs/documentation-schema.md, docs/knowledge-placement.md — Amendment D demonstration 5 |
+| Stages with a recorded, real (non-synthetic) Amendment-D demonstration | 0 fully, 3 partially (rows 2, 5, 8) | See `planning/phase-01-foundation.md` §10 |

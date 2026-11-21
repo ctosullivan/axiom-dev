@@ -5,59 +5,51 @@ Keep this current, not historical. Historical narrative belongs in
 
 ## Current phase and status
 
-**Phase 1, Stages 1.0–1.3 all touched; none closed out.** Stage 1.0 is
-committed/pushed but unmerged (no PR opened yet — no `gh`/token). Stage
-1.1 is committed/pushed on the same branch. Stage 1.2 (lifecycle +
-agent-isolation docs) and Stage 1.3 (Codex gate, deterministic piece only)
-have just been written and are pending independent review before commit.
+**Phase 1, Stages 1.0–1.4 all touched; none closed out.** Stage 1.0–1.3
+are committed/pushed on `phase-1/stage-1.0-bootstrap` (still unmerged —
+no PR opened, no `gh`/token). Stage 1.4's initial validator
+implementation is built, independently reviewed, fixed, and
+pending commit — the refactor has not started.
 
-**Stage 1.3 status, stated precisely:** the deterministic policy
-evaluator is implemented, contracted, tested (16/16 passing,
-`.github/scripts/tests/`), and wired into a CI workflow that needs no
-secrets. The live Codex integration workflow is written to spec but
-**blocked** — no `OPENAI_API_KEY` in this environment, and enabling paid
-Codex review calls is a cost decision for a human. This is recorded as an
-open item, not papered over with a claim the gate is "done."
+**Stage 1.4 status, stated precisely:** `src/axiom_validator.py` (the
+knowledge/documentation validator) is implemented against
+`contracts/documentation-schema-validator.md`, with 10 fixtures and 14
+passing tests. An independent review before the baseline was locked
+found two real defects (unenforced "no paths outside the repository";
+fenced-code-block heading false positive) — both fixed with regression
+fixtures/tests. Dogfooding against real, already-committed documents (not
+just fixtures) found and fixed a real documentation defect (shorthand ADR
+citations in two Stage 1.1 docs). The pre-refactor baseline is locked in
+`evidence/stage-1.4-baseline.md`. **The behaviour-preserving refactor has
+not started.**
 
 ## Latest completed work
 
 **Stage 1.0 (committed, pushed, unmerged):** commits `0307e83`, `649a025`.
 
-**Amendment (prompt 002) + Stage 1.1 (committed, pushed, unmerged):**
-commit `31fb153` on `phase-1/stage-1.0-bootstrap` — `decisions/0004`,
-the amended plan, `evidence/phase-1-log.md`, the documentation schema,
-full knowledge placement policy, first contract
-(`contracts/documentation-schema-validator.md`), and the reconciliation
-procedure. Independently reviewed (2 blocking findings, both fixed — see
-`planning/phase-01-foundation.md` §11).
+**Amendment (prompt 002) + Stage 1.1:** commits `31fb153`, `197dfdc`.
 
-**Stage 1.2 (docs only, uncommitted as of this note):**
-- `docs/development-lifecycle.md` — the six-step lifecycle with
-  entry/exit criteria per step, plus the concrete phase-acceptance
-  procedure (how a stage actually gets marked Completed).
-- `docs/agent-isolation.md` — responsibilities by function (not roster),
-  a three-level isolation taxonomy (prompt-based / fresh-context /
-  mechanical), and an explicit statement that every review run in this
-  project so far has been level 2 (fresh-context, same operator), never
-  level 3.
+**Stage 1.2 + Stage 1.3 deterministic piece:** commits `786e2c9`,
+`38bbb58`. Lifecycle/isolation docs; the Codex-gate policy evaluator (16
+tests); two GitHub Actions workflows; live Codex integration blocked (no
+`OPENAI_API_KEY`) and a second gap (required-status-check configuration
+needs repo-admin access) named explicitly.
 
-**Stage 1.3 (real software, uncommitted as of this note):**
-- Researched current OpenAI Codex GitHub integration options (two
-  searches; chose `openai/codex-action@v1` with structured JSON output
-  over the managed Codex Cloud integration, since the latter only
-  produces a natural-language PR comment unsuitable for deterministic
-  gating).
-- `contracts/codex-gate-policy-evaluator.md` — written to match the
-  implementation below (recorded honestly as implementation-then-contract,
-  unlike Stage 1.4's mandatory contract-first rule).
-- `.github/scripts/policy_evaluator.py` + 16 passing unit tests
-  (`.github/scripts/tests/`) covering all 6 required test scenarios
-  (valid PR, P0/P1 defect, advisory finding, malformed reviewer output,
-  missing/failed review, stale-commit review) — real, run, passing.
-- `.github/workflows/deterministic-checks.yml` (runs now, no secrets
-  needed) and `.github/workflows/codex-review.yml` +
-  `.github/codex/prompts/review.md` (written to spec; live path
-  untested, gated to skip safely without `OPENAI_API_KEY`).
+**Stage 1.4 initial implementation (uncommitted as of this note):**
+- `src/axiom_validator.py` — initial, deliberately monolithic validator.
+- `tests/fixtures/` (10 files: 1 valid + 9 invalid, one per contract rule
+  plus 2 regression fixtures) and `tests/test_axiom_validator.py`
+  (14 tests, all passing, including 4 tests run directly against
+  real already-committed Axiom Dev documents, not only synthetic
+  fixtures).
+- `requirements.txt` (PyYAML).
+- `evidence/stage-1.4-baseline.md` — locked pre-refactor checksums, real
+  captured test output, the real documentation-defect dogfooding finding,
+  and the independent review's two fixed defects.
+- Real fix applied to `docs/documentation-schema.md` and
+  `docs/knowledge-placement.md` (shorthand ADR citations corrected to
+  real filenames) — found by the validator's own real-document tests,
+  not invented.
 
 ## Relevant decisions
 
@@ -65,51 +57,44 @@ procedure. Independently reviewed (2 blocking findings, both fixed — see
 - `decisions/0002` — canonical knowledge and documentation architecture;
   schema-format question resolved by `docs/documentation-schema.md`.
 - `decisions/0003` — independent verification and agent responsibilities;
-  the isolation taxonomy is now concretely applied in
-  `docs/agent-isolation.md`.
-- `decisions/0004` — Phase 1 amendment: anti-circularity verification,
-  measurement, acceptance demonstrations; its architectural split for
-  Stage 1.3 is what's currently in effect.
+  the isolation taxonomy is concretely applied in
+  `docs/agent-isolation.md` and audited against actual review history.
+- `decisions/0004` — Phase 1 amendment: anti-circularity verification
+  (now exercised for real in Stage 1.4 — pre-implementation contract
+  review, checksummed baseline, pre-refactor lock), measurement
+  (`evidence/phase-1-log.md`), acceptance demonstrations
+  (`planning/phase-01-foundation.md` §10).
 
 ## Outstanding issues
 
-- No `gh` CLI or GitHub token — no PR opened yet for any of this work. A
-  human needs to open it from the URL below.
-- **Stage 1.3 has two distinct, separately-blocking gaps, named
-  separately rather than folded into one:**
-  1. Live Codex integration needs an `OPENAI_API_KEY` repository secret
-     and a human cost/billing decision to enable recurring paid review
-     calls (`planning/prompts/002-...md` §9).
-  2. Even once (1) is resolved, making `deterministic-checks.yml` and/or
-     `codex-review.yml` an actual GitHub "required status check" needs
-     repository-admin API access this session doesn't have (no
-     `gh`/token) — a human must configure branch protection separately.
-     An independent review flagged that this second gap had gone
-     unmentioned in earlier status notes; it's recorded explicitly now.
-  Until both are resolved, Stage 1.3's "real GitHub PR evidence
-  demonstrates both successful and blocked outcomes" exit criterion stays
-  unmet — a green `deterministic-checks.yml` run is not, by itself, a
-  merge gate.
-- The independent review of the Stage 1.2 + Stage 1.3 batch has not run
-  yet as of this note.
+- No `gh` CLI or GitHub token — no PR opened yet for any of this work.
+- **Stage 1.3 has two distinct, separately-blocking gaps** (see
+  `planning/phase-01-foundation.md` §4 Stage 1.3 and §12): live Codex
+  integration needs `OPENAI_API_KEY` + a cost decision; required-status-check
+  configuration needs repo-admin access this session lacks. Neither is
+  resolved.
+- The independent review of this Stage 1.4 batch (initial implementation,
+  post-fix) has run and its findings are fixed — see
+  `planning/phase-01-foundation.md` §13 and `evidence/stage-1.4-baseline.md`.
+  Not yet committed as of this note.
 
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through commit
-  `786e2c9` (verified: `git log`, `git push` output). Includes Stage 1.0
-  (`0307e83`, `649a025`), amendment + Stage 1.1 (`31fb153`, `197dfdc`),
-  and Stage 1.2 + Stage 1.3 deterministic piece (`786e2c9`).
+  `38bbb58`. Stage 1.4's initial implementation above is **not yet
+  committed**.
 - PR: still not opened. Creation URL:
   `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
 ## Next concrete action
 
-1. Begin Stage 1.4 (validator component + behaviour-preserving refactor) —
-   this does not require Stage 1.3's live Codex gate to exist first; the
-   self-dogfooding rule explicitly permits documented manual independent
-   review until the gate is live (`planning/prompts/001-...md` §7).
-2. Separately: a human needs to (a) open/review the PR for everything
-   pushed on `phase-1/stage-1.0-bootstrap`, and (b) decide whether to
-   provision `OPENAI_API_KEY` and accept the cost of enabling Stage 1.3's
-   live Codex review, and (c) configure branch protection/required status
-   checks (needs repo-admin access this session lacks).
+1. Commit and push the Stage 1.4 initial implementation.
+2. Perform the behaviour-preserving refactor (split parsing/validation
+   rules/reporting), verify before/after against the locked baseline,
+   record a defect ledger, get independent review, commit.
+3. Begin Stage 1.5 (independent documentation reconstruction + Phase 1
+   closeout).
+4. Separately: a human needs to (a) open/review the PR covering
+   everything on `phase-1/stage-1.0-bootstrap`, (b) decide on
+   `OPENAI_API_KEY`/Codex cost, and (c) configure branch protection
+   (needs repo-admin access this session lacks).

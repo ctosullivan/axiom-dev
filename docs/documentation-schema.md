@@ -2,7 +2,7 @@
 audience: contributors and agents writing or validating Axiom Dev documentation
 purpose: define the declarative schema convention every important document uses, and how it's checked
 required_sections: [Convention, Required fields, Worked example, Manual validation record]
-authoritative_sources: [decisions/0002, decisions/0004]
+authoritative_sources: [decisions/0002-knowledge-architecture.md, decisions/0004-phase-1-amendment-verification-measurement-and-acceptance.md]
 acceptance_criteria:
   - the convention is simpler than CodeCompass's separate-sidecar-file approach, with the simplification reasoned, not just asserted
   - at least one real Axiom Dev document has been checked against this schema by hand

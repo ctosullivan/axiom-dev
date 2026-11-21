@@ -789,3 +789,18 @@ that contradict its own contract and inline-comment reasoning, plus
 committed `.pyc` files with no `.gitignore`. Fix those three items — all
 small, mechanical fixes — before this lands." All fixed as recorded
 above.
+
+## 13. Independent review record — Stage 1.4 initial implementation
+
+Per `decisions/0004` (Amendment B), the initial validator implementation
+was independently reviewed *before* the pre-refactor baseline was locked.
+Full findings, fixes, and the locked checksums/test output live in
+`evidence/stage-1.4-baseline.md` (verification outcomes belong in
+`evidence/`, not duplicated at length here — `AGENTS.md` §7). Summary:
+the reviewer re-ran the tests and re-computed checksums rather than
+trusting the claims, confirmed the real-document dogfooding finding
+against `git diff`, and found two real, demonstrated-with-counter-examples
+blocking defects (an unenforced "no paths outside the repository" rule,
+and a fenced-code-block false positive in heading detection) — both fixed
+with regression fixtures and tests, not just prose. Isolation level:
+best-effort, same as §6, §11, §12.

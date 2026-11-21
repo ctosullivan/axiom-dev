@@ -23,7 +23,7 @@ Full stage detail, dependencies and acceptance criteria:
 | 1.1 | Knowledge and documentation methodology | In progress |
 | 1.2 | Agent development methodology | In progress |
 | 1.3 | Codex CI review gate | In progress — deterministic piece built and tested; live integration **blocked** (no `OPENAI_API_KEY`/cost decision) |
-| 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | Planned |
+| 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | In progress — initial implementation done, reviewed, fixed; refactor not yet started |
 | 1.5 | Independent documentation reconstruction and closeout | Planned |
 
 Amended 2026-11-21 per `planning/prompts/002-phase-1-amend-and-implement.md`
@@ -77,22 +77,39 @@ which would have defeated the malformed-output fail-closed rule the
 moment the live path is enabled. See
 `planning/phase-01-foundation.md` §12.
 
-### Stage 1.4–1.5
+### Stage 1.4 — Axiom self-development and refactoring
 
-Status: **Planned.** Each requires its own focused implementation plan,
+Status: **In progress.** The initial (deliberately monolithic)
+implementation of the knowledge/documentation validator
+(`src/axiom_validator.py`) is built, contracted
+(`contracts/documentation-schema-validator.md`), fixture-tested (14
+passing tests, `tests/`), and independently reviewed — that review found
+and this session fixed two real, demonstrated defects (an unenforced
+"no paths outside the repository" rule; a fenced-code-block false
+positive in heading detection). A real, non-synthetic defect was also
+found and fixed in two already-committed Axiom Dev documents during
+dogfooding (shorthand ADR citations that didn't resolve as real paths).
+The pre-refactor baseline (checksums + test output) is locked in
+`evidence/stage-1.4-baseline.md`. **The refactor itself has not started
+yet.** This stage is not Completed until the refactor, its independent
+review, and before/after behavioural verification are all done with
+evidence.
+
+### Stage 1.5
+
+Status: **Planned.** Requires its own focused implementation plan,
 written and reviewed before work starts (`AGENTS.md` §2) — the detail in
 `planning/phase-01-foundation.md` establishes dependencies and acceptance
 criteria, not implementation authorisation.
 
 ## Directories deliberately not yet created
 
-`src/`, top-level `tests/` do not exist in this repository yet. They are
-scoped to Stage 1.4 and are intentionally absent until that stage gives
-them real content (see `planning/phase-01-foundation.md`), per the
-bootstrap prompt's instruction not to create placeholder structure.
-(`.github/scripts/tests/` already exists — that's Stage 1.3's own
-CI-tooling test suite, a different thing from the top-level `tests/`
-Stage 1.4 will create for the Axiom component itself.)
+Nothing remains deliberately uncreated in the originally-proposed
+scaffold — `src/` and `tests/` were created as part of Stage 1.4 with
+real content (not placeholders): `src/axiom_validator.py`, 10 fixture
+files and 14 tests under `tests/`. (`.github/scripts/tests/` is a
+separate thing — Stage 1.3's own CI-tooling test suite, distinct from the
+top-level `tests/` created for the Axiom component itself.)
 
 `evidence/` was created as part of the Phase 1 amendment (Amendment C,
 `decisions/0004`) with real initial content
