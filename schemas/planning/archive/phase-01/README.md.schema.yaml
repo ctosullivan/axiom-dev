@@ -1,0 +1,8 @@
+audience: contributors and reviewers examining the completed Phase 1 record
+purpose: index canonical Phase 1 plans, decisions, contracts, evidence and owner-accepted qualifications
+required_sections: [Status and accepted scope, Canonical record, Decisions and contracts, Remaining qualifications and follow-on work]
+authoritative_sources: [planning/ROADMAP.md, evidence/phase-1-owner-acceptance.md, docs/phase-archiving.md]
+acceptance_criteria:
+  - Phase 1 remains visible as Completed in planning/ROADMAP.md
+  - historical evidence remains available and its open qualifications are not misrepresented
+  - the archive links to the canonical Phase 1 plan rather than moving or duplicating it
