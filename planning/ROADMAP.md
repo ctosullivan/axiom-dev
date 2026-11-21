@@ -79,21 +79,21 @@ moment the live path is enabled. See
 
 ### Stage 1.4 — Axiom self-development and refactoring
 
-Status: **In progress.** The initial (deliberately monolithic)
-implementation of the knowledge/documentation validator
-(`src/axiom_validator.py`) is built, contracted
-(`contracts/documentation-schema-validator.md`), fixture-tested (14
-passing tests, `tests/`), and independently reviewed — that review found
-and this session fixed two real, demonstrated defects (an unenforced
-"no paths outside the repository" rule; a fenced-code-block false
-positive in heading detection). A real, non-synthetic defect was also
-found and fixed in two already-committed Axiom Dev documents during
-dogfooding (shorthand ADR citations that didn't resolve as real paths).
-The pre-refactor baseline (checksums + test output) is locked in
-`evidence/stage-1.4-baseline.md`. **The refactor itself has not started
-yet.** This stage is not Completed until the refactor, its independent
-review, and before/after behavioural verification are all done with
-evidence.
+Status: **In progress — all planned work done with evidence; awaiting
+human sign-off to mark Completed (`AGENTS.md` §11).** The initial
+implementation of the knowledge/documentation validator was built,
+contracted, fixture-tested, and independently reviewed (two real defects
+found and fixed: an unenforced "no paths outside the repository" rule; a
+fenced-code-block heading false positive). A real, non-synthetic
+documentation defect was found and fixed via dogfooding (shorthand ADR
+citations in two Stage 1.1 docs). The pre-refactor baseline was locked
+(`evidence/stage-1.4-baseline.md`), then a genuine behaviour-preserving
+refactor was performed — `src/axiom_validator.py` split into
+`src/axiom_validator/{parsing,rules,reporting}.py` plus an orchestrator —
+with identical before/after test results (14/14, same tests) and a clean
+independent review (zero blocking findings; see
+`evidence/stage-1.4-refactor.md`). Amendment D demonstrations 4 and 7
+are now fully demonstrated (`planning/phase-01-foundation.md` §10).
 
 ### Stage 1.5
 

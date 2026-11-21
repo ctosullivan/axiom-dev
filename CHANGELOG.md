@@ -48,6 +48,14 @@ This project does not yet have a release; entries accumulate under
   `docs/documentation-schema.md` and `docs/knowledge-placement.md` that
   didn't resolve as real paths.
 
-First real software, first real passing tests, and first real
-(non-synthetic) defect found in this project's own documentation by its
-own tooling. The behaviour-preserving refactor has not started yet.
+- Stage 1.4 (refactor): `src/axiom_validator.py` (one monolithic file)
+  split into `src/axiom_validator/{parsing,rules,reporting}.py` plus an
+  orchestrator (`__init__.py`) and a new `__main__.py` for
+  `python3 -m axiom_validator`. Identical before/after test results
+  (14/14, same tests), zero blocking findings from independent review —
+  see `evidence/stage-1.4-refactor.md`.
+
+First real software, first real passing tests, first real (non-synthetic)
+defect found in this project's own documentation by its own tooling, and
+first genuine behaviour-preserving refactor with a clean independent
+review.

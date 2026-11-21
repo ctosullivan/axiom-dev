@@ -150,14 +150,41 @@ could not be measured and why.
   final (post-fix) checksums and test output as the pre-refactor
   comparison point for the refactor about to follow.
 
+## 2026-11-21 — Stage 1.4 refactor
+
+- **Development effort:** one orchestrating-session pass. Split
+  `src/axiom_validator.py` into `parsing.py`/`rules.py`/`reporting.py`/
+  `__init__.py`/`__main__.py`; deleted the original file; re-ran the
+  exact test suite (14/14 pass, identical to baseline); verified
+  protected checksums unchanged; verified the new `python3 -m
+  axiom_validator` CLI entry point directly.
+- **Agent usage:** one independent-review dispatch of the refactor —
+  62,958 tokens, 16 tool uses, 69.2s duration. Notably the fastest/
+  cheapest review so far, consistent with there being nothing wrong to
+  investigate at length.
+- **Defects detected by independent review, not by self-check:** 0
+  blocking, 0 advisory requiring action — the review's role here was
+  entirely re-derivation/confirmation (re-computed checksums, re-ran
+  tests, diffed old-vs-new logic line by line), not defect-finding. One
+  procedural note (fill in the refactor doc's own placeholder section)
+  was actioned.
+- **Rework:** none needed — first clean independent review in this
+  project's history.
+- **Amendment D demonstration 4** ("a meaningful refactor preserves
+  independently established behaviour") is now fully demonstrated, not
+  partial — see `planning/phase-01-foundation.md` §10 row 4.
+- **Amendment D demonstration 7** ("knowledge reused in a later task")
+  also now fully demonstrated: Stage 1.4's documents reuse Stage 1.1's
+  schema convention and Stage 1.2's isolation vocabulary, concretely.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 5 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 1 Stage 1.4 initial |
-| Subagent tokens so far | 498,986 | 209,592 + 128,322 + 98,748 + 62,324 |
-| Blocking defects found by independent review (not self-caught) | 9 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial — all fixed |
-| Advisory defects found and fixed or accepted | 7 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 (accepted as documented limitations) |
-| Real passing tests | 30 of 30 | 16 policy-evaluator + 14 axiom_validator, both re-run independently and confirmed |
+| Subagent dispatches so far | 6 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor) |
+| Subagent tokens so far | 561,944 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 |
+| Blocking defects found by independent review (not self-caught) | 9 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor — all fixed |
+| Advisory defects found and fixed or accepted | 7 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor |
+| Real passing tests | 30 of 30 | 16 policy-evaluator + 14 axiom_validator, both re-run independently and confirmed (twice, for axiom_validator — before and after the refactor, identical) |
 | Real (non-synthetic) defects found in Axiom Dev's own documentation | 1 | shorthand ADR citations in docs/documentation-schema.md, docs/knowledge-placement.md — Amendment D demonstration 5 |
-| Stages with a recorded, real (non-synthetic) Amendment-D demonstration | 0 fully, 3 partially (rows 2, 5, 8) | See `planning/phase-01-foundation.md` §10 |
+| Stages with a recorded, real (non-synthetic) Amendment-D demonstration | 2 fully (rows 4, 7), 2 partially (rows 2, 5), 1 in progress (row 8) | See `planning/phase-01-foundation.md` §10 |

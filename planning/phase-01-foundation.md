@@ -600,10 +600,10 @@ honest default, not a gap to hide.
 | 1 | A fresh agent resumes development using repository knowledge alone | Stage 1.0 exit criterion, re-exercised explicitly | Not yet demonstrated |
 | 2 | One requirement traced: instruction → plan → decision → implementation → verification | `contracts/documentation-schema-validator.md`, traced from `planning/prompts/001...md` §5 → `decisions/0002` → this plan's Stage 1.4 → the contract | **Partially demonstrated** — chain exists through the contract (prompt → decision → plan → contract); implementation and verification legs pending Stage 1.4 |
 | 3 | A deliberately defective PR is rejected by the required CI gate | Stage 1.3, live integration piece | Not yet demonstrated — depends on Stage 1.3's live-integration blocker status (§4) |
-| 4 | A meaningful refactor preserves independently established behaviour | Stage 1.4 | Not yet demonstrated |
+| 4 | A meaningful refactor preserves independently established behaviour | Stage 1.4 (`evidence/stage-1.4-refactor.md`) | **Demonstrated** — real structural split, identical before/after test results, independently verified |
 | 5 | Knowledge placement and documentation consistency evaluated against real changes | Ongoing from Stage 1.1 onward, against each substantive change | **Partially demonstrated** — this batch's own independent review (§11) found and fixed two real placement/format inconsistencies in live Stage 1.1 content, not a synthetic exercise |
 | 6 | Documentation independently reconstructed from permitted evidence | Stage 1.5 | Not yet demonstrated |
-| 7 | Knowledge from earlier work reused in a later task | Cross-stage; candidate: Stage 1.4 reusing Stage 1.1's schema/placement conventions and Stage 1.2's verification procedure | Not yet demonstrated |
+| 7 | Knowledge from earlier work reused in a later task | Stage 1.4 reused Stage 1.1's documentation-schema convention (every Stage 1.4 evidence/contract document carries the front-matter format Stage 1.1 defined, and is itself validated by the Stage 1.4 tool against that convention) and Stage 1.2's lifecycle/isolation vocabulary (every review record names its isolation level using Stage 1.2's taxonomy) | **Demonstrated** — concrete, citable instances, not just a stated intention |
 | 8 | Methodology overhead recorded and assessed | `evidence/phase-1-log.md` (§9), assessed at Stage 1.5 closeout | In progress from this amendment onward |
 
 Phase 1 cannot close (§7) while any row above remains "Not yet
@@ -804,3 +804,26 @@ blocking defects (an unenforced "no paths outside the repository" rule,
 and a fenced-code-block false positive in heading detection) — both fixed
 with regression fixtures and tests, not just prose. Isolation level:
 best-effort, same as §6, §11, §12.
+
+## 14. Independent review record — Stage 1.4 refactor
+
+The behaviour-preserving refactor (splitting `src/axiom_validator.py`
+into `parsing.py`/`rules.py`/`reporting.py`/`__init__.py`) was
+independently reviewed against the locked baseline. Full findings live
+in `evidence/stage-1.4-refactor.md`. Summary: the reviewer re-computed
+every protected checksum (exact match), re-ran the 14-test suite itself
+(exact match), diffed the old monolith against the new modules line by
+line and confirmed a genuine separation of concerns with identical rule
+ordering (including both prior bug fixes carrying over unchanged), and
+confirmed the one CLI-invocation change (`python3 -m axiom_validator`
+instead of direct script execution) is not a contract violation since
+the contract specifies no CLI shape. **No blocking findings.** Isolation
+level: best-effort, same as §6, §11, §12, §13.
+
+Stage 1.4 is now complete with evidence: initial implementation built,
+contracted, independently reviewed, fixed; real documentation defect
+found and fixed via dogfooding; baseline locked; refactor performed,
+independently reviewed, before/after behaviour verified identical. Per
+`AGENTS.md` §11, marking it Completed in `planning/ROADMAP.md` is still a
+human approval action — this record documents the evidence for that
+approval, it does not self-certify.

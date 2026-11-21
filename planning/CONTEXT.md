@@ -5,96 +5,74 @@ Keep this current, not historical. Historical narrative belongs in
 
 ## Current phase and status
 
-**Phase 1, Stages 1.0–1.4 all touched; none closed out.** Stage 1.0–1.3
-are committed/pushed on `phase-1/stage-1.0-bootstrap` (still unmerged —
-no PR opened, no `gh`/token). Stage 1.4's initial validator
-implementation is built, independently reviewed, fixed, and
-pending commit — the refactor has not started.
+**Phase 1, Stages 1.0–1.4 done with evidence (none human-approved as
+Completed yet); Stage 1.5 is next.** Everything is on
+`phase-1/stage-1.0-bootstrap`, pushed, unmerged (no PR opened — no
+`gh`/token).
 
-**Stage 1.4 status, stated precisely:** `src/axiom_validator.py` (the
-knowledge/documentation validator) is implemented against
-`contracts/documentation-schema-validator.md`, with 10 fixtures and 14
-passing tests. An independent review before the baseline was locked
-found two real defects (unenforced "no paths outside the repository";
-fenced-code-block heading false positive) — both fixed with regression
-fixtures/tests. Dogfooding against real, already-committed documents (not
-just fixtures) found and fixed a real documentation defect (shorthand ADR
-citations in two Stage 1.1 docs). The pre-refactor baseline is locked in
-`evidence/stage-1.4-baseline.md`. **The behaviour-preserving refactor has
-not started.**
+**Stage 1.4 status, stated precisely:** initial implementation built,
+contracted, independently reviewed and fixed (2 real defects); a real
+documentation defect found and fixed via dogfooding; pre-refactor
+baseline locked; genuine behaviour-preserving refactor performed
+(monolithic file → `parsing`/`rules`/`reporting` modules); identical
+before/after test results (14/14); independent review of the refactor
+found zero blocking issues. Full record:
+`evidence/stage-1.4-baseline.md`, `evidence/stage-1.4-refactor.md`,
+`planning/phase-01-foundation.md` §13–§14.
 
 ## Latest completed work
 
-**Stage 1.0 (committed, pushed, unmerged):** commits `0307e83`, `649a025`.
-
+**Stage 1.0:** commits `0307e83`, `649a025`.
 **Amendment (prompt 002) + Stage 1.1:** commits `31fb153`, `197dfdc`.
-
-**Stage 1.2 + Stage 1.3 deterministic piece:** commits `786e2c9`,
-`38bbb58`. Lifecycle/isolation docs; the Codex-gate policy evaluator (16
-tests); two GitHub Actions workflows; live Codex integration blocked (no
-`OPENAI_API_KEY`) and a second gap (required-status-check configuration
-needs repo-admin access) named explicitly.
-
-**Stage 1.4 initial implementation (uncommitted as of this note):**
-- `src/axiom_validator.py` — initial, deliberately monolithic validator.
-- `tests/fixtures/` (10 files: 1 valid + 9 invalid, one per contract rule
-  plus 2 regression fixtures) and `tests/test_axiom_validator.py`
-  (14 tests, all passing, including 4 tests run directly against
-  real already-committed Axiom Dev documents, not only synthetic
-  fixtures).
-- `requirements.txt` (PyYAML).
-- `evidence/stage-1.4-baseline.md` — locked pre-refactor checksums, real
-  captured test output, the real documentation-defect dogfooding finding,
-  and the independent review's two fixed defects.
-- Real fix applied to `docs/documentation-schema.md` and
-  `docs/knowledge-placement.md` (shorthand ADR citations corrected to
-  real filenames) — found by the validator's own real-document tests,
-  not invented.
+**Stage 1.2 + Stage 1.3 deterministic piece:** commits `786e2c9`, `38bbb58`.
+**Stage 1.4 initial implementation:** commits `07d5548`, `05e242a`.
+**Stage 1.4 refactor (uncommitted as of this note):**
+- `src/axiom_validator.py` deleted; replaced by
+  `src/axiom_validator/{__init__,parsing,rules,reporting,__main__}.py`.
+- `evidence/stage-1.4-refactor.md` — before/after verification, defect
+  ledger (0 introduced), and the independent review's findings (0
+  blocking).
+- `planning/phase-01-foundation.md` §14 added; §10's Amendment D
+  demonstration table rows 4 and 7 updated from "not yet"/"partial" to
+  "Demonstrated."
 
 ## Relevant decisions
 
-- `decisions/0001` — development governance and repository methodology.
-- `decisions/0002` — canonical knowledge and documentation architecture;
-  schema-format question resolved by `docs/documentation-schema.md`.
-- `decisions/0003` — independent verification and agent responsibilities;
-  the isolation taxonomy is concretely applied in
-  `docs/agent-isolation.md` and audited against actual review history.
-- `decisions/0004` — Phase 1 amendment: anti-circularity verification
-  (now exercised for real in Stage 1.4 — pre-implementation contract
-  review, checksummed baseline, pre-refactor lock), measurement
-  (`evidence/phase-1-log.md`), acceptance demonstrations
-  (`planning/phase-01-foundation.md` §10).
+- `decisions/0001`–`0004` — see prior entries; `decisions/0004`'s
+  anti-circularity mechanics (Amendment B) have now been exercised fully
+  end-to-end once: pre-implementation contract review, checksummed
+  baseline, pre-refactor lock, before/after verification, independent
+  review at each stage.
 
 ## Outstanding issues
 
-- No `gh` CLI or GitHub token — no PR opened yet for any of this work.
-- **Stage 1.3 has two distinct, separately-blocking gaps** (see
-  `planning/phase-01-foundation.md` §4 Stage 1.3 and §12): live Codex
-  integration needs `OPENAI_API_KEY` + a cost decision; required-status-check
-  configuration needs repo-admin access this session lacks. Neither is
-  resolved.
-- The independent review of this Stage 1.4 batch (initial implementation,
-  post-fix) has run and its findings are fixed — see
-  `planning/phase-01-foundation.md` §13 and `evidence/stage-1.4-baseline.md`.
-  Not yet committed as of this note.
+- No `gh` CLI or GitHub token — no PR opened yet.
+- Stage 1.3's two blockers remain open (live Codex integration needs
+  `OPENAI_API_KEY` + a cost decision; required-status-check config needs
+  repo-admin access this session lacks) — unaffected by Stage 1.4's
+  completion, tracked separately.
+- Stage 1.4's evidence is complete, but it is not marked Completed in
+  `planning/ROADMAP.md` — that's a human approval action (`AGENTS.md` §11).
 
 ## Current branch / PR
 
-- Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through commit
-  `07d5548` (verified: `git log`, `git push` output). Stage 1.4's initial
-  implementation is now committed and pushed; the refactor is not.
+- Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through
+  commit `05e242a`. The refactor above is **not yet committed**.
 - PR: still not opened. Creation URL:
   `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
 ## Next concrete action
 
-1. Commit and push the Stage 1.4 initial implementation.
-2. Perform the behaviour-preserving refactor (split parsing/validation
-   rules/reporting), verify before/after against the locked baseline,
-   record a defect ledger, get independent review, commit.
-3. Begin Stage 1.5 (independent documentation reconstruction + Phase 1
-   closeout).
-4. Separately: a human needs to (a) open/review the PR covering
-   everything on `phase-1/stage-1.0-bootstrap`, (b) decide on
-   `OPENAI_API_KEY`/Codex cost, and (c) configure branch protection
-   (needs repo-admin access this session lacks).
+1. Commit and push the Stage 1.4 refactor.
+2. Begin Stage 1.5: write a focused plan for independent documentation
+   reconstruction (define the permitted-evidence set — likely `src/`,
+   `tests/`, `contracts/`, `evidence/`, excluding `docs/` itself, to
+   prevent the reconstructing agent from copying rather than
+   reconstructing); dispatch a fresh-context reconstruction; compare
+   against actual `docs/`; resolve findings through the normal workflow;
+   perform the Phase 1 closeout assessment against the Amendment D table
+   and the Definition of Done in `planning/prompts/002-...md` §11.
+3. Separately: a human needs to (a) open/review the PR, (b) decide on
+   `OPENAI_API_KEY`/Codex cost, (c) configure branch protection, and (d)
+   mark Stage 1.4 Completed in `planning/ROADMAP.md` if satisfied with
+   the evidence.

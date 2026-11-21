@@ -16,13 +16,14 @@ preserves important project knowledge, supports independent verification,
 maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
-> **Status: Phase 1, Stages 1.0–1.4 in progress.** Governance (1.0),
-> knowledge/documentation methodology (1.1), the development lifecycle
-> and agent-isolation docs (1.2), the Codex gate's deterministic piece
-> (1.3, tested; live integration blocked on credentials/cost), and the
-> first Axiom component — a knowledge/documentation validator (1.4,
-> initial implementation done and reviewed; refactor not yet started) —
-> all exist. See [`planning/CONTEXT.md`](planning/CONTEXT.md) for the
+> **Status: Phase 1, Stages 1.0–1.4 in progress; Stage 1.5 next.**
+> Governance (1.0), knowledge/documentation methodology (1.1), the
+> development lifecycle and agent-isolation docs (1.2), the Codex gate's
+> deterministic piece (1.3, tested; live integration blocked on
+> credentials/cost), and the first Axiom component — a
+> knowledge/documentation validator, built, reviewed, and
+> behaviour-preservingly refactored with identical before/after test
+> results (1.4) — all exist. See [`planning/CONTEXT.md`](planning/CONTEXT.md) for the
 > current state and
 > [`planning/ROADMAP.md`](planning/ROADMAP.md) for what is planned, in
 > progress, or done.
@@ -114,7 +115,7 @@ for how to propose and land a change.
 | `.github/workflows/` | Deterministic CI (tested, running) and the Codex review gate (written, blocked). |
 | `.github/scripts/` | The Stage 1.3 policy evaluator and its own test suite. |
 | `.github/codex/prompts/review.md` | The review instructions given to Codex once the live gate is enabled. |
-| `src/axiom_validator.py` | The first Axiom Dev component: a knowledge/documentation schema validator. |
+| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules, refactored from an initial single-file implementation). |
 | `tests/` | Fixtures (valid + deliberately invalid, one per contract rule) and tests for the validator. |
 | `requirements.txt` | The one runtime dependency (PyYAML) the validator needs. |
 
