@@ -186,6 +186,22 @@ def check_authoritative_sources(data: dict, repo_root: Path) -> list[str]:
                 f"authoritative_sources entry is not a bare path: {source!r}"
             )
             continue
+        # Reject an absolute path explicitly, before resolving it —
+        # found by native Codex review of PR #1 (rule 5 requires a
+        # bare, repository-relative path, but `repo_root / source`
+        # silently discards `repo_root` and resolves `source` alone
+        # when `source` is itself absolute, per pathlib's own `/`
+        # semantics; an absolute path to a real file *inside* the
+        # repository then passed both the containment check and the
+        # existence check, wrongly accepting it as if it were a valid
+        # bare path). Checked as its own rule, before any resolution,
+        # so it never reaches that pathlib behaviour at all.
+        if Path(source).is_absolute():
+            errors.append(
+                f"authoritative_sources entry must be a repository-relative "
+                f"path, not absolute: {source!r}"
+            )
+            continue
         resolved = (repo_root / source).resolve()
         if not is_within(resolved, repo_root):
             errors.append(

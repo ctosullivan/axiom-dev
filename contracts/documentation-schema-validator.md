@@ -62,11 +62,37 @@ Given a Markdown file:
    naming the offending entry. (This checks the path exists; it does not
    check the document's claims are actually consistent with that source —
    that remains a semantic/editorial check, per
-   `docs/knowledge-placement.md` "Enforcement classes.")
+   `docs/knowledge-placement.md` "Enforcement classes.") **Implementation
+   note (found by a fifth native Codex review of PR #1):** "bare path"
+   was checked for stray `§` markers and surrounding whitespace, but not
+   for being *absolute* — `(repo_root / source).resolve()` silently
+   discards `repo_root` when `source` is itself absolute (pathlib's own
+   `/` behaviour), so an absolute path to a real file inside the
+   repository passed both the containment and existence checks, wrongly
+   accepted as if it were bare. Not a contract change (the rule's text
+   already required a *bare* path, which an absolute path never is) —
+   fixed by rejecting `Path(source).is_absolute()` explicitly, before
+   any resolution. **Related, deferred finding, not fixed under this
+   same change:** rule 6's body-link check has the analogous structural
+   pattern (`document_path.parent / link_path`) and the same latent
+   behaviour for an absolute-path link — out of scope for this specific
+   Codex finding (which named `check_authoritative_sources` only); left
+   open and recorded here rather than silently expanded into. **Second
+   related, deferred finding (found by this project's own independent
+   review of the above fix, not Codex):** an empty-string entry (`""`)
+   also passes with no error — `(repo_root / "").resolve()` resolves to
+   `repo_root` itself, which exists as a directory. Confirmed identical
+   in the pre-fix code, so not introduced or widened by the fix above;
+   left unfixed for the same reason (out of this specific finding's
+   named scope), not silently dropped — see
+   `planning/phase-01-foundation.md` §29.
 6. **Any Markdown relative link in the document body (`[text](path)`,
-   excluding `http(s)://` and in-page `#anchor` links)** → checked the same
-   way as rule 5: must resolve relative to the document's own location.
-   Unresolvable → `FAIL` naming the broken link.
+   excluding `http(s)://` and in-page `#anchor` links)** → checked the
+   same way as rule 5 (including the same two deferred gaps noted under
+   rule 5 above: absolute paths, and empty-string entries, both
+   confirmed to behave the same way here). Must resolve relative to the
+   document's own location. Unresolvable → `FAIL` naming the broken
+   link.
 7. **Scope note for rule 5/6 results that point into `decisions/`:** if an
    `authoritative_sources` entry or a body Markdown link (not a bare
    inline-code mention in running prose — those aren't checked, since they

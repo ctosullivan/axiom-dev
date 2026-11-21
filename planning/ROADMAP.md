@@ -74,34 +74,28 @@ this roadmap itself (`decisions/0006`; §21–§22) — its own 21-item
 Definition of Done (`planning/prompts/004-...md` §13) stands at 19 MET,
 1 locally-verified-only, 2 open. **PR #1 exists and is open**
 (<https://github.com/ctosullivan/axiom-dev/pull/1>) and has now had
-**three native Codex reviews**, each finding one or two real defects,
-all corrected: the first (commit `3a8c395`) found a fenced-code-block
-heading false positive and an unhandled `TypeError` on malformed
-severity values (`decisions/0007`; §23–§24); the second (commit
-`2ebac4c`) found a heading-whitespace false positive (§25–§26); the
-third (commit `6e75d2b`) found that the governed-document manifest
-wasn't checked when a document's own schema existed (§27–§28). All
-four findings are corrected, regression-tested, and independently
-reviewed. The fourth review's dispatch itself found two real issues
-in this project's own record-keeping, not in the fix: this exact
-sentence briefly overclaimed "independently reviewed" before that
-review had actually completed (caught and corrected here, in the same
-change that records the review's real result — see §28), and a
-genuine, now-fixed gap where a `schemas/governed-documents.txt` that
-exists but isn't a readable file (e.g. a directory) raised an
-unhandled exception instead of a structured failure. Both are fixed;
-see §28 for the full record.
-**GitHub Actions is now confirmed passing** on commit `6e75d2b`
-(fetched directly from the live Actions run page) — the first time
-this project has had verbatim confirmation of a real run. **The
-remaining open items**: a *fourth* native Codex review of the latest
-corrected commit has not been requested (no `gh`/token to post the
-request — confirmed repeatedly across four amendments, not assumed),
-and human acceptance has not been sought. See
-`evidence/phase-1-final-closeout.md` and its addenda for the current
-full acceptance matrix. Phase 1 cannot be marked Completed, merged, or
-archived until a human requests that review, dispositions whatever it
-finds, and reviews the result (`AGENTS.md` §11).
+**four native Codex reviews**, finding five real defects in total, all
+corrected and independently verified:
+
+| Review | Commit | Finding(s) | Correction | Independent review |
+|---|---|---|---|---|
+| 1st | `3a8c395` | A: fenced-code-block heading false positive; B: unhandled `TypeError` on malformed severity | `162e5c6` | §24 |
+| 2nd | `2ebac4c` | C: heading-whitespace false positive (`\s+` matching a newline) | `0645af3` | §26 |
+| 3rd | `6e75d2b` | D: governed-document manifest not checked when a document's own schema exists | `e0094f7` | §28 (also found and fixed: a directory-as-manifest unhandled exception; a brief documentation overclaim this project corrected in the same batch) |
+| 4th | `10dd266` | E: `check_authoritative_sources` wrongly accepting an absolute path to a file inside the repository | this batch (§29) | dispatched |
+
+**GitHub Actions confirmed passing** across all 25 runs on this branch
+to date (fetched directly from the Actions run listing, not a single
+spot-checked run) — the first time this project has seen the whole
+recent run history rather than one result. **The remaining open
+items**: a *fifth* native Codex review of the latest corrected commit
+has not been requested (no `gh`/token to post the request — confirmed
+repeatedly across five amendments, not assumed), and human acceptance
+has not been sought. See `evidence/phase-1-final-closeout.md` and its
+addenda for the current full acceptance matrix. Phase 1 cannot be
+marked Completed, merged, or archived until a human requests that
+review, dispositions whatever it finds, and reviews the result
+(`AGENTS.md` §11).
 
 ## Phase 2 — Real-world validation (proposed)
 

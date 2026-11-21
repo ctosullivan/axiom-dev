@@ -1974,3 +1974,236 @@ which must be corrected (and the directory-as-manifest unhandled-exception
 gap should at minimum be recorded, if not fixed) before this
 correction can be considered fully reconciled." Both are fixed in this
 same change; no other blocking gap remains open from this review.
+
+## 29. Fifth Codex correction — absolute authoritative-source paths (prompt 008)
+
+Authorising prompt:
+[`planning/prompts/008-final-phase-1-correction-and-acceptance-preparation.md`](prompts/008-final-phase-1-correction-and-acceptance-preparation.md).
+Baseline recorded before implementation: branch
+`phase-1/stage-1.0-bootstrap`, HEAD `10dd266` (clean working tree,
+matching the prompt's "Last confirmed HEAD" exactly).
+
+**Reproduced before any change:** `rules.check_authoritative_sources`
+extracted from commit `10dd266` via `git show`, loaded alongside the
+current (unchanged) `parsing.py`/`reporting.py` in an isolated scratch
+package, called with an absolute path to a real file inside the
+repository (`str(repo_root / "AGENTS.md")`) — returned `[]` (no
+errors), confirming the exact defect: an absolute path wrongly accepted
+as if it were bare. Root cause: `(repo_root / source).resolve()` relies
+on pathlib's `/` operator, which silently discards `repo_root` when
+`source` is itself absolute — the resulting path then passed both the
+repository-containment check and the existence check purely by
+coincidence (because it happened to already be inside the repo).
+
+**Corrected** by rejecting `Path(source).is_absolute()` explicitly,
+before any resolution — a new, separate check ahead of the existing
+"bare path" check's `§`/whitespace tests, not a change to them. No
+contract amendment: rule 5's text already required a bare path, which
+an absolute path never is; a short implementation note was added
+recording the bug and fix, consistent with this project's practice for
+findings against already-correct rules. 9 new regression tests
+(`tests/test_authoritative_source_absolute_path.py`), covering all 6
+required scenarios (absolute inside/outside the repo, valid relative,
+missing relative, bad/good ADR references, relative escape via `../`,
+and the pre-existing empty-list legitimacy) with an extra ADR-success
+case.
+
+**Related, deferred finding — found while fixing this one, not
+separately reported by Codex:** `check_links` (contract rule 6, the
+body-link half) has the identical structural pattern
+(`document_path.parent / link_path`) and the same latent behaviour —
+confirmed directly: an absolute-path link to a real in-repo file also
+returns no errors under the current code. **Not fixed under this
+change** — prompt 008 §1 names `check_authoritative_sources` only and
+explicitly says "avoid unrelated refactoring or contract changes."
+Recorded in the contract's new implementation note and here, rather
+than silently expanded into or silently left undiscovered.
+
+**Verification:** full suite 82/82 (73 before this batch + 9 new),
+policy-evaluator suite unaffected at 33/33, all 11 governed documents
+still `PASS`, zero orphaned schemas, no trailing whitespace. All four
+earlier Codex corrections (fenced-code handling; severity validation;
+heading whitespace; manifest integrity) re-verified as part of the
+same full-suite run, not assumed still passing.
+
+**GitHub Actions confirmed** for the prior commit (`10dd266`, the
+baseline this batch started from): a `web-fetch` of the Actions run
+listing for this branch returned, verbatim, run `#25`
+(`deterministic-checks`, run `44907192873`) as "completed successfully"
+against commit `10dd266` — plus run `#26`, a PR-triggered
+`synchronize` re-run immediately after, also successful. 25 consecutive
+successful runs are listed for this branch with none failed or
+in-progress, the first time this project has seen the *whole* recent
+run history rather than a single spot-checked run.
+
+**Independent review of this correction:** dispatched (fresh-context
+subagent, this project's standard best-effort/level-2 isolation per
+`docs/agent-isolation.md` — named honestly by the reviewer itself:
+"fresh context... but same operator, same machine, and same model
+family as the work being reviewed, not a genuinely external audit").
+28 tool uses, 78,758 tokens, 205.96s.
+
+**Verdict: PASS, no BLOCKING findings.** The reviewer independently
+reproduced the original defect against the actual pre-fix commit
+(`git show 10dd266:...`, not the orchestrating session's description),
+confirmed the current diff is exactly the described 16-line addition
+with zero deletions and no scope creep, re-ran all suites itself
+(82/82, 33/33, all 11 governed documents `PASS`, zero orphans, 9/9 on
+the new test file standalone), and re-ran all four earlier
+corrections' regression files directly (A: 10/10, B: 17/17, C: 12/12,
+D: 11/11) — no regressions.
+
+It confirmed the `check_links` deferral claim directly (reproducing
+the same wrongly-accepted-absolute-path behaviour in `check_links`)
+and read the contract's new implementation note in full, calling it
+"accurate and proportionate," with one cosmetic nit: the deferral note
+lives under rule 5's text only, cross-referencing rule 6, rather than
+also appearing under rule 6 itself — a reader who jumps straight to
+rule 6 could miss it (ADVISORY, not actioned, noted here).
+
+**MATERIAL-NONBLOCKING findings:**
+
+- **M1 (already known):** the `check_links` absolute-path gap,
+  reproduced directly by the reviewer as real and currently unfixed —
+  matches this session's own §29 deferral above. The reviewer
+  recommends it get "its own tracked fix before Phase 1 is treated as
+  fully closed out, rather than riding indefinitely" — recorded as the
+  reviewer's recommendation, not yet actioned (see "Disposition"
+  below).
+- **M2 (new, found by the reviewer's own adversarial testing):** an
+  empty-string `authoritative_sources` entry (`['']`) silently passes
+  with no error — `(repo_root / "").resolve()` resolves to `repo_root`
+  itself, which exists as a directory, so an empty string is wrongly
+  treated as a valid bare path. Confirmed directly:
+  `check_authoritative_sources({"authoritative_sources": [""]}, repo_root)`
+  → `[]`. The reviewer confirmed this is identical behaviour in the
+  pre-fix `10dd266` code — **not introduced or widened by this fix**,
+  unlike the Finding-D `IsADirectoryError` gap (which this fix's own
+  predecessor had newly widened the reach of, and which this project
+  therefore fixed in the same batch as §28). M2 is a different
+  category: pre-existing, unrelated to Finding E's own change, in the
+  same family of bug as `check_links`'s deferred gap.
+
+**ADVISORY notes (not actioned):** a Windows-style absolute path
+(`C:\foo\bar.md`) is not `is_absolute()` on this Linux-only project and
+safely falls through to "does not resolve" — no gap, out of scope by
+design. Double-slash paths are correctly rejected. When an entry is
+both absolute and `§`-contaminated or mis-whitespaced, the pre-existing
+bare-path check fires first, so the error message says "not a bare
+path" rather than "not absolute" — functionally correct (rejected
+either way), cosmetic only. Mixed-type lists and unexpanded `~` paths
+behave correctly with no gap.
+
+**Disposition — M1 and M2 both deliberately left unfixed in this
+batch, not silently dropped:** both are real but are a different bug
+from Finding E itself (which prompt 008 §1 scopes to the
+absolute-path case only), and prompt 008 §6 explicitly instructs
+"avoid unrelated refactoring" and "do not... expand Phase 1 for
+speculative improvements." Both are now recorded in two independent
+places — this section and `contracts/documentation-schema-validator.md`'s
+rule 5/6 notes — specifically so they do not need rediscovering by a
+future review. Recommended as a single small follow-up fix (both gaps
+share the same root shape: accepting a path string that resolves to
+something other than the specific file it claims to be) once Phase 1
+closes, not before.
+
+**Five-finding disposition table (prompt 008 §12):**
+
+| Finding | File | Correction commit | Regression tests | Independent verification | GitHub thread |
+|---|---|---|---|---|---|
+| A — fenced-code heading false positive | `src/axiom_validator/parsing.py` | `162e5c6` | `tests/test_fenced_code_blocks.py` (10) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
+| B — malformed severity `TypeError` | `.github/scripts/policy_evaluator.py` | `162e5c6` | `.github/scripts/tests/test_policy_evaluator_severity_types.py` (17) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
+| C — heading whitespace crosses newline | `src/axiom_validator/parsing.py` | `0645af3` | `tests/test_heading_whitespace.py` (12) | §26 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
+| D — manifest integrity not checked when schema exists | `src/axiom_validator/__init__.py` | `e0094f7` (plus a follow-up fix for a gap its own review found — §28) | `tests/test_manifest_integrity.py` (11) | §28 (no blocking findings in the fix; 1 real code gap + 1 real documentation overclaim found and fixed) | Suggested reply in §27/§28; not confirmed resolved on GitHub |
+| E — absolute authoritative-source path wrongly accepted | `src/axiom_validator/rules.py` | this batch | `tests/test_authoritative_source_absolute_path.py` (9) | PASS, no blocking (see above); 2 material-nonblocking findings deliberately deferred (M1, M2) | Suggested reply below; not confirmed resolved on GitHub |
+
+**Suggested reply text for Finding E's GitHub thread (prompt 008 §12),
+prepared, not posted** — this session has no `gh`/token/API access to
+post or resolve a thread:
+
+> "Fixed — `src/axiom_validator/rules.py`'s `check_authoritative_sources`
+> now rejects `Path(source).is_absolute()` explicitly, as its own check
+> before any path resolution. Root cause: `(repo_root / source).resolve()`
+> relies on pathlib's `/` operator, which discards `repo_root` when
+> `source` is itself absolute; an absolute path to a real file inside
+> the repository then passed both the containment and existence checks
+> purely because it happened to already be inside the repo. Regression
+> tests: `tests/test_authoritative_source_absolute_path.py` (9 tests:
+> absolute inside/outside the repo, valid relative, missing relative,
+> ADR references, relative escape, empty list). A structurally
+> identical gap in `check_links` (rule 6, body links) was found while
+> fixing this and deliberately left open as out of this finding's
+> scope — recorded in the contract and in
+> `planning/phase-01-foundation.md` §29, not silently dropped (a
+> second, pre-existing, equally narrow gap — an empty-string entry
+> silently passing — was also found by the independent review below
+> and likewise deferred for the same reason).
+> Independent verification: see `planning/phase-01-foundation.md` §29
+> — PASS, no blocking findings; the fix was independently reproduced
+> against the actual pre-fix commit, re-verified with its own 9-test
+> run plus all 4 earlier findings' regression suites (A–D), and 2
+> material-nonblocking, pre-existing gaps were found and recorded for
+> future follow-up, not fixed under this change."
+
+No contract amendment was needed (rule 5's text already specified a
+bare path correctly; only the implementation's "bare path" check
+didn't test for absoluteness) — recorded here so a reviewer doesn't go
+looking for one.
+
+**Suggested PR #1 description (prompt 008 §9), prepared, not posted**
+— the PR currently has no description; this is offered as the
+complete text, not a diff against an existing one:
+
+> **Phase 1 — Foundation.** Establishes and tests a lightweight,
+> evidence-based AI-assisted development methodology: governance,
+> knowledge placement, documentation schemas, behavioural contracts,
+> independent review, deterministic CI, self-development of a real
+> component, a genuine refactor, and independent documentation
+> reconstruction. Full plan: `planning/phase-01-foundation.md`. Key
+> ADRs: `decisions/0001`–`0007`.
+>
+> **Native Codex review findings and corrections (5 findings across 4
+> reviews, all corrected and independently re-verified):**
+> 1. Fenced-code-block heading false positive
+>    (`src/axiom_validator/parsing.py`) — fixed `162e5c6`,
+>    `tests/test_fenced_code_blocks.py` (10 tests).
+> 2. Policy-evaluator `TypeError` on malformed severity values
+>    (`.github/scripts/policy_evaluator.py`) — fixed `162e5c6`,
+>    `.github/scripts/tests/test_policy_evaluator_severity_types.py`
+>    (17 tests).
+> 3. Heading-whitespace false positive (`\s+` matching a newline,
+>    `src/axiom_validator/parsing.py`) — fixed `0645af3`,
+>    `tests/test_heading_whitespace.py` (12 tests).
+> 4. Governed-document manifest integrity not checked when the
+>    document's own schema exists (`src/axiom_validator/__init__.py`)
+>    — fixed `e0094f7`, `tests/test_manifest_integrity.py` (11 tests,
+>    including a follow-up fix for an unhandled `IsADirectoryError`
+>    found by this project's own independent review).
+> 5. `check_authoritative_sources` wrongly accepting an absolute path
+>    to a file inside the repository (`src/axiom_validator/rules.py`)
+>    — fixed this batch,
+>    `tests/test_authoritative_source_absolute_path.py` (9 tests).
+>
+> **Verification:** 82/82 validator tests, 33/33 policy-evaluator
+> tests, all 11 governed documents `PASS`, zero orphaned schemas.
+> GitHub Actions `deterministic-checks` confirmed passing on 25
+> consecutive runs on this branch. Every correction independently
+> reviewed by a fresh-context subagent
+> (`planning/phase-01-foundation.md` §24, §26, §28, §29) — best-effort
+> (level 2) isolation, named honestly as such throughout, per
+> `docs/agent-isolation.md`. Finding E's review returned PASS, no
+> blocking findings, with the fix independently reproduced against the
+> actual pre-fix commit (not merely trusted).
+>
+> **Known limitations:** a fifth native Codex review of the latest
+> commit has not yet run; two narrow, pre-existing, deliberately
+> deferred gaps in the same bug family as Finding E — an absolute-path
+> gap in `check_links` (rule 6) and an empty-string
+> `authoritative_sources` entry silently passing (both rules) — are
+> known, documented, and recommended as a single small follow-up fix
+> once Phase 1 closes, not fixed under this PR (see §29); this session
+> has no `gh`/token/API access, so review threads cannot be marked
+> resolved from here. See `evidence/phase-1-final-closeout.md` for the
+> full acceptance matrix. **Phase 1 is Ready for human acceptance, not
+> Completed** — merging this PR requires explicit human approval
+> (`AGENTS.md` §11).

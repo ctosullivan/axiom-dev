@@ -274,3 +274,21 @@ complete, on two named, real, external blockers.
   self-contradicting claim against `planning/CONTEXT.md`'s own honest
   "pending" disclosure in the very next commit) and corrected once the
   review's real result was available to cite.
+
+### Fixed (fifth native Codex review finding)
+
+- `src/axiom_validator/rules.py`: `check_authoritative_sources` wrongly
+  accepted an absolute path to a file inside the repository as if it
+  were a valid bare, repository-relative path (contract rule 5).
+  `(repo_root / source).resolve()` relies on pathlib's `/` operator,
+  which discards `repo_root` when `source` is itself absolute, so an
+  absolute path to a real in-repo file passed both the
+  repository-containment and existence checks by coincidence. Fixed by
+  rejecting `Path(source).is_absolute()` explicitly, before any
+  resolution. 9 new regression tests
+  (`tests/test_authoritative_source_absolute_path.py`). A structurally
+  identical gap in `check_links` (rule 6, body links) was found while
+  fixing this and deliberately left open, as out of this specific
+  finding's scope — recorded in
+  `contracts/documentation-schema-validator.md` and
+  `planning/phase-01-foundation.md` §29.

@@ -311,3 +311,89 @@ on PR #1's latest commit, let a human disposition whatever it finds
 turn), then proceed through the same acceptance-matrix review and
 two-step merge/closeout sequence. **Phase 1 remains Ready for human
 acceptance, not Completed.**
+
+## Third addendum (2026-11-21 — prompt 008, independent review of Finding D's fix, and fifth Codex finding)
+
+Preserving everything above, including both earlier addenda, as
+written. This addendum covers two things that happened after the
+second addendum: the independent review it was waiting on, and a
+fifth native Codex finding found afterward.
+
+**What changed since the second addendum:**
+
+- **The independent review of Finding D's correction (commit
+  `e0094f7`) that the second addendum left pending has now run and its
+  findings are resolved**, at commit `10dd266`. No blocking finding in
+  the fix itself (the reviewer independently re-reproduced it and ran
+  3 adversarial scenarios of its own). It found and this session fixed
+  two real issues instead: (1) a BLOCKING documentation
+  self-contradiction — `README.md`/`planning/ROADMAP.md` had briefly
+  asserted Finding D was "independently reviewed with no blocking
+  findings" in the very commit that pushed the fix, before that review
+  had actually run, directly contradicting this file's own second
+  addendum, which correctly recorded it as pending; and (2) a
+  MATERIAL-NONBLOCKING real defect — `schemas/governed-documents.txt`
+  existing as something other than a readable file (e.g. a directory)
+  raised an unhandled `IsADirectoryError` rather than the contract's
+  required structured `FAIL`. Both fixed, with a new regression test
+  for the second. See `planning/phase-01-foundation.md` §28.
+- **A fourth native Codex review (on commit `10dd266`) found a fifth
+  finding** (Finding E — `check_authoritative_sources` wrongly
+  accepting an absolute path to a file inside the repository,
+  `src/axiom_validator/rules.py`, violating contract rule 5). Corrected
+  by rejecting `Path(source).is_absolute()` explicitly before any path
+  resolution, preserving all existing relative-path, missing-path,
+  ADR-reference and containment behaviour. 9 new regression tests
+  (`tests/test_authoritative_source_absolute_path.py`). See
+  `planning/phase-01-foundation.md` §29.
+- **A related, structurally identical gap in `check_links` (contract
+  rule 6) was found while fixing Finding E, and deliberately left
+  unfixed** — out of this specific Codex finding's scope, which named
+  `check_authoritative_sources` only. Recorded in
+  `contracts/documentation-schema-validator.md`'s rule 6 note and in
+  `planning/phase-01-foundation.md` §29, not silently discovered and
+  dropped.
+- **Updated test counts**: 82/82 validator tests (was 72/72: +1 from
+  §28's `IsADirectoryError` regression test, +9 from this batch), 33/33
+  policy-evaluator tests (unchanged).
+- **All four earlier corrections (A–D) re-verified**, not assumed still
+  fixed — the full suite, re-run in this same batch, includes all of
+  their regression tests, all passing. All 11 governed documents still
+  `PASS`; zero orphaned schemas; no trailing whitespace.
+- **GitHub Actions confirmed passing on commit `10dd266`** (run `#25`,
+  `deterministic-checks`, "completed successfully") via a `web-fetch`
+  of the Actions run listing for this branch — which also showed 25
+  consecutive successful runs with none failed or in-progress, the
+  broadest confirmation this project has had of its own CI history in
+  one look, not a single spot-checked run.
+- **A fifth native Codex review, of this latest corrected commit
+  (Finding E's fix), has not been requested.** Same blocker as before
+  (no `gh`/token).
+- **All five GitHub review threads' actual "Resolved" state cannot be
+  confirmed or changed from this session.** Suggested reply text for
+  each is recorded in `planning/phase-01-foundation.md` §25 (findings
+  A–C), §27/§28 (finding D), and §29 (finding E).
+- **No new ADR or contract amendment was required** for either the
+  `IsADirectoryError` gap or finding E — both were implementation
+  defects against already-correctly-specified contract rules, not
+  changed decisions; short implementation notes were added to the
+  relevant existing rule text in each case, not new rules.
+
+**Updated acceptance matrix** (only rows that changed from the
+original table above; all others unchanged):
+
+| # | Criterion | Status | Evidence | Remaining action |
+|---|---|---|---|---|
+| 6 | Deterministic testing | **MET**, including live GitHub Actions | 82/82 + 33/33 local; Actions run `#25` on `10dd266` confirmed "completed successfully," plus 24 further consecutive successful runs on this branch | None |
+| 7 | Independent verification | MET | 15 independent-review dispatches across Phase 1 (`evidence/phase-1-log.md` running totals) | None |
+| 11 | Native Codex GitHub PR review | **PARTIAL** | Four reviews have run (commits `3a8c395`, `2ebac4c`, `6e75d2b`, `10dd266`), finding 5 real defects total, all corrected | Fifth review of the latest commit — human must trigger it |
+| 12 | Codex findings and their disposition | MET for all five findings found so far (all corrected, regression-tested, independently re-verified) — not applicable yet to a fifth review that hasn't run | `planning/phase-01-foundation.md` §24, §26, §28, §29 | Disposition whatever the fifth review finds |
+| 16 | Final human acceptance | **NOT MET** | No approval sought — correctly, per `AGENTS.md` §11 | Human reviews this assessment before approving |
+
+**Updated recommendation (as of this addendum)**: unchanged in kind —
+comment `@codex review` on PR #1's latest commit (`10dd266`), let a
+human disposition whatever it finds (or, if explicitly authorised to
+continue, this session in a later turn), then proceed through the same
+acceptance-matrix review and two-step merge/closeout sequence already
+described above. **Phase 1 remains Ready for human acceptance, not
+Completed.**

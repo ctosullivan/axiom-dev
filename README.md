@@ -12,7 +12,7 @@ across successive, disconnected development sessions.
 > (`decisions/0006`, `decisions/0007`). Phase 1's independent-review
 > requirement is **native Codex GitHub PR review**
 > (`decisions/0005`) — [PR #1](https://github.com/ctosullivan/axiom-dev/pull/1)
-> is open and has had three native Codex reviews so far; every finding
+> is open and has had four native Codex reviews so far; every finding
 > stands corrected with regression evidence and independent
 > verification. `planning/ROADMAP.md` covers the long-term direction
 > beyond Phase 1 (Phases 2–4 proposed, not yet authorised). See
@@ -20,7 +20,7 @@ across successive, disconnected development sessions.
 > [`evidence/phase-1-final-closeout.md`](evidence/phase-1-final-closeout.md)
 > for the latest acceptance assessment, and
 > [`planning/phase-01-foundation.md`](planning/phase-01-foundation.md)
-> §16–§28 for Phase 1's full evidence and status.
+> §16–§29 for Phase 1's full evidence and status.
 
 ## Mission
 
