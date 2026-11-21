@@ -79,15 +79,15 @@ blocking findings, both fixed — see
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through commit
-  `649a025` (Stage 1.0 only) as of the last push. The amendment and Stage
-  1.1 work is committed locally on top of that but **not yet pushed** —
-  do not assume it is on `origin` until a later update to this file
-  records the push.
+  `31fb153` (verified: `git log`, `git push` output). Includes Stage 1.0
+  (`0307e83`, `649a025`) and the amendment + Stage 1.1 first content
+  (`31fb153`).
+- PR: still not opened (no `gh`/token). Creation URL:
+  `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
 ## Next concrete action
 
-1. Push the amendment + Stage 1.1 commit(s) to `origin`.
-2. Begin Stage 1.2 (development workflow and agent isolation docs).
-3. Separately: a human needs to open and review the PR for everything
+1. Begin Stage 1.2 (development workflow and agent isolation docs).
+2. Separately: a human needs to open and review the PR for everything
    pushed so far on `phase-1/stage-1.0-bootstrap` before any of it merges
    to `main`.
