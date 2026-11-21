@@ -64,8 +64,18 @@ This project does not yet have a release; entries accumulate under
   gaps in that doc (two missing non-goals; one true claim misplaced in
   the wrong section).
 
+- Phase 1 closeout: `evidence/phase-1-closeout.md` (independent
+  assessment against all 17 Definition-of-Done items and all 8
+  Amendment D rows: 15 MET, 1 partially met, 1 not met — the live Codex
+  gate, genuinely blocked on missing credentials/access, not glossed
+  over); `planning/retros/phase-1-stages-1.0-through-1.5.md` (first
+  retrospective in this project); fixes to two staleness issues the
+  closeout found (`CONTRIBUTING.md`, `planning/CONTEXT.md`).
+
 First real software, first real passing tests, first real (non-synthetic)
 defect found in this project's own documentation by its own tooling,
 first genuine behaviour-preserving refactor with a clean independent
-review, and first independent documentation reconstruction run against a
-deliberately restricted evidence set.
+review, first independent documentation reconstruction run against a
+deliberately restricted evidence set, and first Phase 1 closeout
+assessment — which recommends **leaving Phase 1 open**, not marking it
+complete, on two named, real, external blockers.

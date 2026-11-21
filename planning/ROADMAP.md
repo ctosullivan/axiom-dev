@@ -23,16 +23,23 @@ Full stage detail, dependencies and acceptance criteria:
 | 1.1 | Knowledge and documentation methodology | In progress |
 | 1.2 | Agent development methodology | In progress |
 | 1.3 | Codex CI review gate | In progress — deterministic piece built and tested; live integration **blocked** (no `OPENAI_API_KEY`/cost decision) |
-| 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | In progress — initial implementation done, reviewed, fixed; refactor not yet started |
-| 1.5 | Independent documentation reconstruction and closeout | In progress — reconstruction done; Phase 1 closeout assessment pending |
+| 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | In progress — done with evidence (build, review, fix, refactor, review); awaiting human sign-off |
+| 1.5 | Independent documentation reconstruction and closeout | In progress — reconstruction done; Phase 1 closeout assessment done (see below); recommends staying open |
 
 Amended 2026-11-21 per `planning/prompts/002-phase-1-amend-and-implement.md`
 and `decisions/0004` — see `planning/phase-01-foundation.md` §0 for what
 changed.
 
-**Phase 1 as a whole is not Completed until Stage 1.5's dogfooding exercise
-closes out successfully.** Stage 1.0 completing does not imply Phase 1
-completing — these are tracked separately below.
+**Phase 1 as a whole is not Completed.** An independent closeout
+assessment (`evidence/phase-1-closeout.md`,
+`planning/phase-01-foundation.md` §16) recommends leaving it open: 15 of
+17 Definition-of-Done items are met with independently-reproduced
+evidence, 1 is partially met, and 1 is genuinely blocked (Stage 1.3's
+live Codex integration — no `OPENAI_API_KEY`, no `gh`/repo-admin access
+to configure required checks, no real GitHub PR ever run through any
+gate). No stage above is marked Completed by this session — that is a
+human-approval action (`AGENTS.md` §11); this roadmap documents the
+evidence, a human decides.
 
 ### Stage 1.0 — Repository bootstrap and governance
 

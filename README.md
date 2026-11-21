@@ -16,14 +16,16 @@ preserves important project knowledge, supports independent verification,
 maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
-> **Status: Phase 1, Stages 1.0–1.4 in progress; Stage 1.5 next.**
-> Governance (1.0), knowledge/documentation methodology (1.1), the
-> development lifecycle and agent-isolation docs (1.2), the Codex gate's
-> deterministic piece (1.3, tested; live integration blocked on
-> credentials/cost), and the first Axiom component — a
-> knowledge/documentation validator, built, reviewed, and
-> behaviour-preservingly refactored with identical before/after test
-> results (1.4) — all exist. See [`planning/CONTEXT.md`](planning/CONTEXT.md) for the
+> **Status: Phase 1 is substantially done but deliberately left open.**
+> Stages 1.0, 1.1, 1.2, 1.4, and 1.5 are done with independently
+> re-verified evidence. Stage 1.3's deterministic piece is done and
+> tested; its live Codex integration is genuinely blocked (no
+> `OPENAI_API_KEY`, no `gh`/repo-admin access to configure required
+> checks). An independent closeout assessment
+> ([`evidence/phase-1-closeout.md`](evidence/phase-1-closeout.md))
+> found 15 of 17 Definition-of-Done items met, recommends leaving Phase
+> 1 open on that one named blocker rather than marking it complete. See
+> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the
 > current state and
 > [`planning/ROADMAP.md`](planning/ROADMAP.md) for what is planned, in
 > progress, or done.

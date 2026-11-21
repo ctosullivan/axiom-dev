@@ -56,15 +56,25 @@ not repeat its reasoning, only the mechanics.
 
 ## Testing requirements
 
-There is no source code yet (Phase 1 Stage 1.0–1.3 is governance, planning
-and CI scaffolding only). Once Stage 1.4 introduces the first real
-component:
+Stage 1.4 introduced the first real component
+(`src/axiom_validator/`), so this is no longer forward-looking — it's
+the standard that component was actually built and refactored against,
+and it applies to anything added after it:
 
-- New behaviour needs a deterministic test.
+- New behaviour needs a deterministic test. (`tests/test_axiom_validator.py`
+  and `.github/scripts/tests/test_policy_evaluator.py` are the first two
+  real examples — run with `PYTHONPATH=src python3 -m unittest discover
+  -s tests -v` and `PYTHONPATH=.github/scripts python3 -m unittest
+  discover -s .github/scripts/tests -v` respectively.)
 - Contract-governed behaviour needs a test that demonstrates the contract
-  holds, and ideally one that demonstrates it would fail if violated.
+  holds, and ideally one that demonstrates it would fail if violated —
+  `contracts/documentation-schema-validator.md` and its fixtures are the
+  working example (valid + deliberately invalid documents, one per
+  contract rule).
 - "Tests pass" is not sufficient evidence on its own for phase closeout —
-  see `AGENTS.md` §6 and §8.
+  see `AGENTS.md` §6 and §8. In practice this meant independent review
+  found two real defects in the validator that passing tests alone had
+  not caught (`evidence/stage-1.4-baseline.md`).
 
 ## Definition of Done
 

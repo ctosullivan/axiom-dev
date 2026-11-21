@@ -604,7 +604,7 @@ honest default, not a gap to hide.
 | 5 | Knowledge placement and documentation consistency evaluated against real changes | §11 (Stage 1.1 format fix), Stage 1.4 dogfooding (real ADR-citation defect), Stage 1.5 reconstruction (missing-doc gap + 2 Limitations fixes) | **Demonstrated** — four independent, real (non-synthetic) instances across three different stages |
 | 6 | Documentation independently reconstructed from permitted evidence | Stage 1.5 (`evidence/stage-1.5-reconstruction.md`) | **Demonstrated** — restricted-evidence reconstruction, compared, 2 real findings fixed, 1 correctly accepted as out-of-scope-for-the-evidence-given |
 | 7 | Knowledge from earlier work reused in a later task | Stage 1.4 reused Stage 1.1's documentation-schema convention (every Stage 1.4 evidence/contract document carries the front-matter format Stage 1.1 defined, and is itself validated by the Stage 1.4 tool against that convention) and Stage 1.2's lifecycle/isolation vocabulary (every review record names its isolation level using Stage 1.2's taxonomy) | **Demonstrated** — concrete, citable instances, not just a stated intention |
-| 8 | Methodology overhead recorded and assessed | `evidence/phase-1-log.md` (§9), assessed at Stage 1.5 closeout | In progress from this amendment onward |
+| 8 | Methodology overhead recorded and assessed | `evidence/phase-1-log.md` (recorded); `evidence/phase-1-closeout.md` + §16 (assessed) | **Demonstrated** |
 
 Phase 1 cannot close (§7) while any row above remains "Not yet
 demonstrated" without an explicit, recorded reason the gap is acceptable
@@ -855,3 +855,36 @@ This satisfies Amendment D demonstration 6
 updated to Demonstrated) and is also a second real instance of
 demonstration 5 (documentation consistency evaluated against real
 changes, not synthetic ones).
+
+## 16. Phase 1 closeout assessment
+
+Full record: `evidence/phase-1-closeout.md`; retrospective:
+`planning/retros/phase-1-stages-1.0-through-1.5.md`.
+
+**Verdict: partially complete, with two named, real, currently-external
+blockers. Phase 1 stays open — not marked Completed.** An independent
+assessment (fresh dispatch, no prior involvement, best-effort isolation
+per the same standard as every other review in this plan) re-verified
+all 17 Definition-of-Done items
+(`planning/prompts/002-phase-1-amend-and-implement.md` §11) and all 8
+Amendment D rows (§10 above) by re-running tests and re-checking files
+itself: 15 of 17 DoD items MET, 1 partially met (validator tests pass
+locally but aren't wired into CI yet), 1 not met (the live Codex gate —
+no `OPENAI_API_KEY`, no `gh`, no PR ever opened, and the project's own
+"no synthetic substitute" rule correctly disqualifies the unit-test-level
+evidence from counting). 6 of 8 Amendment D rows fully demonstrated; row
+3 correctly left open; row 8 is this assessment.
+
+The assessment also found and this session fixed two staleness issues
+no prior review's scope had covered — `CONTRIBUTING.md`'s testing
+section still read as a future-tense placeholder after Stage 1.4
+shipped, and `planning/CONTEXT.md` carried a self-reference that went
+stale the instant its own commit landed. Explicitly **not** found:
+anything describing the Codex gate, branch protection, or a required
+check as working despite the known blockers; anything marked Completed
+in `planning/ROADMAP.md` without human sign-off; any "mechanical"
+claim for what is actually procedural.
+
+Per `AGENTS.md` §11, this record documents the evidence for a human to
+decide what to mark Completed — it does not self-certify, and
+`planning/ROADMAP.md` is not changed to say "Completed" by this session.

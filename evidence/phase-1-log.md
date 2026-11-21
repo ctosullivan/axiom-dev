@@ -248,14 +248,46 @@ could not be measured and why.
   here rather than smoothed over.
 - **Agent usage:** 79,707 tokens, 16 tool uses, 72.9s duration.
 
+## 2026-11-21 — Phase 1 closeout assessment
+
+- **What was run:** a fresh, uninvolved agent independently re-verified
+  all 17 Definition-of-Done items and all 8 Amendment D rows by
+  re-running both test suites itself, re-computing checksums itself, and
+  confirming the missing `OPENAI_API_KEY`/`gh` directly rather than
+  trusting prior claims.
+- **Result:** 15 of 17 DoD items MET, 1 partially met, 1 not met (the
+  live Codex gate — genuinely blocked); 6 of 8 Amendment D rows fully
+  demonstrated, 1 correctly left open, 1 is this assessment itself. No
+  overclaiming found anywhere in the repository. Two real staleness
+  issues found (outside every prior review's stated scope) and fixed in
+  this same change: `CONTRIBUTING.md`'s testing section, and
+  `planning/CONTEXT.md`'s self-referential commit-SHA pattern.
+- **Verdict recorded:** Phase 1 stays open — partially complete, two
+  named external blockers, not a shortcut taken. Full record:
+  `evidence/phase-1-closeout.md`.
+- **Agent usage:** 145,847 tokens, 32 tool uses, 181.3s duration — the
+  largest single review dispatch in this phase, proportionate to
+  assessing the entire repository against two full checklists.
+- **Phase 1 retrospective written:** `planning/retros/phase-1-stages-1.0-through-1.5.md`,
+  the first entry in `planning/retros/`.
+- **One more real, non-synthetic catch, this time pre-commit rather than
+  by independent review:** running the validator against the
+  retrospective itself (before this commit) found the exact same
+  shorthand-ADR-citation defect Stage 1.4's dogfooding found in
+  Stage 1.1's docs — `decisions/0001` instead of the real filename —
+  this time in the retrospective's own front-matter, introduced while
+  writing this very log entry. Fixed before commit. Third real instance
+  of this specific defect pattern across the phase.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 8 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1 |
-| Subagent tokens so far | 721,000 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 |
-| Blocking/real defects found by independent review (not self-caught) | 11 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5 — all fixed |
+| Subagent dispatches so far | 9 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout |
+| Subagent tokens so far | 866,847 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 |
+| Blocking/real defects found by independent review (not self-caught) | 13 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout (CONTRIBUTING.md, CONTEXT.md staleness) — all fixed |
 | Advisory defects found and fixed or accepted | 8 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted) |
 | Real passing tests | 30 of 30 | 16 policy-evaluator + 14 axiom_validator, both re-run independently and confirmed (twice, for axiom_validator — before and after the refactor, identical) |
-| Real (non-synthetic) defects found in Axiom Dev's own documentation | 1 | shorthand ADR citations in docs/documentation-schema.md, docs/knowledge-placement.md — Amendment D demonstration 5 |
-| Amendment-D demonstrations fully demonstrated with real evidence | 6 of 8 (rows 1, 2, 4, 5, 6, 7) | See `planning/phase-01-foundation.md` §10; row 3 blocked (Stage 1.3 live gate), row 8 assessed at Phase 1 closeout |
+| Real (non-synthetic) defects found in Axiom Dev's own documentation | 2 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout) |
+| Amendment-D demonstrations fully demonstrated with real evidence | 7 of 8 (rows 1, 2, 4, 5, 6, 7, 8) | See `planning/phase-01-foundation.md` §10; row 3 is the one genuine, externally-blocked gap |
+| Phase 1 Definition of Done (17 items, `planning/prompts/002-...md` §11) | 15 MET, 1 partially met, 1 not met | See `evidence/phase-1-closeout.md` |
