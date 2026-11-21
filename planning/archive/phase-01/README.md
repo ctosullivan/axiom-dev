@@ -29,9 +29,14 @@ outstanding conditions.
 
 ## Decisions and contracts
 
-- [ADRs 0001–0007](../../../decisions/) preserve the
-  foundational design decisions, including companion schemas and
-  independent verification.
+- [ADR 0001](../../../decisions/0001-development-governance.md),
+  [ADR 0002](../../../decisions/0002-knowledge-architecture.md),
+  [ADR 0003](../../../decisions/0003-independent-verification.md),
+  [ADR 0004](../../../decisions/0004-phase-1-amendment-verification-measurement-and-acceptance.md),
+  [ADR 0005](../../../decisions/0005-native-codex-review-and-deferred-automated-gate.md),
+  [ADR 0006](../../../decisions/0006-companion-schema-files.md), and
+  [ADR 0007](../../../decisions/0007-top-level-schemas-directory.md)
+  preserve the foundational decisions.
 - [Documentation-validator contract](../../../contracts/documentation-schema-validator.md)
 - [Codex policy-evaluator contract](../../../contracts/codex-gate-policy-evaluator.md)
 
