@@ -72,13 +72,19 @@ GitHub PR review (`decisions/0005`; `planning/phase-01-foundation.md`
 amendment moved documentation schemas to companion files and expanded
 this roadmap itself (`decisions/0006`; §21–§22) — its own 21-item
 Definition of Done (`planning/prompts/004-...md` §13) stands at 19 MET,
-1 locally-verified-only, 2 open. **The remaining open item common to
-all three assessments: no GitHub PR has ever been opened on this
-branch** (no `gh` CLI, no token, no passwordless `sudo` to install it —
-confirmed repeatedly, not assumed), so native Codex review has not run
-and human acceptance has not been sought. Phase 1 cannot be marked
-Completed, or archived, until that happens and a human reviews the
-result (`AGENTS.md` §11).
+1 locally-verified-only, 2 open. **PR #1 now exists and is open**
+(<https://github.com/ctosullivan/axiom-dev/pull/1>) — a first native
+Codex review ran on it and found 2 P2 findings (0 P0/P1); a final
+remediation batch corrected both, with its own independent review
+finding no blocking code defects (`decisions/0007`; §23–§24). **The
+remaining open items**: a *second* native Codex review of the
+corrected commit has not been requested (no `gh`/token to post the
+request from this session — confirmed repeatedly, not assumed), and
+human acceptance has not been sought. See
+`evidence/phase-1-final-closeout.md` for the current full acceptance
+matrix. Phase 1 cannot be marked Completed, merged, or archived until
+a human requests that second review, dispositions its findings, and
+reviews the result (`AGENTS.md` §11).
 
 ## Phase 2 — Real-world validation (proposed)
 

@@ -1,0 +1,8 @@
+audience: the repository owner deciding whether to accept, merge, and archive Phase 1; future sessions resuming this project
+purpose: a fresh closeout assessment against the current accepted Phase 1 requirements, stopping at a clearly identified Ready-for-human-acceptance state
+required_sections: [Scope and review methodology, Original Codex review findings, Corrections and regression evidence, Latest independently verified commit, Deterministic CI results, Native Codex re-review result, Remaining limitations, Acceptance matrix, Independent reviewer verdict, Recommendation to the human owner]
+authoritative_sources: [planning/phase-01-foundation.md, decisions/0005-native-codex-review-and-deferred-automated-gate.md, decisions/0007-top-level-schemas-directory.md, evidence/phase-1-closeout.md]
+acceptance_criteria:
+  - every acceptance-matrix row cites real, checkable evidence, not a restated assertion
+  - the second native Codex review's absence is recorded as absent, never inferred or fabricated as passing
+  - this document does not mark Phase 1 Completed, merge PR #1, or archive Phase 1 — those remain human actions
