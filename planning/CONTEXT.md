@@ -96,19 +96,20 @@ procedure. Independently reviewed (2 blocking findings, both fixed — see
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through commit
-  `31fb153`. Stage 1.2/1.3 work above is **not yet committed**.
+  `786e2c9` (verified: `git log`, `git push` output). Includes Stage 1.0
+  (`0307e83`, `649a025`), amendment + Stage 1.1 (`31fb153`, `197dfdc`),
+  and Stage 1.2 + Stage 1.3 deterministic piece (`786e2c9`).
 - PR: still not opened. Creation URL:
   `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
 ## Next concrete action
 
-1. Dispatch independent review of the Stage 1.2 + Stage 1.3 batch.
-2. Resolve findings, commit, push.
-3. Begin Stage 1.4 (validator component + behaviour-preserving refactor) —
+1. Begin Stage 1.4 (validator component + behaviour-preserving refactor) —
    this does not require Stage 1.3's live Codex gate to exist first; the
    self-dogfooding rule explicitly permits documented manual independent
    review until the gate is live (`planning/prompts/001-...md` §7).
-4. Separately: a human needs to (a) open/review the PR for everything
+2. Separately: a human needs to (a) open/review the PR for everything
    pushed on `phase-1/stage-1.0-bootstrap`, and (b) decide whether to
    provision `OPENAI_API_KEY` and accept the cost of enabling Stage 1.3's
-   live Codex review.
+   live Codex review, and (c) configure branch protection/required status
+   checks (needs repo-admin access this session lacks).
