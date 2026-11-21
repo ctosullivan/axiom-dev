@@ -177,6 +177,22 @@ could not be measured and why.
   also now fully demonstrated: Stage 1.4's documents reuse Stage 1.1's
   schema convention and Stage 1.2's isolation vocabulary, concretely.
 
+## 2026-11-21 — Pre-Stage-1.5 reconciliation gap found and fixed
+
+- **Self-caught, not by independent review:** before starting Stage
+  1.5's reconstruction, a check against `AGENTS.md` §7's placement table
+  found that the validator had a contract (`contracts/`) and evidence
+  (`evidence/`) but no human-facing `docs/` explanation — a real
+  knowledge-placement gap, not a hypothetical one, per the exact category
+  that table calls for. Fixed: `docs/axiom-validator.md` written,
+  describing the actual (not aspirational) architecture and usage,
+  including a limitations section carrying forward the documented gaps
+  from Stage 1.4's reviews rather than re-litigating or hiding them.
+- **Why this matters for Amendment D demonstration 5:** this is a second
+  real instance of "documentation consistency evaluated against real
+  changes" — this time caught by checking the project's own placement
+  rules against itself, not by an independent reviewer or a failing test.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
