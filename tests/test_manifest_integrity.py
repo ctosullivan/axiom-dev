@@ -165,6 +165,26 @@ class TestMalformedSchemaValidManifestPresent(_TempRepoCase):
         self.assertEqual(result["result"], "INVALID_SCHEMA")
 
 
+class TestManifestPathNotAReadableFile(_TempRepoCase):
+    """Found by independent review of this exact batch (not one of
+    prompt 007's original required scenarios): schemas/governed-documents.txt
+    existing as a directory (or anything else that raises OSError on
+    read) previously propagated an unhandled `IsADirectoryError` out of
+    `validate_file`, instead of the structured FAIL this contract
+    requires. Reproduced directly before this fix: the directory-as-manifest
+    case above raised uncaught; the corrected `load_governed_manifest`
+    catches OSError generally, not just FileNotFoundError."""
+
+    def test_directory_as_manifest_fails_closed_without_raising(self):
+        self.write_schema()
+        (self.tmp / "schemas" / "governed-documents.txt").mkdir()
+        result = validate_file(self.tmp / "foo.md", self.tmp)
+        self.assertEqual(result["result"], "FAIL")
+        self.assertTrue(
+            any("could not be read" in e for e in result["errors"])
+        )
+
+
 class TestCliEncountersMissingManifest(_TempRepoCase):
     """Required case: CLI encounters missing manifest -> nonzero exit,
     structured, actionable failure report."""

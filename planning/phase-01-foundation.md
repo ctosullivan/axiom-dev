@@ -1870,7 +1870,7 @@ still pass unchanged.
 | A — fenced-code heading false positive | `src/axiom_validator/parsing.py` | `162e5c6` | `tests/test_fenced_code_blocks.py` (10) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
 | B — malformed severity `TypeError` | `.github/scripts/policy_evaluator.py` | `162e5c6` | `.github/scripts/tests/test_policy_evaluator_severity_types.py` (17) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
 | C — heading whitespace crosses newline | `src/axiom_validator/parsing.py` | `0645af3` | `tests/test_heading_whitespace.py` (12) | §26 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
-| D — manifest integrity not checked when schema exists | `src/axiom_validator/__init__.py` | `e0094f7` | `tests/test_manifest_integrity.py` (10) | Dispatched, not yet reviewed as of this commit — see planning/CONTEXT.md | Suggested reply below; not confirmed resolved on GitHub |
+| D — manifest integrity not checked when schema exists | `src/axiom_validator/__init__.py` | `e0094f7` (plus a follow-up fix for a gap the review itself found — see §28) | `tests/test_manifest_integrity.py` (11) | §28 (no blocking findings in the fix; 1 real code gap + 1 real documentation overclaim found and fixed) | Suggested reply below; not confirmed resolved on GitHub |
 
 **Suggested reply text for Finding D's GitHub thread (prompt 007 §12),
 prepared, not posted** — this session has no `gh`/token/API access to
@@ -1885,8 +1885,92 @@ post or resolve a thread:
 > schema wrongly `PASS` even with no manifest file at all. Regression
 > tests: `tests/test_manifest_integrity.py` (10 tests, all 8 required
 > scenarios from the review comment's own reproduction recipe).
-> Independent verification: dispatched; not yet recorded as of this commit — check planning/CONTEXT.md for the current state before citing a result."
+> Independent verification: see `planning/phase-01-foundation.md` §28 —
+> no blocking findings in the fix itself; the review also found (and
+> this session fixed) a real gap where a `schemas/governed-documents.txt`
+> that exists but isn't a readable file raised an unhandled exception
+> instead of a structured FAIL."
 
 No contract amendment was needed (the contract already specified this
 rule correctly; only the implementation didn't match it) — recorded
 here so a reviewer doesn't go looking for one.
+
+## 28. Independent review record — manifest-integrity correction (prompt 007)
+
+Dispatched: a fresh, non-forked `general-purpose` agent with no prior
+conversation context — best-effort isolation, level 2 of
+`docs/agent-isolation.md`'s taxonomy, named that way in the reviewer's
+own report. 51 tool uses, 143,423 tokens, 301.9s. The orchestrating
+turn hit a usage limit partway through this dispatch; commits `e0094f7`
+and `2357d35` were pushed before the review finished, with
+`planning/CONTEXT.md` recording that honestly as pending rather than
+guessing at a result (see that commit's own message). The review
+completed shortly after and is recorded here, in the next turn, exactly
+as it found things — not backdated to read as though it had already
+been incorporated into `e0094f7`.
+
+**No BLOCKING finding in the correction itself.** The reviewer
+independently reproduced the pre-fix defect by extracting
+`src/axiom_validator/__init__.py` from commit `6e75d2b` via `git show`
+(confirming via `git diff` that `parsing.py`/`rules.py`/`reporting.py`
+were unchanged since that commit, so pairing the old orchestrator with
+current modules was valid), confirmed the current code's exact fix
+ordering via `git diff 6e75d2b HEAD -- src/axiom_validator/__init__.py`,
+re-ran both full suites itself (72 and 33, matching this plan's
+figures), and constructed 3 of its own adversarial scenarios beyond
+the required 8 — including confirming the `governed_manifest` override
+takes full precedence over a *contradictory* on-disk manifest in both
+directions (override says ungoverned while disk says governed, and
+vice versa), which the required test table didn't explicitly cover.
+
+**One BLOCKING finding — not in the fix, in this project's own
+record-keeping, found and fixed in the same commit as this section:**
+`README.md` and `planning/ROADMAP.md`, both edited in commit `e0094f7`,
+asserted Finding D was already "independently reviewed with no
+blocking findings" in the same breath as findings A–C — while
+`planning/CONTEXT.md`, edited in the very next commit (`2357d35`),
+correctly disclosed that this review had not yet run. The reviewer
+caught this live, checkable self-contradiction directly (not a
+historical artifact): exactly the "an agent's own claim treated as
+verification evidence before verification occurred" failure
+`AGENTS.md` §6 exists to prevent. **Fixed**: both files' wording
+corrected in this same change, once the review's actual (now genuinely
+available) result could be cited honestly.
+
+**One MATERIAL-NONBLOCKING finding, a real and previously-latent
+defect:** the reviewer constructed `schemas/governed-documents.txt` as
+a directory (not a file) and found `validate_file` raised an unhandled
+`IsADirectoryError` straight out of the function, instead of the
+structured `FAIL` prompt 007 §5 explicitly requires ("do not introduce
+an unhandled exception"). Root cause: `load_governed_manifest` checked
+`.exists()` (true for a directory) before unconditionally calling
+`.read_text()`, and the only exception type caught upstream was
+`GovernedManifestMissing`, not a generic I/O failure. This gap
+predated this specific correction (it was already latent on the
+narrower "schema absent" path) but this correction's fix widened its
+reach to every document validated through the default path, making it
+worth closing now rather than carrying forward. **Fixed**:
+`load_governed_manifest` now reads the file inside a `try`/`except`,
+catching `FileNotFoundError` (the original message) and `OSError`
+generally (a new message, same `GovernedManifestMissing` exception,
+same fail-closed `FAIL` outcome) instead of checking `.exists()` first.
+One new regression test
+(`tests/test_manifest_integrity.py::TestManifestPathNotAReadableFile`,
+reproducing the exact directory-as-manifest scenario) — 11 tests in
+that file now, 73/73 in the full suite.
+
+**One ADVISORY, not actioned:** the reviewer judged this plan's
+implementation note phrasing ("prompt 006's follow-up, found by a
+third native Codex review") as slightly imprecise shorthand (Finding D
+was found by the review of the commit that *followed* prompt 006's
+work, not literally part of prompt 006 itself) but not worth a
+separate fix.
+
+**Verdict (reviewer's own words, condensed):** "The Finding D fix
+itself is correct, independently reproduced, correctly verified by
+both required test suites, and contract-compliant — but README.md and
+planning/ROADMAP.md currently contain a live, checkable false claim...
+which must be corrected (and the directory-as-manifest unhandled-exception
+gap should at minimum be recorded, if not fixed) before this
+correction can be considered fully reconciled." Both are fixed in this
+same change; no other blocking gap remains open from this review.

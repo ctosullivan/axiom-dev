@@ -12,7 +12,7 @@ amendments since the original closeout assessment**
 documentation drift, moved documentation schemas twice, expanded
 `planning/ROADMAP.md`, established a phase-archiving procedure, and
 corrected four real defects found across three native Codex GitHub
-reviews of PR #1** — see `planning/phase-01-foundation.md` §17–§27.
+reviews of PR #1** — see `planning/phase-01-foundation.md` §17–§28.
 **Phase 1 stays open, not marked Completed.** Everything is on
 `phase-1/stage-1.0-bootstrap`, pushed. **PR #1 is open:**
 <https://github.com/ctosullivan/axiom-dev/pull/1>, and has had
@@ -36,19 +36,22 @@ check not run when a schema exists) — it was an implementation defect
 against an already-correctly-specified contract rule, not a changed
 decision.
 
-## Independent review pending (as of commit `e0094f7`)
+## Independent review of Finding D now resolved (as of commit [recorded below])
 
-The Finding D correction was committed and pushed before its dispatched
-independent review finished (the orchestrating turn hit a usage limit).
-**That review's findings have not been read, resolved, or recorded
-anywhere in this repository yet.** Before treating this batch as
-independently verified or citing a review result for Finding D, a
-future session must: retrieve that review's result, resolve any real
-findings it reports, and record it as a new section in
-`planning/phase-01-foundation.md` (the next available number). Until
-then, Finding D's fix is **self-verified only** (72/72 local tests,
-confirmed GitHub Actions success) — not yet independently confirmed,
-unlike findings A–C.
+The review dispatched for the Finding D correction (commit `e0094f7`)
+has completed and its findings are resolved — see
+`planning/phase-01-foundation.md` §28 for the full record. In brief: no
+blocking defect in the fix itself; the review found and this session
+fixed (1) a genuine, previously-latent gap where
+`schemas/governed-documents.txt` existing as something other than a
+readable file (e.g. a directory) raised an unhandled `IsADirectoryError`
+instead of a structured `FAIL`, and (2) a real documentation
+overclaim this session had briefly introduced — `README.md` and
+`planning/ROADMAP.md` asserted Finding D was "independently reviewed
+with no blocking findings" in the same commit that pushed the fix,
+before that review had actually run. Both are fixed in the commit this
+file is updated alongside. Finding D is now independently verified,
+the same standard as A–C.
 
 ## Outstanding issues (the real, named blockers)
 

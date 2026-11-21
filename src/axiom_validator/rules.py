@@ -130,17 +130,34 @@ def find_orphaned_schemas(repo_root: Path, mirror_root: Path | None = None) -> l
 def load_governed_manifest(repo_root: Path) -> set[str]:
     """Contract rule 15: repository-relative paths that must carry a
     passing schema. Raises GovernedManifestMissing if the manifest file
-    itself does not exist — a legitimately-empty-but-present manifest
-    still returns an empty set (no error); only an absent *file* fails
-    closed (prompt 005, "Manifest integrity")."""
+    itself does not exist, or exists but cannot actually be read as a
+    regular file (e.g. it's a directory, or unreadable) — a
+    legitimately-empty-but-present, readable manifest still returns an
+    empty set (no error); only an unusable manifest fails closed
+    (prompt 005, "Manifest integrity"; the not-a-regular-file case
+    found by independent review of the prompt 007 batch, which
+    constructed a `schemas/governed-documents.txt` *directory* and
+    found it raised an unhandled `IsADirectoryError` straight out of
+    `validate_file` instead of this structured failure — reading via
+    try/except rather than checking `.exists()` first closes that gap
+    for any OS-level reason the path isn't usable as a file, not only
+    a directory)."""
     manifest_path = repo_root / GOVERNED_MANIFEST_PATH
-    if not manifest_path.exists():
+    try:
+        text = manifest_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
         raise GovernedManifestMissing(
             f"{GOVERNED_MANIFEST_PATH} does not exist — cannot determine which "
             "documents are governed; failing closed rather than silently "
             "treating every document as ungoverned."
-        )
-    lines = manifest_path.read_text(encoding="utf-8").splitlines()
+        ) from None
+    except OSError as exc:
+        raise GovernedManifestMissing(
+            f"{GOVERNED_MANIFEST_PATH} exists but could not be read ({exc}) — "
+            "cannot determine which documents are governed; failing closed "
+            "rather than silently treating every document as ungoverned."
+        ) from exc
+    lines = text.splitlines()
     return {
         stripped
         for line in lines

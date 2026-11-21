@@ -488,8 +488,23 @@ could not be measured and why.
   for commit `6e75d2b` — the first time this project has directly
   confirmed a real CI run result rather than recording it as
   unconfirmed.
-- **Agent usage:** 1 independent-review dispatch (token/tool counts
-  recorded once it completes).
+- **Agent usage:** 1 independent-review dispatch — 143,423 tokens, 51
+  tool uses, 301.9s. No BLOCKING finding in the fix itself (which it
+  independently reproduced and re-verified via its own `git diff`
+  checks and 3 adversarial scenarios of its own). 1 BLOCKING finding in
+  this project's own record-keeping — this session had asserted
+  Finding D was "independently reviewed with no blocking findings" in
+  the same commit (`e0094f7`) that pushed the fix, before that review
+  had actually run; caught live by the reviewer and fixed. 1
+  MATERIAL-NONBLOCKING real defect found and fixed: a
+  `schemas/governed-documents.txt` that exists but isn't a readable
+  file (e.g. a directory) raised an unhandled `IsADirectoryError`
+  instead of a structured `FAIL` — a previously-latent gap this
+  specific correction had widened the reach of. The orchestrating turn
+  hit a usage limit partway through this dispatch and pushed two
+  commits before the review finished; `planning/CONTEXT.md` recorded
+  that honestly as pending rather than guessing at a result, and this
+  entry/§28 record the review's actual findings once it completed.
 - **Not measured:** real API/token cost for native Codex review (ran
   three times already via the connected integration); wall-clock time
   for this session's own non-dispatched work.
@@ -501,14 +516,14 @@ could not be measured and why.
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 14 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout, 2 prompt-003 corrective batch (review + confirmation), 1 prompt-004 documentation-schema/roadmap batch, 1 prompt-005 final remediation batch, 1 prompt-006 third-finding correction batch |
-| Subagent tokens so far | 1,496,546 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 + 187,061 + 71,421 + 131,094 + 128,983 + 111,140 |
-| Blocking/real defects found by independent review (not self-caught) | 17 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout, 4 prompt-003 corrective batch, 0 prompt-004 batch, 0 prompt-005 batch, 0 prompt-006 batch (clean on code; documentation cross-reference findings tracked in Advisory row) — all fixed and independently re-confirmed |
-| Advisory defects found and fixed or accepted | 18 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted), 2 prompt-003 corrective batch, 2 prompt-004 batch, 3 prompt-005 batch (1 evidence staleness fixed + 2 out-of-scope fence gaps documented), 3 prompt-006 batch (2 dangling-§26-reference/stale-README-range findings fixed + 1 contract-precision suggestion recorded, not actioned) — see `planning/phase-01-foundation.md` §24, §26 |
-| Real passing tests | 95 of 95 | 33 policy-evaluator + 62 axiom_validator, all re-run independently and confirmed — 3 of the last 3 real defects this project's own self-testing didn't catch were found by native Codex review instead, across two separate reviews of PR #1 |
-| Real (non-synthetic) defects found in Axiom Dev's own documentation or code | 8 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout); `planning/CONTEXT.md` staleness against `decisions/0005` (prompt-003 batch); `validate_file`'s unresolved-`repo_root` defect (prompt-003 batch); `find_orphaned_schemas`'s would-fail-CI-forever defect against the real repo root (prompt-004 batch); fenced-code-block false positive and policy-evaluator `TypeError` (prompt-005 batch); `HEADING_RE`'s `\s+`-matches-newline false positive (prompt-006 batch) — the last three all found by native Codex review, not this session's own testing |
+| Subagent dispatches so far | 15 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout, 2 prompt-003 corrective batch (review + confirmation), 1 prompt-004 documentation-schema/roadmap batch, 1 prompt-005 final remediation batch, 1 prompt-006 third-finding correction batch, 1 prompt-007 fourth-finding correction batch |
+| Subagent tokens so far | 1,639,969 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 + 187,061 + 71,421 + 131,094 + 128,983 + 111,140 + 143,423 |
+| Blocking/real defects found by independent review (not self-caught) | 18 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout, 4 prompt-003 corrective batch, 0 prompt-004 batch, 0 prompt-005 batch, 0 prompt-006 batch, 1 prompt-007 batch (README.md/ROADMAP.md overclaiming independent verification before the review that would provide it had actually run) — all fixed and independently re-confirmed |
+| Advisory/material-nonblocking defects found and fixed or accepted | 19 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted), 2 prompt-003 corrective batch, 2 prompt-004 batch, 3 prompt-005 batch, 3 prompt-006 batch, 1 prompt-007 batch (the directory-as-manifest unhandled-exception gap — fixed, not merely documented) — see `planning/phase-01-foundation.md` §24, §26, §28 |
+| Real passing tests | 106 of 106 | 33 policy-evaluator + 73 axiom_validator, all re-run independently and confirmed — 4 of the last 4 real code defects this project's own self-testing didn't catch were found by native Codex review instead, across three separate reviews of PR #1; the manifest-not-a-file gap (prompt-007 batch) was the first found by this project's *own* independent-review dispatch rather than native Codex |
+| Real (non-synthetic) defects found in Axiom Dev's own documentation or code | 10 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout); `planning/CONTEXT.md` staleness against `decisions/0005` (prompt-003 batch); `validate_file`'s unresolved-`repo_root` defect (prompt-003 batch); `find_orphaned_schemas`'s would-fail-CI-forever defect against the real repo root (prompt-004 batch); fenced-code-block false positive and policy-evaluator `TypeError` (prompt-005 batch); `HEADING_RE`'s `\s+`-matches-newline false positive (prompt-006 batch); manifest-integrity-not-checked-when-schema-exists and the directory-as-manifest unhandled exception (prompt-007 batch) |
 | Amendment-D demonstrations fully demonstrated with real evidence | 7 of 8 (rows 1, 2, 4, 5, 6, 7, 8) | See `planning/phase-01-foundation.md` §10; row 3 is the one genuine, externally-blocked gap, now reframed by `decisions/0005` as "native Codex review on a real PR," not "automated gate rejection" |
 | Phase 1 Definition of Done (17 items, `planning/prompts/002-...md` §11) | 15 MET, 1 partially met, 1 not met | See `evidence/phase-1-closeout.md` (predates the prompt-003 corrective batch) |
 | Prompt 003's revised Definition of Done (16 items, `planning/phase-01-foundation.md` §18) | 10 MET, 1 locally-verified-only (CI not triggered on a real GitHub Actions run), 5 open (items 10–12: native Codex review, blocked on no `gh`/token; item 15: no holistic closeout dispatch has run yet, only narrowly-scoped checks and a confirmation pass; item 16: human approval, deliberately not sought by this session) | See `planning/phase-01-foundation.md` §18, §20 |
 | Prompt 004's Definition of Done (21 bullet items, `planning/prompts/004-...md` §13) | 19 MET, 1 locally-verified-only (GitHub Actions not triggered on a real run), 2 open (native Codex review and human approval — the same cross-cutting PR/`gh`-token blocker as prompt 003, not new work this amendment could resolve on its own) | See `planning/phase-01-foundation.md` §21, §22 |
-| Prompt 005/006's final acceptance matrix (16 criteria, `planning/prompts/005-...md` §12) | 14 MET, 1 PARTIAL (native Codex review — two reviews done and dispositioned, a third of the latest commit not yet requested), 1 NOT MET (final human acceptance, correctly not sought yet) | See `evidence/phase-1-final-closeout.md` and its 2026-11-21 addendum |
+| Prompt 005/006/007's final acceptance matrix (16 criteria, `planning/prompts/005-...md` §12) | 14 MET, 1 PARTIAL (native Codex review — three reviews done and dispositioned, a fourth of the latest commit not yet requested), 1 NOT MET (final human acceptance, correctly not sought yet) | See `evidence/phase-1-final-closeout.md` and its two addenda |

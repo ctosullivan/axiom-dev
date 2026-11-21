@@ -253,3 +253,24 @@ complete, on two named, real, external blockers.
 - `README.md`, `planning/ROADMAP.md`, `planning/CONTEXT.md`,
   `evidence/phase-1-final-closeout.md` (second addendum) updated to
   reflect PR #1's third review and this correction.
+
+### Fixed (independent review of the fourth-finding correction)
+
+- `src/axiom_validator/rules.py`: `load_governed_manifest` checked
+  `.exists()` (true for a directory) before unconditionally calling
+  `.read_text()` — a `schemas/governed-documents.txt` that exists but
+  isn't a readable regular file (e.g. a directory) raised an unhandled
+  `IsADirectoryError` straight out of `validate_file`, instead of the
+  structured `FAIL` the contract requires. Found by this session's own
+  dispatched independent review (not native Codex this time), via a
+  self-constructed adversarial scenario beyond every required test
+  case. Fixed by reading inside `try`/`except`, catching `OSError`
+  generally rather than checking existence first. 1 new regression
+  test.
+- `README.md` and `planning/ROADMAP.md` briefly asserted Finding D was
+  "independently reviewed with no blocking findings" in the same
+  commit that pushed the fix, before that review had actually
+  completed — caught live by the review itself (a direct,
+  self-contradicting claim against `planning/CONTEXT.md`'s own honest
+  "pending" disclosure in the very next commit) and corrected once the
+  review's real result was available to cite.

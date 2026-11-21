@@ -80,9 +80,17 @@ heading false positive and an unhandled `TypeError` on malformed
 severity values (`decisions/0007`; §23–§24); the second (commit
 `2ebac4c`) found a heading-whitespace false positive (§25–§26); the
 third (commit `6e75d2b`) found that the governed-document manifest
-wasn't checked when a document's own schema existed (§27). All four
-findings are corrected, regression-tested, and independently reviewed
-with no blocking findings in any of the four review dispatches.
+wasn't checked when a document's own schema existed (§27–§28). All
+four findings are corrected, regression-tested, and independently
+reviewed. The fourth review's dispatch itself found two real issues
+in this project's own record-keeping, not in the fix: this exact
+sentence briefly overclaimed "independently reviewed" before that
+review had actually completed (caught and corrected here, in the same
+change that records the review's real result — see §28), and a
+genuine, now-fixed gap where a `schemas/governed-documents.txt` that
+exists but isn't a readable file (e.g. a directory) raised an
+unhandled exception instead of a structured failure. Both are fixed;
+see §28 for the full record.
 **GitHub Actions is now confirmed passing** on commit `6e75d2b`
 (fetched directly from the live Actions run page) — the first time
 this project has had verbatim confirmation of a real run. **The

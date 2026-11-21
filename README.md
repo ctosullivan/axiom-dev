@@ -20,7 +20,7 @@ across successive, disconnected development sessions.
 > [`evidence/phase-1-final-closeout.md`](evidence/phase-1-final-closeout.md)
 > for the latest acceptance assessment, and
 > [`planning/phase-01-foundation.md`](planning/phase-01-foundation.md)
-> §16–§27 for Phase 1's full evidence and status.
+> §16–§28 for Phase 1's full evidence and status.
 
 ## Mission
 
