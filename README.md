@@ -6,21 +6,17 @@ preserves important project knowledge, supports independent verification,
 maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
-> **Status: Phase 1 is substantially done but deliberately left open.**
-> Documentation schemas now live under a dedicated
-> [`schemas/`](schemas/) directory, mirrored by document path
-> (`decisions/0006`, `decisions/0007`). Phase 1's independent-review
-> requirement is **native Codex GitHub PR review**
-> (`decisions/0005`) — [PR #1](https://github.com/ctosullivan/axiom-dev/pull/1)
-> is open and has had four native Codex reviews so far; every finding
-> stands corrected with regression evidence and independent
-> verification. `planning/ROADMAP.md` covers the long-term direction
-> beyond Phase 1 (Phases 2–4 proposed, not yet authorised). See
-> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state,
-> [`evidence/phase-1-final-closeout.md`](evidence/phase-1-final-closeout.md)
-> for the latest acceptance assessment, and
-> [`planning/phase-01-foundation.md`](planning/phase-01-foundation.md)
-> §16–§29 for Phase 1's full evidence and status.
+> **Status: Phase 1 completed by owner decision on 2026-11-22.**
+> Its [archive](planning/archive/phase-01/README.md) preserves the
+> [independent closeout](evidence/phase-1-final-closeout.md) and
+> [outstanding qualifications](evidence/phase-1-owner-acceptance.md).
+> **Phase 2 is planned, not implemented**: an independent, reusable
+> development template, Ledgerkit/hledger semantic wiki, stable claim
+> identifiers, a local knowledge API and deterministic CI drift controls,
+> dogfooded through the full lifecycle **without A/B testing the template**.
+> Phase 3 adds an optional MCP adapter and Assure-backed agent-strategy
+> experiments once the harness is ready. See
+> [roadmap](planning/ROADMAP.md) and [current context](planning/CONTEXT.md).
 
 ## Mission
 
@@ -50,10 +46,10 @@ without requiring a specialised AI development platform.
 This is a hypothesis to be tested, not a conclusion to be assumed. The goal
 is not to maximise automation, knowledge records, or architectural
 sophistication — it is to demonstrate improvement net of the methodology's
-own overhead. Phase 1 includes a mandatory self-development exercise
-(Stages 1.1–1.5) in which Axiom Dev is built, refactored and independently
-re-documented using its own methodology, specifically to test this
-hypothesis against real work rather than assert it.
+own overhead. Phase 1 included a self-development exercise (Stages 1.1–1.5)
+in which Axiom Dev was built, refactored and independently re-documented
+using its own methodology. Phase 2 will extend dogfooding to an
+independent repository; this is not a controlled A/B test.
 
 ## Relationship to Axiom Assure
 
@@ -96,17 +92,18 @@ for how to propose and land a change.
 | `CLAUDE.md` | Claude Code–specific adaptations of `AGENTS.md`. |
 | `CONTRIBUTING.md` | How to propose, implement and land a change. |
 | `CHANGELOG.md` | Human-readable record of notable changes. |
-| `planning/ROADMAP.md` | Concise, long-term roadmap: Phase 1 (in progress) plus Phases 2–4 (proposed direction, not yet authorised). |
+| `planning/ROADMAP.md` | Concise phase status: Phase 1 completed; Phase 2 template work planned; Phases 3–4 proposed. |
 | `planning/CONTEXT.md` | Current phase, latest work, and the next concrete action. |
-| `planning/phase-01-foundation.md` | The implementation-ready Phase 1 plan (Stages 1.0–1.5) and its two amendments' full detail. |
+| `planning/phase-01-foundation.md` | Canonical historical Phase 1 plan, stages and amendments (unchanged by archiving). |
+| `planning/phase-02-template.md` | Proposed focused Phase 2 plan: knowledge API, stable IDs, comparative wiki, deterministic gates and Ledgerkit dogfooding. |
 | `planning/prompts/` | Original planning prompts, preserved verbatim with provenance. |
 | `planning/retros/` | Phase retrospectives, created as phases complete. |
-| `planning/archive/` | Index of archived (Completed) phases — currently empty; see `docs/phase-archiving.md`. |
+| `planning/archive/` | Completed Phase 1 archive index; see `docs/phase-archiving.md`. |
 | `decisions/` | Sequentially numbered Architecture Decision Records. |
 | `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema, phase archiving) — Markdown only, no schema files, since `decisions/0007`. |
 | `schemas/` | Every production document's declarative schema, mirrored by path (`docs/axiom-validator.md` → `schemas/docs/axiom-validator.md.schema.yaml`), plus `schemas/governed-documents.txt`, the minimal manifest of documents that must carry a passing schema (contract rule 15). |
 | `contracts/` | Required behaviour, written and reviewed before the implementation it governs. |
-| `evidence/` | Verification outcomes and the Phase 1 measurement log. |
+| `evidence/` | Verification outcomes, the Phase 1 measurement log and explicit owner acceptance qualifications. |
 | `.github/pull_request_template.md` | Checklist a PR description must address. |
 | `.github/workflows/` | Deterministic CI: policy-evaluator tests, validator tests, governed-documentation check, doc hygiene — all tested and running, none a required merge check. |
 | `.github/deferred/` | The API-backed Codex review workflow, deferred (not deleted) in favour of native Codex GitHub PR review for Phase 1 — see `decisions/0005`. |
