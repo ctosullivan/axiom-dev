@@ -1,0 +1,88 @@
+# Contributing to Axiom Dev
+
+This document is the practical "how to land a change" guide for human
+contributors. The methodology it implements is defined canonically in
+[`AGENTS.md`](AGENTS.md) — read that first if you haven't; this file does
+not repeat its reasoning, only the mechanics.
+
+## Before you start
+
+1. Read `planning/CONTEXT.md` for the current phase/stage and what's
+   actually in flight.
+2. Check `planning/ROADMAP.md` — a roadmap entry existing is not
+   authorisation to build it. Each stage needs its own focused,
+   version-controlled plan before implementation starts (`AGENTS.md` §2).
+3. If your change isn't covered by an existing plan, write one under
+   `planning/` before writing code or substantive docs.
+
+## Making a change
+
+1. Branch from `main`. Don't commit directly to `main` for anything
+   non-trivial.
+2. Implement to the plan. If reality diverges from the plan, update the
+   plan — don't silently drift.
+3. Update affected documentation, ADRs, `planning/ROADMAP.md`, and
+   `planning/CONTEXT.md` in the **same** change (`AGENTS.md` §5). A PR that
+   changes behaviour without touching the docs that describe that behaviour
+   will be asked to add that before review.
+4. Record a new ADR under `decisions/` only if the change involves a
+   genuinely non-obvious decision (`AGENTS.md` §3). Never edit an accepted
+   ADR's decision in place — add a superseding ADR instead.
+5. Attach verification evidence appropriate to the change — for now
+   (pre-Stage-1.4, no source code yet) that means: internal consistency
+   checks, cross-reference checks, and an independent review pass; once
+   Axiom Dev has source code, deterministic tests are required
+   (`AGENTS.md` §8).
+
+## Commit conventions
+
+- Imperative summary line, `type(scope): subject` where it clarifies intent
+  (e.g. `docs(phase-1): establish governance and implementation plan`).
+- Explain *why* in the body when the summary line doesn't make it obvious.
+- Never commit secrets, credentials, tokens, or personal information —
+  including anything pasted into a preserved prompt under
+  `planning/prompts/`.
+
+## Pull requests
+
+- Every substantive change goes through a PR, even for a single
+  contributor — this is what makes independent review (`AGENTS.md` §6)
+  possible before merge.
+- The PR description states: what changed, why, which plan and/or ADR
+  authorises it, and what verification evidence is attached.
+- Do not merge your own PR without the review called for by the plan.
+  Human approval is required before merge regardless of agent confidence
+  (`AGENTS.md` §11).
+
+## Testing requirements
+
+There is no source code yet (Phase 1 Stage 1.0–1.3 is governance, planning
+and CI scaffolding only). Once Stage 1.4 introduces the first real
+component:
+
+- New behaviour needs a deterministic test.
+- Contract-governed behaviour needs a test that demonstrates the contract
+  holds, and ideally one that demonstrates it would fail if violated.
+- "Tests pass" is not sufficient evidence on its own for phase closeout —
+  see `AGENTS.md` §6 and §8.
+
+## Definition of Done
+
+See `AGENTS.md` §10. In short: planned, documented in the same change,
+evidenced, ADR'd if non-obvious, and reflected accurately in the roadmap —
+not merely written.
+
+## Changing governing files
+
+`AGENTS.md`, `CLAUDE.md`, and this file are governance itself. Changes to
+them require explicit human approval and, if they materially change prior
+methodology, a superseding ADR (`AGENTS.md` §12). The initial versions of
+these three files were necessarily written during bootstrap, before this
+process existed to govern their own creation — that bootstrap exception is
+recorded in `AGENTS.md` §0 and does not apply to anything after it.
+
+## Human approval boundaries
+
+See `AGENTS.md` §11 for the list of actions that always need explicit human
+sign-off (governance changes, marking phases complete, merging PRs,
+destructive git operations, starting a new Phase 1 stage, licence changes).
