@@ -171,7 +171,7 @@ validator) is covered by `tests/test_axiom_validator.py` and
 `.github/scripts/tests/test_policy_evaluator.py`
 (`PYTHONPATH=.github/scripts python3 -m unittest discover -s
 .github/scripts/tests -v`). Both suites, plus a check of the governed
-documentation manifest (`docs/governed-documents.txt`), run in
+documentation manifest (`schemas/governed-documents.txt`), run in
 `.github/workflows/deterministic-checks.yml` on every push and PR — see
 `docs/knowledge-placement.md`'s "Enforcement classes" for exactly which
 level (implemented / locally tested / executed by CI / a required merge

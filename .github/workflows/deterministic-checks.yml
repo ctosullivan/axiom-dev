@@ -17,10 +17,14 @@ name: deterministic-checks
 # "Validate every governed documentation file" below also performs a
 # repository-wide orphaned-schema scan as a side effect of calling
 # axiom_validator's main() — not a separate step, since main() always
-# scans --repo-root for orphans regardless of which paths are passed
-# (contract revision rule 8, prompt 004). tests/ is excluded from that
-# scan by default (rules.find_orphaned_schemas), so the deliberately
-# orphaned test fixture under tests/fixtures/ does not fail this job.
+# scans --repo-root/schemas/ for orphans regardless of which paths are
+# passed (contract revision rule 8). Schemas moved from colocated
+# <doc>.md.schema.yaml files to a mirrored top-level schemas/ tree
+# (prompt 005, decisions/0007) — the governed-document manifest moved
+# with them, to schemas/governed-documents.txt. Test fixtures keep
+# their own, separate tests/fixtures/schemas/ tree, which this job's
+# orphan scan never touches (it only scans <repo_root>/schemas/), so
+# the deliberately orphaned test fixture cannot fail this job.
 
 on:
   push:
@@ -65,7 +69,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate every governed documentation file
         run: |
-          mapfile -t FILES < <(grep -vE '^\s*(#|$)' docs/governed-documents.txt)
+          mapfile -t FILES < <(grep -vE '^\s*(#|$)' schemas/governed-documents.txt)
           echo "Validating: ${FILES[@]}"
           PYTHONPATH=src python3 -m axiom_validator "${FILES[@]}" --repo-root .
 

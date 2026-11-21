@@ -14,34 +14,43 @@ document describes current policy, not history.
 
 ## Convention
 
-Each document that needs a declarative schema has a companion file at a
-fully deterministic path: `<document>.md` → `<document>.md.schema.yaml`,
-in the same directory, with no separate registry mapping one to the
-other.
+Each document that needs a declarative schema has a schema file at a
+fully deterministic, mirrored path under a top-level `schemas/`
+directory: `<document>.md` → `schemas/<document>.md.schema.yaml`, with
+no separate registry mapping one to the other. `README.md`'s schema is
+`schemas/README.md.schema.yaml`; `docs/axiom-validator.md`'s is
+`schemas/docs/axiom-validator.md.schema.yaml`. This is the second
+location this convention has used: `decisions/0006` first introduced a
+companion file *colocated* beside its document (`<document>.md.schema.yaml`,
+same directory); `decisions/0007` moved it to this mirrored `schemas/`
+tree once `docs/` (and `contracts/`, `evidence/`, `planning/`)
+accumulated enough colocated schema files to clutter a directory
+listing meant for human-readable documentation — the same class of
+readability argument that originally justified leaving embedded
+front-matter, one directory level up.
 
-**Why a companion file instead of embedded front-matter (reversing the
-original choice):** fifteen real governed/schema-bearing documents
-accumulated embedded YAML blocks a human reader had to scroll past
-before reaching the actual explanation — a real, concrete readability
-cost, not a hypothetical one, once there was real content to weigh it
-against. A companion file keeps the Markdown document as plain,
-cleanly-rendering Markdown.
+**Why mirrored under `schemas/` instead of colocated beside the
+document:** a reader browsing `docs/` for an explanation shouldn't have
+to pick real documents out from their schemas in the same listing.
+Moving schemas to their own tree keeps `docs/` (and every other
+documentation directory) Markdown-only.
 
-**The drift risk the original choice was built around is real, and is
+**The drift risk a separate schema file always risks is real, and is
 not dismissed — it's addressed mechanically instead of by physical
-proximity.** `src/axiom_validator/` detects two failure modes a sidecar
-convention would otherwise risk going unnoticed: an **orphaned schema**
-(a `.schema.yaml` file with no corresponding document — contract
-revision rule 8) and an **accidentally reintroduced embedded
-front-matter block** (contract revision rule 7 — the validator never
-silently falls back to parsing it, and never supports both conventions
-side by side). Same-commit-sync (`AGENTS.md` §5) still applies to the
-companion file exactly as it did to front-matter: both files change
-together, in the same change, by the same rule.
+proximity.** `src/axiom_validator/` detects two failure modes: an
+**orphaned schema** (a schema file with no corresponding mirrored
+document — contract revision 2 rule 6) and an **accidentally
+reintroduced embedded front-matter block** (contract revision rule 7 —
+the validator never silently falls back to parsing it). Same-commit-sync
+(`AGENTS.md` §5) still applies: a document and its schema file change
+together, in the same change, by the same rule, regardless of how far
+apart they now live in the directory tree.
 
-**Cost accepted, stated plainly:** a governed document is now two files
-instead of one. This is the direct, named cost of the readability gain
-above — see `decisions/0006`'s own Decision point 3.
+**Cost accepted, stated plainly:** a governed document is still two
+files, now in two different directories rather than side by side — a
+real, slightly higher navigation cost than the colocated convention,
+accepted for the same reason that convention itself accepted two files
+instead of one (see `decisions/0007`'s own Consequences).
 
 **Not every document needs this.** Only documents whose audience,
 required content, or acceptance criteria are non-obvious benefit from
@@ -84,8 +93,10 @@ acceptance_criteria:
 ## Worked example
 
 `README.md` was fitted with this schema as the first real example —
-originally as embedded front-matter (Stage 1.1), migrated to a companion
-file by this same change (`evidence/schema-migration.md`):
+originally as embedded front-matter (Stage 1.1), then a colocated
+companion file (`decisions/0006`), now at its mirrored `schemas/`
+location (`decisions/0007`) — see `evidence/schema-migration.md` for
+both moves:
 
 `README.md`:
 
@@ -95,7 +106,7 @@ file by this same change (`evidence/schema-migration.md`):
 Axiom Dev is the primary product of the Axiom project...
 ```
 
-`README.md.schema.yaml`:
+`schemas/README.md.schema.yaml`:
 
 ```yaml
 audience: new contributors, agents resuming work, and anyone evaluating the project

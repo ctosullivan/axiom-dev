@@ -35,7 +35,7 @@ class TestValidDocument(unittest.TestCase):
     """Rule 8: a fully conforming document passes with no errors."""
 
     def test_complete_fixture_passes(self):
-        result = validate_file(FIXTURES / "valid" / "complete.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "valid" / "complete.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "PASS")
         self.assertEqual(result["errors"], [])
 
@@ -47,7 +47,7 @@ class TestNoCompanionSchema(unittest.TestCase):
     trigger condition.)"""
 
     def test_no_schema_is_skipped(self):
-        result = validate_file(FIXTURES / "invalid" / "no_schema.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "no_schema.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "SKIPPED")
         self.assertEqual(result["errors"], [])
 
@@ -57,7 +57,7 @@ class TestInvalidYaml(unittest.TestCase):
     INVALID_SCHEMA with the parse error. (Formerly rule 2.)"""
 
     def test_bad_yaml_is_invalid_schema(self):
-        result = validate_file(FIXTURES / "invalid" / "bad_yaml.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "bad_yaml.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("YAML" in e for e in result["errors"]))
 
@@ -66,7 +66,7 @@ class TestMissingField(unittest.TestCase):
     """Rule 3: valid YAML missing a required field is INVALID_SCHEMA, naming it."""
 
     def test_missing_field_is_invalid_schema(self):
-        result = validate_file(FIXTURES / "invalid" / "missing_field.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "missing_field.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("acceptance_criteria" in e for e in result["errors"]))
 
@@ -75,7 +75,7 @@ class TestMissingSection(unittest.TestCase):
     """Rule 4: a required_sections entry absent from the body is FAIL, named."""
 
     def test_missing_section_fails_and_names_it(self):
-        result = validate_file(FIXTURES / "invalid" / "missing_section.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "missing_section.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(any("NotPresent" in e for e in result["errors"]))
 
@@ -85,7 +85,7 @@ class TestBrokenAuthoritativeSource(unittest.TestCase):
 
     def test_broken_authoritative_source_fails_and_names_it(self):
         result = validate_file(
-            FIXTURES / "invalid" / "broken_authoritative_source.md", REPO_ROOT
+            FIXTURES / "invalid" / "broken_authoritative_source.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(
@@ -97,7 +97,7 @@ class TestBrokenLink(unittest.TestCase):
     """Rule 6: a broken body Markdown link is FAIL, named."""
 
     def test_broken_link_fails_and_names_it(self):
-        result = validate_file(FIXTURES / "invalid" / "broken_link.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "broken_link.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(
             any("this-does-not-exist.md" in e for e in result["errors"])
@@ -109,7 +109,7 @@ class TestBadAdrReference(unittest.TestCase):
     with ADR-specific error detail (not just a generic broken-link message)."""
 
     def test_bad_adr_reference_fails_with_adr_specific_message(self):
-        result = validate_file(FIXTURES / "invalid" / "bad_adr_reference.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "bad_adr_reference.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(any("9999" in e for e in result["errors"]))
         self.assertTrue(any("ADR" in e for e in result["errors"]))
@@ -121,7 +121,7 @@ class TestPathOutsideRepository(unittest.TestCase):
     found this was unenforced — see evidence/stage-1.4-baseline.md."""
 
     def test_authoritative_source_outside_repo_fails(self):
-        result = validate_file(FIXTURES / "invalid" / "path_outside_repo.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "path_outside_repo.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(
             any("outside the repository" in e for e in result["errors"])
@@ -135,7 +135,7 @@ class TestHeadingInsideFencedCodeBlock(unittest.TestCase):
 
     def test_heading_only_in_code_block_still_fails_as_missing(self):
         result = validate_file(
-            FIXTURES / "invalid" / "heading_in_code_block.md", REPO_ROOT
+            FIXTURES / "invalid" / "heading_in_code_block.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(any("HiddenHeading" in e for e in result["errors"]))
@@ -148,7 +148,7 @@ class TestEmbeddedFrontmatterReintroduced(unittest.TestCase):
 
     def test_embedded_frontmatter_fails_and_names_it(self):
         result = validate_file(
-            FIXTURES / "invalid" / "embedded_frontmatter_reintroduced.md", REPO_ROOT
+            FIXTURES / "invalid" / "embedded_frontmatter_reintroduced.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(
@@ -189,7 +189,7 @@ class TestArchiveEntryLinkVerification(unittest.TestCase):
 
     def test_archive_entry_shaped_fixture_with_broken_link_fails(self):
         result = validate_file(
-            FIXTURES / "invalid" / "archive_entry_broken_link.md", REPO_ROOT
+            FIXTURES / "invalid" / "archive_entry_broken_link.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(

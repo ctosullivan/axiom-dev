@@ -1416,3 +1416,194 @@ by the commit this record accompanies.
 claim I could independently execute... reproduced exactly as the
 repository's own records describe... nothing BLOCKING was found in this
 pass."
+
+## 23. Phase 1 final remediation and closeout (prompt 005)
+
+Authorising prompt:
+[`planning/prompts/005-phase-1-final-remediation-and-closeout.md`](prompts/005-phase-1-final-remediation-and-closeout.md).
+New ADR: [`decisions/0007`](../decisions/0007-top-level-schemas-directory.md).
+This section amends — does not replace — the plan above. Prompt 005 has
+four parts: A (correct two native-Codex-review findings on PR #1), B
+(consolidate schemas into `schemas/`), C (verify), D (GitHub/Codex
+re-review), E (final closeout). This section covers A–C; §24 (below, once
+written) will cover the independent review of this batch; D and E are
+addressed directly in the final report, since D requires a human action
+this session cannot perform and E's outcome depends on D.
+
+**Baseline recorded before any change (prompt 005 §9, "record... before
+implementation"):** branch `phase-1/stage-1.0-bootstrap`, HEAD
+`3a8c395` (clean working tree, matching PR #1's actual reviewed
+commit — confirmed by fetching the live PR page, not assumed), 49
+tests passing before this batch (37 validator + ... — actually recorded
+as of the prior batch's close: 37 validator tests, 33 policy-evaluator
+tests). Codex's two P2 findings, their file/line anchors, and their
+required corrections are preserved verbatim in
+`planning/prompts/005-...md` §3–§4; both were independently reproduced
+against the actual pre-fix code (not merely read as claims) before any
+fix was written — see Part A below.
+
+**Part A — Codex findings, corrected.**
+
+1. **Finding 1 (parsing.py, fenced-code-block handling).** Reproduced:
+   `PYTHONPATH=src python3 -c "..."` against the pre-fix
+   `extract_headings` returned `{'Required', 'Doc'}` for a document
+   containing only a `~~~`-fenced "# Required" example — the exact
+   false positive Codex described. Corrected by replacing the
+   single-regex fence stripper with a line-oriented parser tracking
+   fence character, fence length, and valid/invalid closing fences
+   (`parsing._strip_fenced_code_blocks`) — the exact approach Codex's
+   own comment suggested. All 9 required regression scenarios
+   implemented and passing (`tests/test_fenced_code_blocks.py`, 10
+   tests — the 9th scenario plus an extra "shorter closing candidate
+   does not close" case). Before/after evidence: the fix was verified
+   against the actual pre-fix implementation extracted via
+   `git show 3a8c395:src/axiom_validator/parsing.py`, not a
+   reconstruction from memory.
+2. **Finding 2 (policy_evaluator.py, severity type).** Reproduced:
+   `evaluate(..., [{"severity": []}])` raised an unhandled `TypeError:
+   unhashable type: 'list'` against the pre-fix code. Corrected by
+   validating `isinstance(severity, str)` before the `in
+   BLOCKING_SEVERITIES` membership test, returning `FAIL_CLOSED` with
+   the documented `EvaluationResult` shape instead of raising. All 7
+   required malformed-severity scenarios plus preserved coverage of 8
+   existing scenarios implemented
+   (`.github/scripts/tests/test_policy_evaluator_severity_types.py`,
+   17 tests). The explicit "should unknown severity strings be
+   rejected" evaluation required by prompt 005 §4 was answered
+   **no** — recorded as a reasoned decision in
+   `contracts/codex-gate-policy-evaluator.md` rule 8's amendment, not
+   left implicit.
+
+Both corrections amend `contracts/codex-gate-policy-evaluator.md` (rule
+6, rule 8's note) in place as historically-dated amendments — not
+silently, and not by weakening any existing guarantee (both fixes
+strictly narrow what is accepted, matching prompt 005 §4's explicit
+"do not weaken the existing accepted contract" instruction).
+
+**Part B — Schema consolidation.** Every one of the 18 production
+schema files and 18 fixture schema files (36 total — independently
+recounted via `find . -name "*.md.schema.yaml"`, not assumed to match
+the prior batch's "15 real + 20 fixture" figure, which predates
+subsequent fixtures added since) moved: production schemas to a
+mirrored path under a new top-level `schemas/` directory
+(`schemas/<relative-document-path>.schema.yaml`); fixture schemas to
+their own separate mirror tree (`tests/fixtures/schemas/`), never
+nested inside the production tree. `docs/governed-documents.txt` moved
+to `schemas/governed-documents.txt`. Implemented via two new pure
+functions (`parsing.schema_path_for`, `parsing.doc_path_for_schema`)
+and one new optional `validate_file`/`find_orphaned_schemas` parameter
+each (`schema_mirror_root` / `mirror_root`, both defaulting to
+`repo_root` so every untouched call site is unaffected). Full record:
+`evidence/schema-migration.md`'s "Second relocation" section. New
+ADR: `decisions/0007`. New contract section: "Contract revision 2" in
+`contracts/documentation-schema-validator.md` (the original "Contract
+revision" section is left as the historical record of the first,
+colocated-companion-file move, with a note at its top pointing to the
+superseding section rather than being rewritten).
+
+Two things found and fixed during this work, before independent review
+dispatch:
+
+- **A genuine design gap, caught by re-deriving the "exclude tests/ by
+  name" workaround's own rationale rather than copying it forward
+  unexamined:** the previous orphan-scan exclusion (prompt 004) was a
+  patch for a problem that this relocation's own architecture (a
+  wholly separate fixture mirror tree, never nested in the production
+  one) makes structurally impossible — so the exclusion mechanism was
+  removed rather than carried forward as now-redundant complexity.
+- **Manifest integrity, explicitly required by prompt 005 §7 to be
+  assessed rather than left as an accident:** a missing
+  `schemas/governed-documents.txt` file previously (and would have
+  continued to) silently disable all governed-document enforcement.
+  Fixed with a new `GovernedManifestMissing` exception and fail-closed
+  handling in `validate_file`, with its own regression tests
+  (`tests/test_schema_relocation.py`'s `TestMissingManifestFailsClosed`,
+  3 tests covering missing-file, explicit-override, and
+  present-but-empty cases separately so the three are never conflated).
+
+**Part C — Verification.** 50/50 validator tests pass: 27 before this
+batch (confirmed via `git show 3a8c395:tests/test_axiom_validator.py`
+and its sibling file's method counts) + 23 net-new
+(`test_fenced_code_blocks.py`, 10; `test_schema_relocation.py`, 13,
+including a symlink-escape regression test added after path-safety was
+checked by hand against a real symlink before independent review was
+dispatched) — arithmetic checked against the actual `python3 -m
+unittest discover -s tests -v` "Ran 50 tests" line, not asserted from
+hand-added subtotals, precisely because §22 above already found one
+such subtotal wrong once in this project. 33/33 policy-evaluator tests
+pass (16 before + 17 new, `test_policy_evaluator_severity_types.py`). Both suites and the exact
+CI commands (`schemas/governed-documents.txt`-driven validation, the
+orphan scan that runs as a `main()` side effect) were run directly
+against the real repository, not assumed from file existence.
+
+## 24. Independent review record — final remediation batch (prompt 005)
+
+Dispatched: a fresh, non-forked `general-purpose` agent with no prior
+conversation context — best-effort isolation, level 2 of
+`docs/agent-isolation.md`'s taxonomy, named that way in the reviewer's
+own report. 35 tool uses, 128,983 tokens, 270.7s.
+
+**No BLOCKING code findings.** The reviewer independently reproduced
+both pre-fix Codex defects from `git show 3a8c395:...` (not from reading
+the diff), confirmed both fixes against the real post-fix code,
+re-ran both full test suites directly (50/50, 33/33 — matching this
+plan's own figures exactly, itself informative since §22/§23 above
+record two prior instances of this project's own test-count arithmetic
+being wrong), constructed 11 of its own fence scenarios and 5 of its
+own malformed/edge-case severity values beyond every existing fixture,
+diffed 5 real schema files against their pre-relocation git history to
+confirm only the one disclosed content change actually occurred, built
+its own temp-directory reproductions of the missing-manifest and
+path-escape (including an actual Unix symlink, not just a `../`
+string) cases, and confirmed `decisions/0002` was untouched and
+`decisions/0006` only gained its disclosed Status annotation via
+direct `git diff` against `3a8c395`.
+
+**One real finding, in the evidence record rather than the code:**
+`evidence/schema-migration.md`'s "Second relocation" section stated
+"49 tests... 12 new" — stale by exactly one in both figures, because
+that section was written before the symlink-escape regression test
+(added after this session's own hand-check of path safety, per §23
+above) was added to `tests/test_schema_relocation.py`. **Fixed** —
+corrected to 50/13, with a note on what caused the discrepancy rather
+than a silent number swap.
+
+**Two ADVISORY findings, both pre-existing gaps the fence fix never
+claimed to close, found by the reviewer constructing scenarios beyond
+every existing fixture, not reproductions of anything already known:**
+
+1. CommonMark's 4-space-indented code-block convention is not
+   recognised as code at all by `extract_headings` — a heading-looking
+   line inside one still counts as real. Out of scope for Codex's
+   finding (which was about fence character/length recognition, not
+   indentation) and genuinely new, not previously documented.
+2. A closing fence indented with a tab (rather than spaces) fails to
+   close. Fails safe (over-hides content, risking a missed real
+   heading reported `FAIL`) — never reintroduces the false-PASS
+   direction Codex's original finding was about.
+
+Both **disposition: documented, not fixed** — added to
+`contracts/documentation-schema-validator.md`'s Non-goals and
+`docs/axiom-validator.md`'s Limitations in this same change, per this
+project's own standing practice of recording a genuinely out-of-scope
+gap rather than expanding a bounded fix's scope to chase it.
+
+**Also assessed, not merely accepted:** the reviewer gave its own
+independent judgement that rule 8's "unrecognised severity stays
+advisory, not malformed" decision (contract amendment, §23 Part A
+above) is "reasonable, and explicitly, non-evasively justified," not
+scope-avoidance — with one soft, non-blocking observation (case
+sensitivity of the `P0`/`P1` match is a real operational
+consideration the contract discusses for *unrecognised* severities but
+not explicitly for *case-variant* ones) recorded here for visibility,
+not actioned as a defect.
+
+**Verdict (reviewer's own words, condensed):** "The two Codex P2
+findings are genuinely corrected... the schema relocation is
+structurally complete and byte-level verified where claimed, path-safety
+and fail-closed manifest behaviour hold up against my own adversarial
+constructions... This batch is not yet ready to be committed and
+independently closed out until that evidence-count discrepancy is
+corrected — everything else checked here supports proceeding once it
+is." That correction is the fix recorded above; no other blocking gap
+remains open from this review.

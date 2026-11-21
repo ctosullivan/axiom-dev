@@ -5,7 +5,7 @@ headings/links (see parsing.py) for most rules, so they can be reasoned
 about independently of how a document was parsed. Two exceptions read
 the filesystem directly, because what they check is inherently about
 files other than the one document being validated, not about already-
-parsed content: load_governed_manifest (docs/governed-documents.txt) and
+parsed content: load_governed_manifest (schemas/governed-documents.txt) and
 find_orphaned_schemas (a repository-wide scan for *.md.schema.yaml files
 with no corresponding document — contract revision rule 8, prompt 004).
 Split out of the original monolithic implementation as Stage 1.4's
@@ -17,6 +17,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from . import parsing
 from .parsing import SCHEMA_SUFFIX
 
 REQUIRED_FIELDS = {
@@ -55,7 +56,19 @@ def check_required_fields(data: dict) -> list[str]:
 NON_EMPTY_STRING_FIELDS = ("audience", "purpose")
 LIST_OF_STRINGS_FIELDS = ("required_sections", "authoritative_sources", "acceptance_criteria")
 
-GOVERNED_MANIFEST_PATH = "docs/governed-documents.txt"
+GOVERNED_MANIFEST_PATH = "schemas/governed-documents.txt"
+
+
+class GovernedManifestMissing(Exception):
+    """Raised when the governed-document manifest file itself does not
+    exist. Distinguished deliberately from "manifest exists but lists
+    zero documents" (load_governed_manifest legitimately returns an
+    empty set for that case) — a missing manifest *file* is a
+    configuration-integrity failure, found worth failing closed on
+    rather than silently treating as "nothing is governed" (prompt 005
+    Sec 7, "Manifest integrity": "assess the current behaviour when the
+    entire governed-document manifest is missing... implement an
+    appropriately scoped fail-closed behaviour")."""
 
 
 def check_field_types_and_content(data: dict) -> list[str]:
@@ -85,43 +98,48 @@ def check_field_types_and_content(data: dict) -> list[str]:
     return errors
 
 
-def find_orphaned_schemas(
-    repo_root: Path, exclude_prefixes: tuple[str, ...] = ("tests",)
-) -> list[Path]:
-    """Contract revision rule 8: every *.md.schema.yaml under repo_root
-    with no corresponding <path>.md document. Repository-wide by nature
-    (asserting "no document exists here" needs a full scan), so this is
-    called from main()'s batch entry point, not from validate_file.
+def find_orphaned_schemas(repo_root: Path, mirror_root: Path | None = None) -> list[Path]:
+    """Contract revision 2, rule 8 (decisions/0007): every schema file
+    under <mirror_root>/schemas/ with no corresponding mirrored
+    document. Repository-wide by nature (asserting "no document exists
+    here" needs a full scan of the schema tree), so this is called from
+    main()'s batch entry point, not from validate_file.
 
-    exclude_prefixes: top-level path components (relative to repo_root)
-    to skip. Defaults to excluding tests/ — fixtures deliberately
-    include a real orphaned schema (tests/fixtures/invalid/orphaned.md.schema.yaml)
-    to test this very function; without this exclusion, scanning the
-    real repository root would report that fixture as a real orphan on
-    every CI run, forever — found by actually running main() against the
-    real repo root before committing, not left as a hypothetical.
-    Callers testing against FIXTURES directly (not the full repo root)
-    are unaffected, since "tests" is never the first path component
-    relative to FIXTURES itself.
+    mirror_root defaults to repo_root (the production schemas/ tree).
+    Tests pass FIXTURES to scan the separate fixture schema tree
+    (tests/fixtures/schemas/) instead. Because that tree is never
+    nested inside <repo_root>/schemas/, scanning repo_root's own
+    schemas/ directory never sees a fixture at all — prompt 004's
+    "exclude tests/ by name" workaround for this exact problem is no
+    longer needed; the two trees simply don't overlap.
     """
+    if mirror_root is None:
+        mirror_root = repo_root
+    mirror_root = mirror_root.resolve()
+    schema_root = mirror_root / parsing.SCHEMA_ROOT_DIR
+    if not schema_root.is_dir():
+        return []
     orphans: list[Path] = []
-    for schema_path in sorted(repo_root.rglob(f"*{SCHEMA_SUFFIX}")):
-        rel_parts = schema_path.relative_to(repo_root).parts
-        if rel_parts and rel_parts[0] in exclude_prefixes:
-            continue
-        doc_path = schema_path.with_name(schema_path.name[: -len(SCHEMA_SUFFIX)])
-        if not doc_path.exists():
+    for schema_path in sorted(schema_root.rglob(f"*{SCHEMA_SUFFIX}")):
+        doc_path = parsing.doc_path_for_schema(schema_path, mirror_root)
+        if doc_path is not None and not doc_path.exists():
             orphans.append(schema_path)
     return orphans
 
 
 def load_governed_manifest(repo_root: Path) -> set[str]:
     """Contract rule 15: repository-relative paths that must carry a
-    passing schema. Missing manifest file => empty set (nothing governed),
-    not an error."""
+    passing schema. Raises GovernedManifestMissing if the manifest file
+    itself does not exist — a legitimately-empty-but-present manifest
+    still returns an empty set (no error); only an absent *file* fails
+    closed (prompt 005, "Manifest integrity")."""
     manifest_path = repo_root / GOVERNED_MANIFEST_PATH
     if not manifest_path.exists():
-        return set()
+        raise GovernedManifestMissing(
+            f"{GOVERNED_MANIFEST_PATH} does not exist — cannot determine which "
+            "documents are governed; failing closed rather than silently "
+            "treating every document as ungoverned."
+        )
     lines = manifest_path.read_text(encoding="utf-8").splitlines()
     return {
         stripped

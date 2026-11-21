@@ -34,7 +34,7 @@ class TestEmptyAudience(unittest.TestCase):
     """Rule 10: audience must be a non-empty string."""
 
     def test_whitespace_only_audience_is_invalid_schema(self):
-        result = validate_file(FIXTURES / "invalid" / "empty_audience.md", REPO_ROOT)
+        result = validate_file(FIXTURES / "invalid" / "empty_audience.md", REPO_ROOT, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("audience" in e for e in result["errors"]))
 
@@ -44,7 +44,7 @@ class TestNonStringRequiredSections(unittest.TestCase):
 
     def test_bare_string_required_sections_is_invalid_schema(self):
         result = validate_file(
-            FIXTURES / "invalid" / "non_string_required_sections.md", REPO_ROOT
+            FIXTURES / "invalid" / "non_string_required_sections.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("required_sections" in e for e in result["errors"]))
@@ -55,7 +55,7 @@ class TestEmptyRequiredSections(unittest.TestCase):
 
     def test_empty_required_sections_is_invalid_schema(self):
         result = validate_file(
-            FIXTURES / "invalid" / "empty_required_sections.md", REPO_ROOT
+            FIXTURES / "invalid" / "empty_required_sections.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("required_sections" in e for e in result["errors"]))
@@ -66,7 +66,7 @@ class TestEmptyAcceptanceCriteria(unittest.TestCase):
 
     def test_empty_acceptance_criteria_is_invalid_schema(self):
         result = validate_file(
-            FIXTURES / "invalid" / "empty_acceptance_criteria.md", REPO_ROOT
+            FIXTURES / "invalid" / "empty_acceptance_criteria.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("acceptance_criteria" in e for e in result["errors"]))
@@ -78,7 +78,7 @@ class TestPlaceholderAcceptanceCriteria(unittest.TestCase):
 
     def test_whitespace_only_entry_is_invalid_schema(self):
         result = validate_file(
-            FIXTURES / "invalid" / "placeholder_acceptance_criteria.md", REPO_ROOT
+            FIXTURES / "invalid" / "placeholder_acceptance_criteria.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "INVALID_SCHEMA")
         self.assertTrue(any("acceptance_criteria" in e for e in result["errors"]))
@@ -90,7 +90,7 @@ class TestEmptyAuthoritativeSourcesIsValid(unittest.TestCase):
 
     def test_empty_authoritative_sources_passes(self):
         result = validate_file(
-            FIXTURES / "valid" / "empty_authoritative_sources.md", REPO_ROOT
+            FIXTURES / "valid" / "empty_authoritative_sources.md", REPO_ROOT, schema_mirror_root=FIXTURES
         )
         self.assertEqual(result["result"], "PASS", result["errors"])
         self.assertEqual(result["errors"], [])
@@ -101,27 +101,27 @@ class TestGovernedDocumentScope(unittest.TestCase):
     schema file (contract revision rule 2's trigger condition, formerly
     "no front-matter") is FAIL, not SKIPPED. Uses an explicit
     governed_manifest override so this test does not depend on the real
-    docs/governed-documents.txt contents, which may change independently
+    schemas/governed-documents.txt contents, which may change independently
     of this rule's logic."""
 
     def test_governed_path_with_no_schema_fails(self):
         fixture = FIXTURES / "invalid" / "no_schema.md"
         rel = str(fixture.resolve().relative_to(REPO_ROOT.resolve()))
-        result = validate_file(fixture, REPO_ROOT, governed_manifest={rel})
+        result = validate_file(fixture, REPO_ROOT, governed_manifest={rel}, schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(any("governed document" in e for e in result["errors"]))
 
     def test_ungoverned_path_with_no_schema_is_still_skipped(self):
         fixture = FIXTURES / "invalid" / "no_schema.md"
-        result = validate_file(fixture, REPO_ROOT, governed_manifest=set())
+        result = validate_file(fixture, REPO_ROOT, governed_manifest=set(), schema_mirror_root=FIXTURES)
         self.assertEqual(result["result"], "SKIPPED")
         self.assertEqual(result["errors"], [])
 
     def test_real_governed_manifest_documents_all_pass(self):
         """Dogfooding, per Amendment D's "no synthetic substitute" rule:
-        every real document docs/governed-documents.txt actually lists
+        every real document schemas/governed-documents.txt actually lists
         must itself pass, using the real (not overridden) manifest."""
-        manifest_path = REPO_ROOT / "docs" / "governed-documents.txt"
+        manifest_path = REPO_ROOT / "schemas" / "governed-documents.txt"
         paths = [
             line.strip()
             for line in manifest_path.read_text(encoding="utf-8").splitlines()

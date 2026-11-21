@@ -99,7 +99,7 @@ database or bespoke project-management system"):
 
 - **Archive entries link to real artifacts, not broken or duplicated
   ones.** `planning/archive/README.md` and every `phase-NN/README.md`
-  are schema-bearing documents on `docs/governed-documents.txt`, so the
+  are schema-bearing documents on `schemas/governed-documents.txt`, so the
   existing validator's link-resolution and required-sections checks
   (`contracts/documentation-schema-validator.md` rules 4, 6) already
   cover this — no new checking code needed. A broken link in an archive

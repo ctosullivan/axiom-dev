@@ -100,8 +100,8 @@ for how to propose and land a change.
 | `planning/retros/` | Phase retrospectives, created as phases complete. |
 | `planning/archive/` | Index of archived (Completed) phases — currently empty; see `docs/phase-archiving.md`. |
 | `decisions/` | Sequentially numbered Architecture Decision Records. |
-| `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema, phase archiving). |
-| `docs/governed-documents.txt` | The minimal manifest of documents that must carry a passing companion schema (contract rule 15). |
+| `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema, phase archiving) — Markdown only, no schema files, since `decisions/0007`. |
+| `schemas/` | Every production document's declarative schema, mirrored by path (`docs/axiom-validator.md` → `schemas/docs/axiom-validator.md.schema.yaml`), plus `schemas/governed-documents.txt`, the minimal manifest of documents that must carry a passing schema (contract rule 15). |
 | `contracts/` | Required behaviour, written and reviewed before the implementation it governs. |
 | `evidence/` | Verification outcomes and the Phase 1 measurement log. |
 | `.github/pull_request_template.md` | Checklist a PR description must address. |
@@ -109,10 +109,9 @@ for how to propose and land a change.
 | `.github/deferred/` | The API-backed Codex review workflow, deferred (not deleted) in favour of native Codex GitHub PR review for Phase 1 — see `decisions/0005`. |
 | `.github/scripts/` | The Stage 1.3 policy evaluator and its own test suite — preserved, reusable if the deferred automated gate is reconsidered. |
 | `.github/codex/prompts/review.md` | The review instructions written for the deferred API-backed workflow. |
-| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules; reads companion `<doc>.md.schema.yaml` files, not front-matter, since `decisions/0006`). |
-| `tests/` | Fixtures (valid + deliberately invalid, one per contract rule, as `.md`/`.md.schema.yaml` pairs) and tests for the validator, across two test files — `test_axiom_validator.py` and `test_axiom_validator_schema_content.py`. |
+| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules; reads each document's schema from the mirrored `schemas/` tree, since `decisions/0007`). |
+| `tests/` | Fixtures (valid + deliberately invalid, one per contract rule, as `.md` files under `tests/fixtures/{valid,invalid}/`) and tests for the validator, across several test files. Fixture schemas live in their own mirrored tree, `tests/fixtures/schemas/`, never inside the production `schemas/` tree. |
 | `requirements.txt` | The one runtime dependency (PyYAML) the validator needs. |
-| `*.md.schema.yaml` (alongside a governed `*.md` file) | That document's declarative schema — see `docs/documentation-schema.md`. |
 
 Every directory in the originally-proposed Stage 1.0 scaffold now has
 real content — none remain deliberately empty.

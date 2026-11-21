@@ -163,3 +163,50 @@ complete, on two named, real, external blockers.
   the deliberately-orphaned test fixture forever; an imprecise error
   message for the (expected, harmless) case of an unrelated
   `---`-delimited block in `planning/prompts/`.
+
+### Fixed (Phase 1 final remediation — native Codex review findings)
+
+- `src/axiom_validator/parsing.py`: fenced-code-block stripping only
+  recognised exactly-three-backtick fences, so a required heading
+  hidden inside a tilde-fenced or 4-plus-backtick-fenced example could
+  wrongly count as present. Found by native Codex GitHub review of
+  PR #1 — the first defect in this project found by an external
+  reviewer rather than a dispatched Claude agent. Reproduced against
+  the actual pre-fix code, then fixed with a line-oriented fence-state
+  parser; 10 new regression tests
+  (`tests/test_fenced_code_blocks.py`).
+- `.github/scripts/policy_evaluator.py`: a non-string `severity` value
+  (e.g. `{"severity": []}`) raised an unhandled `TypeError` instead of
+  the contract's required structured `FAIL_CLOSED`. Also found by
+  native Codex review of PR #1. Fixed by validating the type before
+  the set-membership test; 17 new regression tests
+  (`.github/scripts/tests/test_policy_evaluator_severity_types.py`).
+  `contracts/codex-gate-policy-evaluator.md` amended (rule 6) with the
+  fix and (after rule 8) with the explicit, reasoned decision not to
+  reject unrecognised-but-well-formed severity strings.
+
+### Changed (schema consolidation into `schemas/`)
+
+- `decisions/0007`: every production and fixture documentation schema
+  moves a second time, from colocated beside its document
+  (`decisions/0006`) to a mirrored path under a top-level `schemas/`
+  directory; fixture schemas get their own, separate
+  `tests/fixtures/schemas/` tree. `docs/governed-documents.txt` moves
+  to `schemas/governed-documents.txt`.
+- `contracts/documentation-schema-validator.md` "Contract revision 2."
+  `src/axiom_validator/parsing.py` gains `schema_path_for`/
+  `doc_path_for_schema`; `validate_file`/`find_orphaned_schemas` each
+  gain one new optional, backward-compatible parameter
+  (`schema_mirror_root`/`mirror_root`).
+- **A missing `schemas/governed-documents.txt` file now fails closed**
+  (every document checked without an explicit override fails, naming
+  the missing manifest) rather than silently disabling all
+  governed-document enforcement — assessed and fixed per an explicit
+  requirement to check this case, not found by accident.
+  `tests/test_schema_relocation.py` (13 tests, including a symlink
+  path-escape regression test checked by hand before independent
+  review).
+- `docs/` now contains only human-readable Markdown — no `.schema.yaml`
+  or manifest files remain in it; checked directly, not assumed
+  (`tests/test_schema_relocation.py`'s
+  `TestNoStraySchemaFilesOutsideSchemasTree`).

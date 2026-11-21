@@ -95,6 +95,26 @@ Given a Markdown file:
   an unschema'd document a no-op, not a violation.
 - No network access, no fetching remote URLs to check they resolve.
 - No auto-fixing — the validator reports; it does not rewrite documents.
+- **No CommonMark indented-code-block recognition.** The fence-aware
+  heading extraction (rule 4; `_strip_fenced_code_blocks`) handles
+  fenced blocks (``` ``` ``` or `~~~`, 3+ characters) only — a
+  4-space-indented block (CommonMark's other code-block convention) is
+  not recognised as code at all, so a heading-looking line inside one
+  would still count as a real heading. Found by independent review of
+  prompt 005's fence-handling fix, out of scope for that fix (Codex's
+  finding was specifically about fence-character/length recognition,
+  not indentation conventions) and left as a documented, proportionate
+  gap rather than expanded scope.
+- **A closing fence indented with a literal tab does not close.** Only
+  0–3 leading *spaces* are recognised before a closing fence's
+  characters (matching the opening-fence rule, and CommonMark's own
+  convention). A tab-indented closing line is treated as still-fenced
+  content, which fails in the safe direction (more gets hidden, so a
+  real heading could be missed and reported FAIL — never the Codex
+  defect's direction of wrongly reporting PASS). Found by the same
+  independent review pass; left undocumented no longer, not fixed,
+  since over-hiding is not the false-positive failure mode this
+  contract's rule 4 exists to prevent.
 
 ## Contract amendment (prompt 003 Amendment C, 2026-11-21)
 
@@ -185,6 +205,15 @@ placeholder_acceptance_criteria}.md`,
 
 ## Contract revision (prompt 004 Amendments A/C — companion schema files, 2026-11-21)
 
+**Note, added by "Contract revision 2" further down (prompt 005,
+decisions/0007): rules 1–2 and 15's "in the same directory" / "no
+companion schema file... colocated" framing below describes the
+colocated-companion-file location this revision introduced at the
+time — that location is itself superseded by "Contract revision 2."
+The field-validation substance (rules 3–9 below) is unaffected and
+still describes current behaviour; only where the schema file lives
+has moved again.**
+
 Status: **Accepted, authorised contract evolution — not a
 behaviour-preserving refactor.** Per
 `planning/prompts/004-documentation-schema-and-roadmap-amendment.md`
@@ -268,6 +297,67 @@ step (not in `docs/governed-documents.txt`), and nothing in this project
 treats that `FAIL` as a defect requiring migration. Distinguishing the
 two cases would require guessing at a block's semantic intent, which
 this mechanical validator deliberately does not do.
+
+## Contract revision 2 (prompt 005 — top-level `schemas/` directory, 2026-11-21)
+
+Status: **Accepted, authorised contract evolution — not a
+behaviour-preserving refactor.** Per
+`planning/prompts/005-phase-1-final-remediation-and-closeout.md` §8:
+"Amend the current documentation-validator contract to specify the new
+location convention." See `decisions/0007` for the architectural
+decision this implements and `evidence/schema-migration.md` for the
+document migration this revision requires.
+
+**What changes:** where a document's schema file lives, moving a
+second time — from colocated beside its document (Contract revision
+above, decisions/0006) to a mirrored path under a top-level `schemas/`
+directory (decisions/0007). **What does not change:** everything else
+— the field-validation substance (rules 3–9 of the revision above),
+and the embedded-front-matter/orphan-detection rules' *existence*
+(only rule 2's trigger path and rule 8's scan root move).
+
+1. **Mirrored schema path.** For a document at repository-relative path
+   `<rel>`, its schema (if any) lives at `schemas/<rel>.schema.yaml`,
+   computed from the document's path and a *mirror root* — normally
+   the repository root, so production schemas resolve under
+   `<repo_root>/schemas/`. **Supersedes rule 1 of the revision above**
+   ("in the same directory" is no longer where the schema lives).
+2. **Test fixtures use a separate mirror root** (their own
+   `tests/fixtures/` directory, not the repository root), so fixture
+   schemas live at `tests/fixtures/schemas/<rel>.schema.yaml` — a tree
+   wholly separate from the production `schemas/` tree, never nested
+   inside it. This is the mechanism, not a convention taken on faith:
+   `schema_path_for(doc_path, mirror_root)` takes the mirror root as an
+   explicit parameter, and `validate_file`'s new optional
+   `schema_mirror_root` parameter (default: `repo_root`) is how a
+   caller supplies a different one.
+3. **The governed-document manifest moves to `schemas/governed-documents.txt`**
+   (still a flat list of document paths, same logic as rule 15 of the
+   original contract — only its own file's location changes).
+   **Supersedes rule 2 of the revision above's manifest path.**
+4. **NEW — A missing manifest *file* fails closed.** If
+   `schemas/governed-documents.txt` does not exist at all, every
+   document checked via the default (non-overridden) governed-manifest
+   path is `FAIL`, naming the missing manifest — not silently treated
+   as "nothing is governed." A manifest file that exists but lists zero
+   documents is unaffected by this rule and legitimately produces
+   `SKIPPED` for an unschema'd, non-listed document, exactly as before.
+5. **NEW — Path safety.** Computing a schema path for a document that
+   does not resolve under its mirror root is itself a reported failure
+   (`PathEscapesMirrorRoot`), not a silently wrong or escaping path.
+6. **Orphan detection's scan root moves** to `<mirror_root>/schemas/`
+   (from scanning the whole repository tree minus an excluded `tests/`
+   prefix, rule 8 of the revision above). Because the fixture mirror
+   tree (rule 2 above) is never nested inside the production one, this
+   scan now needs no exclusion list at all to avoid flagging the
+   deliberately orphaned test fixture — the two trees simply don't
+   overlap, which is a stronger guarantee than excluding a path prefix
+   by name.
+7. **No obsolete schema files remain outside a `schemas/` directory.**
+   Checked directly against the real repository
+   (`tests/test_schema_relocation.py`'s
+   `TestNoStraySchemaFilesOutsideSchemasTree`), not merely asserted in
+   this contract.
 
 ## Traceability
 

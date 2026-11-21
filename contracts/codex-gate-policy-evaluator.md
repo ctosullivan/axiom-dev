@@ -45,14 +45,38 @@ buildable and testable without live credentials
    by where that workflow file lives),
    not something a unit test of the pure function alone can verify.
 6. **`findings` is not a list, or any entry is not an object with a
-   `severity` field** → `FAIL_CLOSED`, naming the bad entry. *(Covers
-   "malformed reviewer output.")*
+   `severity` field, or a `severity` field whose value is not a
+   string** → `FAIL_CLOSED`, naming the bad entry. *(Covers "malformed
+   reviewer output.")* **Amended** (prompt 005, found by native Codex
+   review of PR #1): the non-string-severity case was originally
+   unhandled — `finding["severity"] in BLOCKING_SEVERITIES` raised an
+   unhandled `TypeError` for an unhashable severity value (a list or
+   dict), defeating this rule's own fail-closed guarantee for exactly
+   the malformed input it exists to catch. Fixed by checking
+   `isinstance(severity, str)` before the membership test; regression
+   tests cover list, dict, int, bool, and `None` severities, all now
+   `FAIL_CLOSED` rather than raising.
 7. **Any finding's `severity` is `P0` or `P1`** → `BLOCK`, listing every
    blocking finding (not just the first) and every advisory finding
    found alongside them. *(Covers "known P0/P1 defect.")*
 8. **No `P0`/`P1` findings, everything else above passed** → `PASS`,
    listing any advisory findings as recorded, non-blocking.
-   *(Covers "valid PR" and "advisory finding" test cases.)*
+   *(Covers "valid PR" and "advisory finding" test cases.)* **A severity
+   string outside `{P0, P1}` — including an unrecognised one, e.g.
+   `"P9"` or `"critical"` — is treated as advisory, not malformed.**
+   Considered and deliberately not tightened (prompt 005 §4 asked this
+   to be evaluated explicitly, not left implicit): rule 6 above already
+   rejects a *missing* or *non-string* severity as malformed; an
+   unrecognised-but-well-formed string is a legitimate "the reviewer
+   used a severity label this contract doesn't currently blocklist,"
+   which the project's own evidence-over-confidence stance says should
+   surface as a recorded, visible advisory finding for a human to see
+   — not be silently rejected as malformed (that would make the
+   evaluator FAIL_CLOSED, i.e. block, every time an unanticipated but
+   valid severity label version appears, which is a worse failure mode
+   than recording it as advisory). If a future requirement needs a
+   closed severity enumeration, that is a real contract change needing
+   its own ADR, not a side effect of this correction.
 9. **Output** is always a JSON object with `decision`, `reasons`,
    `blocking_findings`, `advisory_findings` — never bare text, so a
    workflow step can parse it mechanically rather than pattern-matching

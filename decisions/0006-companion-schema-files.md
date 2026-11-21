@@ -2,7 +2,11 @@
 
 ## Status
 
-Accepted — 2026-11-21
+Accepted — 2026-11-21. **Partially superseded by `decisions/0007`**
+(the *location* of the companion file — colocated beside its document
+here, mirrored under a top-level `schemas/` directory there; this
+ADR's decision to use companion files *at all*, rather than embedded
+front-matter, is unaffected and remains in force).
 
 ## Context
 

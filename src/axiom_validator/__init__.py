@@ -1,21 +1,24 @@
 """Axiom Dev documentation/knowledge validator — package entry point.
 
 Implements contracts/documentation-schema-validator.md, including its
-"Contract revision" section (prompt 004, decisions/0006): schemas load
-from a companion `<path>.md.schema.yaml` file, not embedded front-matter.
-This is the second architectural change to this orchestrator — the
-first was the Stage 1.4 behaviour-preserving refactor (monolithic file
-into parsing/rules/reporting modules); this one is explicitly an
-authorised contract evolution, not behaviour-preserving, per the prompt
-004 Amendment C requirement to say so plainly.
+two "Contract revision" sections: prompt 004/decisions/0006 (schemas
+load from a companion file, not embedded front-matter) and prompt
+005/decisions/0007 (that companion file lives in a mirrored path under
+a top-level schemas/ directory, not colocated beside its document).
+Both are explicitly authorised contract evolutions, not
+behaviour-preserving refactors — the only behaviour-preserving
+refactor in this component's history is the original Stage 1.4 module
+split (monolithic file into parsing/rules/reporting modules).
 
-Public API: validate_file(path, repo_root, governed_manifest=None) and
-main(argv) — same names and call shape as before this change (CLI usage
-is unchanged: `python3 -m axiom_validator <paths> --repo-root .`); the
-*return values* for a document that used to carry front-matter change,
-since front-matter is no longer where its schema lives — that is the
-intended, documented behaviour change this revision authorises, not a
-compatibility break to be hidden.
+Public API: validate_file(path, repo_root, governed_manifest=None,
+schema_mirror_root=None) and main(argv) — same names and call shape as
+before (CLI usage is unchanged: `python3 -m axiom_validator <paths>
+--repo-root .`); the one new parameter is optional and defaults to
+`repo_root`, so every existing call site is unaffected. The *return
+values* for a document whose schema moved change, since the schema is
+no longer where it used to be — that is the intended, documented
+behaviour change each revision authorises, not a compatibility break
+to be hidden.
 """
 from __future__ import annotations
 
@@ -25,18 +28,33 @@ from pathlib import Path
 from . import parsing, reporting, rules
 
 
-def validate_file(path: Path, repo_root: Path, governed_manifest: set[str] | None = None) -> dict:
-    """Validate one Markdown file against its companion schema file.
+def validate_file(
+    path: Path,
+    repo_root: Path,
+    governed_manifest: set[str] | None = None,
+    schema_mirror_root: Path | None = None,
+) -> dict:
+    """Validate one Markdown file against its schema file.
 
     Returns a dict with keys: file, result (SKIPPED|INVALID_SCHEMA|PASS|FAIL),
     errors (list of human-readable strings).
 
     governed_manifest: repository-relative paths that must carry a schema
-    (contract rule 15, prompt 003 Amendment C — now triggered by a
-    missing companion schema file rather than missing front-matter, per
-    the prompt 004 contract revision). Defaults to the real
-    docs/governed-documents.txt manifest when not given; tests may pass
-    an explicit set to exercise the rule without real repository files.
+    (contract rule 15). Defaults to loading the real
+    schemas/governed-documents.txt manifest when not given — which
+    raises (as a FAIL result for this document, not an uncaught
+    exception) if that manifest file is missing entirely, per the
+    prompt 005 "Manifest integrity" fail-closed requirement; tests may
+    pass an explicit set to bypass that and exercise the rule directly.
+
+    schema_mirror_root: the root `path`'s schema is mirrored under
+    (decisions/0007) — defaults to `repo_root`, so production documents
+    get schemas at `<repo_root>/schemas/<rel>.schema.yaml`. Test
+    fixtures pass their own `tests/fixtures/` directory here instead,
+    so fixture schemas live under `tests/fixtures/schemas/`, in a tree
+    wholly separate from the production `schemas/` tree it would
+    otherwise be confused with (prompt 005 Sec 5, "do not confuse
+    production schemas with deliberately invalid test fixtures").
 
     Does NOT check for orphaned schemas — that is inherently a
     repository-wide question (see rules.find_orphaned_schemas), not
@@ -50,9 +68,15 @@ def validate_file(path: Path, repo_root: Path, governed_manifest: set[str] | Non
     repo_root, which only works if repo_root is itself resolved.
     """
     repo_root = repo_root.resolve()
+    if schema_mirror_root is None:
+        schema_mirror_root = repo_root
     text = path.read_text(encoding="utf-8")
 
     if parsing.has_embedded_frontmatter(text):
+        try:
+            schema_hint = str(parsing.schema_path_for(path, schema_mirror_root))
+        except parsing.PathEscapesMirrorRoot:
+            schema_hint = "its mirrored schemas/ location"
         return reporting.build_report(
             path,
             "FAIL",
@@ -60,32 +84,37 @@ def validate_file(path: Path, repo_root: Path, governed_manifest: set[str] | Non
                 f"{path} begins with a '---'-delimited block, which this validator "
                 f"treats as the deprecated embedded-front-matter documentation-schema "
                 f"convention (decisions/0006) and never parses as a live schema — "
-                f"move it to the companion file {parsing.companion_schema_path(path)} "
-                f"if it IS meant to be this document's schema. (Scope note: this check "
-                f"cannot distinguish that case from an unrelated '---'-delimited block "
-                f"used for something else entirely, e.g. planning/prompts/'s provenance "
-                f"headers — those are not schema-bearing documents and are not governed, "
-                f"so this result is expected and harmless for them, not a sign they need "
-                f"migrating.)"
+                f"move it to {schema_hint} if it IS meant to be this document's "
+                f"schema. (Scope note: this check cannot distinguish that case from "
+                f"an unrelated '---'-delimited block used for something else "
+                f"entirely, e.g. planning/prompts/'s provenance headers — those are "
+                f"not schema-bearing documents and are not governed, so this result "
+                f"is expected and harmless for them, not a sign they need migrating.)"
             ],
         )
 
-    schema_path = parsing.companion_schema_path(path)
+    try:
+        schema_path = parsing.schema_path_for(path, schema_mirror_root)
+    except parsing.PathEscapesMirrorRoot as exc:
+        return reporting.build_report(path, "FAIL", [str(exc)])
+
     if not schema_path.exists():
-        manifest = (
-            rules.load_governed_manifest(repo_root)
-            if governed_manifest is None
-            else governed_manifest
-        )
         try:
             rel = str(path.resolve().relative_to(repo_root))
         except ValueError:
             rel = str(path)
+        if governed_manifest is not None:
+            manifest = governed_manifest
+        else:
+            try:
+                manifest = rules.load_governed_manifest(repo_root)
+            except rules.GovernedManifestMissing as exc:
+                return reporting.build_report(path, "FAIL", [str(exc)])
         if rel in manifest:
             return reporting.build_report(
                 path,
                 "FAIL",
-                [f"{rel} is a governed document ({rules.GOVERNED_MANIFEST_PATH}) with no companion schema file ({schema_path.name})"],
+                [f"{rel} is a governed document ({rules.GOVERNED_MANIFEST_PATH}) with no schema file ({schema_path})"],
             )
         return reporting.build_report(path, "SKIPPED", [])
 
@@ -129,7 +158,10 @@ def main(argv: list[str] | None = None) -> int:
         reporting.build_report(
             schema_path,
             "FAIL",
-            [f"orphaned schema: no corresponding document at {schema_path.with_name(schema_path.name[: -len(parsing.SCHEMA_SUFFIX)])}"],
+            [
+                "orphaned schema: no corresponding document at "
+                f"{parsing.doc_path_for_schema(schema_path, repo_root)}"
+            ],
         )
         for schema_path in rules.find_orphaned_schemas(repo_root)
     )

@@ -116,7 +116,7 @@ interface, or an established knowledge record, run this check:
 
 Step 1 (listing governed-documentation-schema violations) can now be
 partly mechanised: `src/axiom_validator/` checks structural/type/content
-rules against `docs/governed-documents.txt` and runs in CI (level 4
+rules against `schemas/governed-documents.txt` and runs in CI (level 4
 above) — but steps 2–4 (finding every *dependent* claim and confirming it
 still holds) remain semantic/editorial (level 6) and are not something
 the validator does or is intended to do.

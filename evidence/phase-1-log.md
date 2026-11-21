@@ -390,6 +390,44 @@ could not be measured and why.
   of scope for prompt 004, which explicitly preserves `decisions/0005`'s
   native-Codex-review decision unmodified (§11).
 
+## 2026-11-21 — Phase 1 final remediation batch (prompt 005)
+
+- **Development effort:** one orchestrating-session pass covering two
+  real-defect corrections from native Codex review of PR #1 (both
+  reproduced against the actual pre-fix code before being fixed, not
+  trusted from Codex's comment text alone), a second schema-location
+  move (`decisions/0007`, every production and fixture schema
+  relocated), a "Contract revision 2" section, 23 new validator
+  regression tests and 17 new policy-evaluator regression tests.
+- **Real defects found and fixed, with before/after evidence captured
+  directly (not asserted):** (1) `extract_headings` only recognised
+  exactly-3-backtick fences — reproduced via
+  `git show 3a8c395:src/axiom_validator/parsing.py` showing the exact
+  pre-fix function wrongly including a tilde-fenced "Required" heading;
+  fixed with a line-oriented fence-state parser. (2) `policy_evaluator.evaluate`
+  raised an unhandled `TypeError` for a non-string `severity` value —
+  reproduced via the same git-show technique against the pre-fix file;
+  fixed with an explicit `isinstance` check before the set-membership
+  test. Both found by native Codex GitHub PR review, not by this
+  session's own prior testing — the first case in this project where
+  an external reviewer (not a dispatched Claude agent) found a real
+  defect this project's own tooling had missed.
+- **Agent usage:** 1 independent-review dispatch covering both Codex
+  findings' reproduction/fix verification, schema-relocation
+  completeness, and documentation/contract reconciliation (token/tool
+  counts recorded once it completes).
+- **Not measured:** real API/token cost for native Codex review (ran
+  once already, via the connected GitHub integration — no per-call
+  cost visible to this session); wall-clock time for this session's own
+  non-dispatched work.
+- **Blocker, unchanged in kind, narrower in one respect:** no `gh` CLI,
+  no GitHub token — this session still cannot push to PR #1 or request
+  a second native Codex review itself (a human action). Narrower than
+  before: PR #1 now demonstrably exists and a first native Codex review
+  has already run once, so the "no PR has ever been opened" framing in
+  `planning/CONTEXT.md` before this batch was itself stale — fixed in
+  this same change.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |

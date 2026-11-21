@@ -119,7 +119,23 @@ def evaluate(review_json_text: str | None, actual_head_sha: str) -> EvaluationRe
                 decision=Decision.FAIL_CLOSED,
                 reasons=[f"Malformed finding entry: {finding!r}"],
             )
-        if finding["severity"] in BLOCKING_SEVERITIES:
+        severity = finding["severity"]
+        # A non-string severity (list, dict, int, bool, None, ...) is
+        # malformed reviewer output just as much as a missing field —
+        # `severity in BLOCKING_SEVERITIES` would raise TypeError for an
+        # unhashable value (list/dict) and silently miscategorise any
+        # other non-string value, defeating the fail-closed contract.
+        # Found by native Codex review of PR #1
+        # (.github/scripts/policy_evaluator.py, "Validate severity types
+        # before testing set membership"), reproduced directly before
+        # this fix (evaluate(..., [{"severity": []}]) raised an
+        # unhandled TypeError), not merely asserted.
+        if not isinstance(severity, str):
+            return EvaluationResult(
+                decision=Decision.FAIL_CLOSED,
+                reasons=[f"Malformed finding entry: severity must be a string, got {finding!r}"],
+            )
+        if severity in BLOCKING_SEVERITIES:
             blocking.append(finding)
         else:
             advisory.append(finding)

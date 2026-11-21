@@ -155,3 +155,61 @@ rule-level intent, plus 3 new tests for contract revision rules 7/8:
 documents under this convention; see Scope above. No other exceptions —
 every file the initial scan found was either migrated or is one of
 these 4, accounted for.
+
+## Second relocation (prompt 005 — top-level `schemas/` directory, decisions/0007)
+
+A second, independent move, recorded separately rather than rewriting
+the record above (which remains accurate for the front-matter → companion-file
+move it describes): every schema file this document lists above moved
+again, from colocated-beside-its-document to a path mirrored under a
+top-level `schemas/` directory, via `git mv` (production schemas) or
+`mv` + re-staging (the small number untracked at move time). **YAML
+content unchanged** for every file except
+`schemas/docs/documentation-schema.md.schema.yaml`, whose
+`acceptance_criteria` needed updating for the same reason its content
+needed updating during the first move (`decisions/0006`'s own schema
+asserted something the convention itself was about to make false) —
+see that file directly for the exact wording change.
+
+| Original path (decisions/0006) | New path (decisions/0007) | Document | YAML changed? | Validates? |
+|---|---|---|---|---|
+| `README.md.schema.yaml` | `schemas/README.md.schema.yaml` | `README.md` | No | PASS |
+| `docs/*.md.schema.yaml` (7 files) | `schemas/docs/*.md.schema.yaml` | `docs/*.md` | `documentation-schema.md.schema.yaml` only | All PASS |
+| `contracts/*.md.schema.yaml` (2 files) | `schemas/contracts/*.md.schema.yaml` | `contracts/*.md` | No | Both PASS |
+| `evidence/*.md.schema.yaml` (5 files) | `schemas/evidence/*.md.schema.yaml` | `evidence/*.md` | No | All PASS (not governed; checked directly) |
+| `planning/retros/*.md.schema.yaml` (1 file) | `schemas/planning/retros/*.md.schema.yaml` | the Phase 1 retrospective | No | PASS (not governed; checked directly) |
+| `planning/archive/README.md.schema.yaml` | `schemas/planning/archive/README.md.schema.yaml` | `planning/archive/README.md` | No | PASS |
+| `docs/governed-documents.txt` | `schemas/governed-documents.txt` | — (the manifest itself) | No | N/A |
+| 18 fixture `.md.schema.yaml` files, colocated under `tests/fixtures/{invalid,valid}/` | `tests/fixtures/schemas/{invalid,valid}/*.md.schema.yaml` | the corresponding fixture `.md` files | No | All 50 tests pass against the new layout |
+
+**Verification performed for this move:**
+
+- **Authoritative-source references still resolve from the repository
+  root:** unaffected by this move — `authoritative_sources` entries are
+  paths to *other* repository files (e.g. `AGENTS.md`), never to a
+  schema file itself, so moving schema files cannot break them. Checked
+  directly: all 11 governed documents and all migrated real documents
+  still report `PASS`.
+- **The new validator discovers every relocated schema correctly:** the
+  full test suite (50 tests, including the 13
+  `tests/test_schema_relocation.py` tests exercising the mirroring
+  function directly against real repository paths — corrected here
+  from an initial 49/12 count that predated this section's own
+  symlink-escape regression test being added; caught by independent
+  review recounting directly rather than trusting the figure already
+  written here) passes; the exact CI command
+  (`PYTHONPATH=src python3 -m axiom_validator "$(cat
+  schemas/governed-documents.txt | ...)" --repo-root .`) was run
+  directly and returns `PASS` for all 11 entries, exit code 0.
+- **No obsolete production schemas left alongside Markdown files:**
+  checked by a repository-wide scan
+  (`tests/test_schema_relocation.py`'s
+  `TestNoStraySchemaFilesOutsideSchemasTree`) asserting every
+  `*.md.schema.yaml` file in the repository has `schemas` as one of its
+  path components (true for both the production `schemas/` tree and the
+  separate `tests/fixtures/schemas/` fixture tree) — zero stray files
+  found.
+- **No competing orphan false-positive:** `rules.find_orphaned_schemas`
+  run against the real repository root returns `[]` (confirmed
+  directly), because it now scans only `<repo_root>/schemas/`, which
+  never contains the fixture tree at all.
