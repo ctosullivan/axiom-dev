@@ -1,0 +1,145 @@
+name: codex-review
+
+# Independent PR review via OpenAI Codex, gated by the deterministic
+# policy evaluator (contracts/codex-gate-policy-evaluator.md). Safely
+# no-ops (job is skipped, not failed) when OPENAI_API_KEY isn't
+# configured as a repository secret, which is the current state of this
+# repository — this workflow is written to spec and pushed, but its live
+# path is UNTESTED and BLOCKED pending that secret and a cost/billing
+# decision. See planning/phase-01-foundation.md Stage 1.3 for the
+# recorded blocker and planning/CONTEXT.md for status.
+#
+# Design sources (fetched 2026-11-21 — verify against current docs
+# before relying on exact action inputs, which this session could not
+# test live):
+#   https://developers.openai.com/codex/integrations/github
+#   https://developers.openai.com/codex/github-action
+#   https://github.com/openai/codex-action
+#   https://developers.openai.com/cookbook/examples/codex/build_code_review_with_codex_sdk
+#
+# Security posture (prompt 002 Sec 6 Stage 1.3 requirements):
+#   - `pull_request` trigger (not `pull_request_target`): GitHub withholds
+#     repository secrets from fork-PR runs of this event by default, so a
+#     fork PR simply can't reach OPENAI_API_KEY — no extra handling
+#     needed for "untrusted fork contributions" beyond using the right
+#     trigger.
+#   - Minimum permissions: scoped per job below, not blanket at workflow
+#     level — only the job that posts a review comment gets write access.
+#   - The Codex action is used in review-only mode: it reads the diff and
+#     repository context to produce findings; nothing in this workflow
+#     executes code the action generates. `safety-strategy` is left at
+#     its default (drop-sudo), never set to `unsafe`.
+#   - The secret is passed only to the one step that needs it, never
+#     echoed, never written to a log-visible file.
+#
+# Known limitation, recorded honestly (planning/CONTEXT.md): even once
+# OPENAI_API_KEY exists, this check cannot be made a GitHub "required
+# status check" from this session — that needs repository-admin API
+# access this environment doesn't have (no `gh`/token). Until a human
+# configures that separately, this workflow running green is not a merge
+# gate by itself.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      has-key: ${{ steps.check.outputs.has-key }}
+    steps:
+      - id: check
+        run: |
+          if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
+            echo "has-key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-key=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  codex-review:
+    needs: check-secret
+    if: needs.check-secret.outputs.has-key == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # TODO (blocked — no OPENAI_API_KEY in this environment to test
+      # against): confirm the current openai/codex-action@v1 input names
+      # for requesting structured JSON output against the schema
+      # contracts/codex-gate-policy-evaluator.md expects
+      # (schema_version, pr_head_sha, status, findings[]), per the
+      # structured-output pattern in the cookbook source above. The shape
+      # below is this session's best-documented understanding, not a
+      # tested invocation.
+      - name: Run Codex review
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          safety-strategy: drop-sudo
+          prompt-file: .github/codex/prompts/review.md
+          output-file: codex-review-output.json
+
+      # Record ONLY which SHA this run actually checked out and fed to
+      # Codex — this is a true statement about this run, nothing more.
+      # Do NOT also fabricate missing `status`/`schema_version` fields
+      # here: if Codex's raw output omits them, that is exactly the
+      # malformed-output case contract rule 3 must FAIL_CLOSED on, and
+      # silently patching them in would defeat that rule the moment this
+      # becomes live. (An earlier version of this step used
+      # `data.setdefault(...)` for both — found wrong in independent
+      # review and removed; do not reintroduce it.)
+      - name: Record the SHA this run reviewed
+        run: |
+          python3 - <<'PYEOF'
+          import json
+          with open("codex-review-output.json") as f:
+              data = json.load(f)
+          data["pr_head_sha"] = "${{ github.event.pull_request.head.sha }}"
+          with open("codex-review-output.json", "w") as f:
+              json.dump(data, f)
+          PYEOF
+
+      # Fetch the PR's TRUE CURRENT head SHA live from the GitHub API,
+      # rather than trusting github.event.pull_request.head.sha for the
+      # comparison target. This matters because a GitHub Actions
+      # "re-run" replays the *original triggering event*, including its
+      # original (now possibly stale) head SHA — if the comparison below
+      # used that same event value on both sides, it would trivially
+      # always match, even when re-running an old job after the PR has
+      # since gained newer, unreviewed commits. An independent review
+      # caught exactly this: the previous version of this workflow
+      # compared the event SHA against itself, making contract rule 5
+      # vacuous. Querying the API independently at evaluation time is
+      # what actually makes the comparison meaningful.
+      - name: Get the PR's live current head SHA
+        id: live-sha
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHA=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" --jq .head.sha)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Evaluate against policy
+        id: policy
+        run: |
+          python3 .github/scripts/policy_evaluator.py \
+            --review-file codex-review-output.json \
+            --actual-head-sha "${{ steps.live-sha.outputs.sha }}"
+
+  codex-review-skipped-notice:
+    needs: check-secret
+    if: needs.check-secret.outputs.has-key == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::notice::OPENAI_API_KEY is not configured — the Codex review job is skipped, not passed. This does not authorise a merge; see planning/phase-01-foundation.md Stage 1.3."

@@ -1,0 +1,39 @@
+name: deterministic-checks
+
+# Runs the Stage 1.3 policy-evaluator test suite and basic doc hygiene
+# checks on every push and PR. Needs no secrets and no external services
+# — this is deliberately the part of the Codex gate
+# (planning/phase-01-foundation.md Stage 1.3) that can run for real from
+# day one. See contracts/codex-gate-policy-evaluator.md for what it
+# verifies.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  policy-evaluator-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run policy evaluator test suite
+        run: |
+          PYTHONPATH=.github/scripts python3 -m unittest discover -s .github/scripts/tests -v
+
+  no-trailing-whitespace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail on trailing whitespace in tracked Markdown
+        run: |
+          if git grep -n --cached ' $' -- '*.md'; then
+            echo "Trailing whitespace found (see above)." >&2
+            exit 1
+          fi
+          echo "No trailing whitespace in tracked Markdown."

@@ -21,8 +21,8 @@ Full stage detail, dependencies and acceptance criteria:
 |---|---|---|
 | 1.0 | Repository bootstrap and governance | In progress — see below |
 | 1.1 | Knowledge and documentation methodology | In progress |
-| 1.2 | Agent development methodology | Planned |
-| 1.3 | Codex CI review gate | Planned |
+| 1.2 | Agent development methodology | In progress |
+| 1.3 | Codex CI review gate | In progress — deterministic piece built and tested; live integration **blocked** (no `OPENAI_API_KEY`/cost decision) |
 | 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | Planned |
 | 1.5 | Independent documentation reconstruction and closeout | Planned |
 
@@ -44,7 +44,40 @@ resolved and the independent-closeout bar in
 `planning/phase-01-foundation.md` is met — not merely because the files
 exist.
 
-### Stages 1.1–1.5
+### Stage 1.3 — Codex CI review gate
+
+Status: **In progress, split per `decisions/0004`'s architectural split.**
+`.github/scripts/policy_evaluator.py` (the deterministic policy evaluator)
+is implemented against `contracts/codex-gate-policy-evaluator.md` and
+covered by 16 passing tests
+(`.github/scripts/tests/test_policy_evaluator.py`) exercising all six
+required scenarios from `planning/prompts/002-...md` §6. The
+`.github/workflows/deterministic-checks.yml` workflow runs this suite on
+every push/PR with no secrets required.
+`.github/workflows/codex-review.yml` and `.github/codex/prompts/review.md`
+implement the live integration to spec (researched against current
+OpenAI documentation — citations in the workflow file) but it is
+**blocked**: no `OPENAI_API_KEY` exists in this environment, and enabling
+it is a cost/billing decision for a human, not this session, to make. The
+workflow is written to fail safely (skip, not false-pass) without that
+secret. **A second, separately-blocking gap** (flagged by independent
+review as previously unmentioned): even with the secret, making either
+workflow an actual GitHub "required status check" needs repository-admin
+API access this session doesn't have. This stage's exit criterion ("real
+GitHub PR evidence demonstrates both successful and blocked outcomes") is
+**not met** for the live piece — recorded open on both counts, not
+papered over.
+
+An independent review of this stage's code also found and fixed, before
+commit: a vacuous staleness check (the comparison was tautological
+because both sides read the same triggering-event value — fixed by
+sourcing the comparison SHA from a live GitHub API call instead) and a
+step that silently fabricated missing `status`/`schema_version` fields,
+which would have defeated the malformed-output fail-closed rule the
+moment the live path is enabled. See
+`planning/phase-01-foundation.md` §12.
+
+### Stage 1.4–1.5
 
 Status: **Planned.** Each requires its own focused implementation plan,
 written and reviewed before work starts (`AGENTS.md` §2) — the detail in
@@ -53,13 +86,18 @@ criteria, not implementation authorisation.
 
 ## Directories deliberately not yet created
 
-`src/`, `tests/`, `.github/workflows/` do not exist in this repository
-yet. They are scoped to Stage 1.3 (`.github/workflows/`) and Stage 1.4
-(`src/`, `tests/`) and are intentionally absent until those stages give
+`src/`, top-level `tests/` do not exist in this repository yet. They are
+scoped to Stage 1.4 and are intentionally absent until that stage gives
 them real content (see `planning/phase-01-foundation.md`), per the
 bootstrap prompt's instruction not to create placeholder structure.
+(`.github/scripts/tests/` already exists — that's Stage 1.3's own
+CI-tooling test suite, a different thing from the top-level `tests/`
+Stage 1.4 will create for the Axiom component itself.)
 
 `evidence/` was created as part of the Phase 1 amendment (Amendment C,
 `decisions/0004`) with real initial content
-(`evidence/phase-1-log.md`). `docs/` and `contracts/` are being created
-as part of Stage 1.1, also with real initial content, not placeholders.
+(`evidence/phase-1-log.md`). `docs/` and `contracts/` were created as
+part of Stage 1.1, also with real initial content, not placeholders.
+`.github/workflows/` and `.github/scripts/` were created as part of
+Stage 1.3, likewise with real, tested content for the deterministic
+piece.

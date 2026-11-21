@@ -16,9 +16,11 @@ preserves important project knowledge, supports independent verification,
 maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
-> **Status: Phase 1, Stages 1.0–1.1 in progress.** Governance (1.0) and the
-> knowledge/documentation methodology (1.1) are being established. No
-> substantive Axiom Dev software has been implemented yet. See
+> **Status: Phase 1, Stages 1.0–1.3 in progress.** Governance (1.0),
+> knowledge/documentation methodology (1.1), the development lifecycle
+> and agent-isolation docs (1.2), and the first real software component
+> (1.3's deterministic policy evaluator, tested) exist. Stage 1.3's live
+> Codex integration is blocked on credentials/cost authorisation — see
 > [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state and
 > [`planning/ROADMAP.md`](planning/ROADMAP.md) for what is planned, in
 > progress, or done.
@@ -107,11 +109,13 @@ for how to propose and land a change.
 | `contracts/` | Required behaviour, written and reviewed before the implementation it governs. |
 | `evidence/` | Verification outcomes and the Phase 1 measurement log. |
 | `.github/pull_request_template.md` | Checklist a PR description must address. |
+| `.github/workflows/` | Deterministic CI (tested, running) and the Codex review gate (written, blocked). |
+| `.github/scripts/` | The Stage 1.3 policy evaluator and its own test suite. |
+| `.github/codex/prompts/review.md` | The review instructions given to Codex once the live gate is enabled. |
 
 Directories named in the Phase 1 plan but not yet present (`src/`,
-`tests/`, `.github/workflows/`) are intentionally deferred to Stage 1.3/1.4,
-which give them real content — see `planning/phase-01-foundation.md` for
-why each is scoped where it is.
+top-level `tests/`) are intentionally deferred to Stage 1.4, which gives
+them real content — see `planning/phase-01-foundation.md` for why.
 
 ## Licence
 

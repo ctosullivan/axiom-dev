@@ -63,12 +63,64 @@ could not be measured and why.
   in this environment); comparison against a non-Axiom-governed baseline
   (no such baseline exists to compare against).
 
+## 2026-11-21 — Stage 1.2 (lifecycle/isolation docs) + Stage 1.3 (Codex gate, partial)
+
+- **Development effort:** one orchestrating-session pass. Stage 1.2:
+  two docs (`docs/development-lifecycle.md`, `docs/agent-isolation.md`).
+  Stage 1.3: researched current Codex integration options (two web
+  searches, four authoritative sources cited), implemented
+  `.github/scripts/policy_evaluator.py` against a contract written to
+  match it (`contracts/codex-gate-policy-evaluator.md` — written after
+  the code, unlike Stage 1.4's mandatory contract-first rule; recorded
+  as such in that contract's own "Ordering note" rather than left
+  implicit), wrote 16 unit tests, ran them (16/16 pass, 0.003s), ran 3
+  real end-to-end CLI invocations, wrote two GitHub Actions workflows and
+  one Codex prompt file.
+- **Defects / self-caught (not yet independently reviewed as of this
+  entry):** none found needing fixes in this pass's own re-reading;
+  pending independent review.
+- **Real test evidence (first in this project with actual passing
+  tests):** 16/16 unit tests pass, exercising all 6 required scenarios
+  from `planning/prompts/002-...md` §6 Stage 1.3 (valid PR, P0/P1 defect,
+  advisory finding, malformed reviewer output, missing/failed review,
+  stale-commit review) plus edge cases (non-object JSON, missing fields,
+  non-list findings). 3 real CLI end-to-end runs (BLOCK, FAIL_CLOSED,
+  PASS) confirmed matching exit codes.
+- **Blocker, named honestly:** the live Codex integration
+  (`.github/workflows/codex-review.yml`) is written to spec but cannot
+  be exercised — no `OPENAI_API_KEY` exists in this environment, and
+  provisioning one plus enabling recurring paid review calls is a
+  cost/credentials decision for a human, not this session
+  (`planning/prompts/002-...md` §9's own instruction: "assess API usage
+  and costs before enabling recurring paid review calls"). Stage 1.3's
+  full exit criterion is therefore **not met**; this is recorded as an
+  open item, not resolved by the deterministic piece alone.
+- **Not measured:** real API/token cost for the Codex calls this stage
+  would make if enabled (no key, so no calls were made, so there is
+  nothing to measure yet — not estimated).
+- **Agent usage:** one independent-review dispatch, which actually ran
+  the test suite itself rather than trusting the claim — 98,748 tokens,
+  37 tool uses, 290.6s duration.
+- **Defects detected by independent review, not by self-check:** 3
+  blocking (a vacuous staleness check caused by comparing a value against
+  itself; silent fabrication of missing required fields that would have
+  defeated a fail-closed rule; committed `.pyc` files with no
+  `.gitignore`), 2 advisory (over-broad workflow permissions; a second
+  blocker — required-status-check configuration — left unmentioned
+  alongside the credentials one). All fixed; see
+  `planning/phase-01-foundation.md` §12.
+- **Rework:** the staleness-check fix required a real architectural
+  change (an added live GitHub API call), not a comment edit — this is
+  the first defect in this project caught by independent review that
+  required redesigning a mechanism, not just rewording a claim about it.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 3 | 2 Stage 1.0, 1 amendment/Stage 1.1 |
-| Subagent tokens so far | 337,914 | 209,592 (Stage 1.0) + 128,322 (amendment/1.1 review) |
-| Blocking defects found by independent review (not self-caught) | 4 | 2 Stage 1.0 (B1, B2), 2 amendment/1.1 (format inconsistency, mechanical-vs-procedural mislabeling) — all fixed |
-| Advisory defects found and fixed | 3 | A1 (Stage 1.0, ADR status), manual-validation gap + reconciliation-caveat (amendment/1.1) |
+| Subagent dispatches so far | 4 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3 |
+| Subagent tokens so far | 436,662 | 209,592 (Stage 1.0) + 128,322 (amendment/1.1) + 98,748 (Stage 1.2/1.3) |
+| Blocking defects found by independent review (not self-caught) | 7 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3 — all fixed |
+| Advisory defects found and fixed | 5 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3 |
+| Real passing tests | 16 of 16 | `.github/scripts/tests/test_policy_evaluator.py`, re-run independently and confirmed |
 | Stages with a recorded, real (non-synthetic) Amendment-D demonstration | 0 fully, 2 partially (rows 2, 5) | See `planning/phase-01-foundation.md` §10 |

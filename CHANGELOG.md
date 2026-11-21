@@ -25,6 +25,13 @@ This project does not yet have a release; entries accumulate under
 - Stage 1.1 first real content: `docs/documentation-schema.md`,
   `docs/knowledge-placement.md`, `docs/knowledge-reconciliation.md`,
   `contracts/documentation-schema-validator.md`.
+- Stage 1.2: `docs/development-lifecycle.md`, `docs/agent-isolation.md`.
+- Stage 1.3 (partial — deterministic piece only, live Codex integration
+  blocked): `contracts/codex-gate-policy-evaluator.md`,
+  `.github/scripts/policy_evaluator.py` and its test suite (16 passing
+  tests), `.github/workflows/deterministic-checks.yml`,
+  `.github/workflows/codex-review.yml` (written to spec, gated to skip
+  without `OPENAI_API_KEY`), `.github/codex/prompts/review.md`.
 
-No substantive Axiom Dev software exists yet. This release establishes
-process only.
+First real software and first real passing tests in this project.
+Everything else is still process and documentation.

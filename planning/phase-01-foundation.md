@@ -703,3 +703,89 @@ flagship anti-circularity mechanism is labeled 'mechanical' when it is
 currently only procedural — the exact mislabeling this project's own ADR
 0003 was written to prevent. Fix those two before committing; everything
 else is advisory polish." Both are fixed as recorded above.
+
+## 12. Independent review record — Stage 1.2 + Stage 1.3 batch
+
+Dispatched: a fresh, non-forked agent, same best-effort isolation level
+as §6/§11. Scope: `docs/development-lifecycle.md`,
+`docs/agent-isolation.md` (Stage 1.2), and
+`contracts/codex-gate-policy-evaluator.md`,
+`.github/scripts/policy_evaluator.py`,
+`.github/scripts/tests/test_policy_evaluator.py`,
+`.github/workflows/deterministic-checks.yml`,
+`.github/workflows/codex-review.yml`, `.github/codex/prompts/review.md`
+(Stage 1.3, deterministic piece). The reviewer ran the test suite itself
+rather than trusting the claim it passed.
+
+### Findings and dispositions
+
+**BLOCKING — the staleness check (contract rule 5) was vacuous in the
+only place it was actually wired up live.** `codex-review.yml`'s
+SHA-stamping step and the evaluation step both read
+`github.event.pull_request.head.sha` — the same triggering-event value —
+so the comparison could never fail by construction. The reviewer
+identified the real threat this missed: a GitHub Actions "re-run" replays
+the *original* triggering event, including its (possibly by-then-stale)
+head SHA, so a stale re-run would pass this check every time, which is
+exactly the "review of an outdated commit must not authorise a later
+unreviewed change" case the rule exists for. The inline comment's stated
+rationale (guarding against a cross-run cached artifact) described a
+threat this architecture doesn't actually have, while missing the one it
+does. **Disposition: fixed** — the evaluation step now queries the PR's
+live current head SHA from the GitHub API at evaluation time (a new
+"Get the PR's live current head SHA" step, using `gh api .../pulls/<n>`),
+independent of the triggering event payload, so a replayed stale event is
+now actually caught. `contracts/codex-gate-policy-evaluator.md` rule 5
+now documents this as a caller responsibility the pure function cannot
+enforce by itself.
+
+**BLOCKING — the same stamping step silently fabricated missing
+`status`/`schema_version` fields** (`data.setdefault(...)` for both),
+which would have converted a genuinely malformed Codex output (missing
+those fields — exactly contract rule 3's `FAIL_CLOSED` case) into
+something that looked like a clean completed review the moment the live
+path is enabled. Not caught by the unit tests, since they call `evaluate()`
+directly and never go through this wiring step. **Disposition: fixed** —
+the `setdefault` calls are removed; the step now only records the SHA
+actually reviewed, and a comment names the removed code explicitly so it
+isn't reintroduced.
+
+**BLOCKING — two compiled `.pyc` files were staged with no `.gitignore`
+anywhere in the repository.** **Disposition: fixed** — unstaged and
+deleted, `.gitignore` added (`__pycache__/`, `*.pyc`, `.pytest_cache/`).
+
+**ADVISORY — `codex-review.yml`'s workflow-level `permissions:` block
+granted `pull-requests: write` to all three jobs**, including the two
+that never post a comment. **Disposition: fixed** — moved to
+job-level permissions on `codex-review` only; the workflow-level block
+is now `contents: read` alone.
+
+**ADVISORY — the second Stage 1.3 blocker (required-status-check
+configuration needs repository-admin access this session doesn't have)
+had gone unmentioned alongside the `OPENAI_API_KEY` blocker.**
+**Disposition: fixed** — both `planning/CONTEXT.md` and this file's
+Stage 1.3 record (ROADMAP.md) now name it as a second, distinct gap.
+
+**No issues found** — the 16 unit tests were re-run by the reviewer
+directly and genuinely pass; `policy_evaluator.py`'s pure `evaluate()`
+function faithfully implements every contract rule; the `pull_request`
+(not `pull_request_target`) trigger choice and its fork-secret-withholding
+rationale hold up; the `check-secret`/`codex-review` job-gating pattern is
+valid; no uncontrolled execution of Codex-generated content; the
+isolation-level claim in `docs/agent-isolation.md` ("every review so far
+has been level 2, none level 3") was checked against §6 and §11 above and
+holds; no `src/` or top-level `tests/` created prematurely; no document
+claims the Codex gate "works" or is "enforced" ahead of it actually being
+exercised live; `authoritative_sources` front-matter in all three new
+schema'd documents uses the bare-path convention fixed in §11.
+
+### Overall verdict (reviewer's own words, condensed)
+
+"The docs (Stage 1.2) and the deterministic evaluator + its tests (Stage
+1.3) are solid, honestly scoped, and internally consistent... But
+`codex-review.yml` has two real defects (vacuous staleness check,
+field-fabrication defeating fail-closed on missing status/schema_version)
+that contradict its own contract and inline-comment reasoning, plus
+committed `.pyc` files with no `.gitignore`. Fix those three items — all
+small, mechanical fixes — before this lands." All fixed as recorded
+above.
