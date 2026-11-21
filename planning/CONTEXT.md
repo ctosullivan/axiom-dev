@@ -57,7 +57,7 @@ found zero blocking issues. Full record:
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through
-  commit `05e242a`. The refactor above is **not yet committed**.
+  commit `f82052c` (verified: `git log`, `git push` output).
 - PR: still not opened. Creation URL:
   `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
