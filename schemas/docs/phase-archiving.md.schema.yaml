@@ -1,0 +1,8 @@
+audience: whoever closes out a phase, archives it, or audits the archiving procedure later
+purpose: define the repeatable procedure for archiving a Completed phase without duplicating its evidence or losing it
+required_sections: [Archive structure, Archive entry contents, Phase completion procedure, Verification, Non-goals]
+authoritative_sources: [AGENTS.md, planning/ROADMAP.md, planning/prompts/004-documentation-schema-and-roadmap-amendment.md]
+acceptance_criteria:
+  - the procedure can be followed by a fresh agent without inventing missing steps
+  - the procedure explicitly forbids archiving Phase 1 before its outstanding requirements are met
+  - archive-entry verification reuses the existing validator rather than introducing new tooling

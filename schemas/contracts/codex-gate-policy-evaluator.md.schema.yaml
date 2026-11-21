@@ -1,0 +1,7 @@
+audience: whoever implements, modifies, or independently verifies the Stage 1.3 deterministic policy evaluator
+purpose: fix the required behaviour of the PR-merge-gate decision logic, independent of whether Codex itself is actually reachable
+required_sections: [Scope, Contract, Non-goals, Ordering note]
+authoritative_sources: [planning/phase-01-foundation.md]
+acceptance_criteria:
+  - every decision below is phrased so a test can assert it directly
+  - the six required test scenarios from prompt 002 Sec 6 Stage 1.3 are each traceable to a specific rule below

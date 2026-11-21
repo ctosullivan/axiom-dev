@@ -1,0 +1,7 @@
+audience: whoever reviews the prompt 004 documentation-schema migration, or audits it later
+purpose: itemise every document migrated from embedded front-matter to a companion schema file, what was verified, and what was deliberately excepted
+required_sections: [Scope, Migrated real documents (15), Migrated and added test fixtures, Verification performed, Test results, Exceptions]
+authoritative_sources: [decisions/0006-companion-schema-files.md, contracts/documentation-schema-validator.md]
+acceptance_criteria:
+  - every file identified by the initial front-matter scan is either migrated or named as an exception, with no unaccounted-for file
+  - the Markdown-body-unchanged claim is backed by an actual git diff, not asserted

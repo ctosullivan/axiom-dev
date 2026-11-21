@@ -1,0 +1,42 @@
+# Governed documentation manifest (contract rule 15; location per
+# decisions/0007, prompt 005).
+#
+# One repository-relative *document* path per line (not a schema path).
+# Each listed document must carry a complete, passing schema at its
+# deterministic mirrored location, schemas/<this-path>.schema.yaml
+# (decisions/0006 introduced the schema-file convention; decisions/0007
+# moved it from colocated-beside-the-document to this mirrored
+# schemas/ tree). For a listed path, a missing schema file is a FAIL,
+# not a no-op (contract revision 2 rule 2, superseding the original
+# "SKIPPED" default — see src/axiom_validator and
+# contracts/documentation-schema-validator.md rule 15 and its Contract
+# revision 2). A document NOT listed here that also has no schema file
+# stays SKIPPED, unchanged.
+#
+# This manifest file itself is load-bearing: if it does not exist at
+# all (this exact path, schemas/governed-documents.txt), the validator
+# fails closed for every document checked without an explicit
+# governed_manifest override, rather than silently treating nothing as
+# governed (rules.GovernedManifestMissing; contract revision 2 rule 4).
+# A manifest that exists but lists zero documents is a different,
+# legitimate case and does not trigger that fail-closed behaviour.
+#
+# Deliberately minimal (per prompt 003: "keep this mechanism minimal"):
+# the canonical, schema-bearing human-facing documents and the component
+# contracts. AGENTS.md/CLAUDE.md/CONTRIBUTING.md are governance documents
+# with their own structure and are not schema-bearing by design, so they
+# are not listed here. Historical evidence/retro files are not listed:
+# they are append-only historical record, not living policy, and adding
+# them would not change their accuracy.
+
+README.md
+docs/documentation-schema.md
+docs/knowledge-placement.md
+docs/knowledge-reconciliation.md
+docs/development-lifecycle.md
+docs/agent-isolation.md
+docs/axiom-validator.md
+docs/phase-archiving.md
+contracts/documentation-schema-validator.md
+contracts/codex-gate-policy-evaluator.md
+planning/archive/README.md

@@ -1,0 +1,6 @@
+audience: test
+purpose: exercise FAIL for a required heading that only appears inside a fenced code example, not as a real heading
+required_sections: [Body, HiddenHeading]
+authoritative_sources: [AGENTS.md]
+acceptance_criteria:
+  - fails because "HiddenHeading" only appears inside a fenced code block, which must not count as a real section

@@ -1,0 +1,6 @@
+audience: test fixture
+purpose: exercise contract revision rule 4 (fence-aware heading extraction) — a required heading inside a tilde fence must not count as present
+required_sections: [Required]
+authoritative_sources: [AGENTS.md]
+acceptance_criteria:
+  - this fixture fails because "Required" only appears inside a tilde-fenced example, never as a real heading

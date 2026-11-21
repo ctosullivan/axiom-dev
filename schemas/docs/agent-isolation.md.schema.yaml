@@ -1,0 +1,7 @@
+audience: anyone dispatching or acting as an agent in a Phase 1 (or later) development cycle
+purpose: define responsibilities by function, what each may read, and name the real isolation level honestly
+required_sections: [Responsibilities by function, Isolation levels, What this session has actually used]
+authoritative_sources: [AGENTS.md, decisions/0003-independent-verification.md]
+acceptance_criteria:
+  - no function is both the sole implementer and the sole verifier of the same change
+  - every isolation claim names mechanical or best-effort explicitly, never leaves it implied

@@ -1,0 +1,7 @@
+audience: anyone running the validator, extending it, or trying to understand what it does and why
+purpose: human-facing explanation of the knowledge/documentation validator — what it does, how it's built, how to run it
+required_sections: [Purpose, Architecture, Usage, Limitations]
+authoritative_sources: [contracts/documentation-schema-validator.md, src/axiom_validator/__init__.py]
+acceptance_criteria:
+  - describes current, actually-built behaviour, not aspirational behaviour
+  - architecture section matches the real module split in src/axiom_validator/

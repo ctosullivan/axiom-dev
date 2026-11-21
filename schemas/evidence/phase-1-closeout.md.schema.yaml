@@ -1,0 +1,7 @@
+audience: whoever decides whether to mark Phase 1 stages Completed, and future sessions picking up where this leaves off
+purpose: record the independent Phase 1 closeout assessment — what's done with evidence, what's genuinely blocked, and the recommendation
+required_sections: [Verdict, Definition of Done results, Amendment D results, Staleness found and fixed, Recommendation]
+authoritative_sources: [planning/phase-01-foundation.md, planning/prompts/002-phase-1-amend-and-implement.md]
+acceptance_criteria:
+  - every DoD item and Amendment D row has an independently-verified status, not a restated claim
+  - the recommendation does not itself mark anything Completed — that stays a human action per AGENTS.md Sec 11

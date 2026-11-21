@@ -1,0 +1,9 @@
+audience: contributors and agents writing or validating Axiom Dev documentation
+purpose: define the declarative schema convention every important document uses, and how it's checked
+required_sections: [Convention, Required fields, Worked example, Manual validation record]
+authoritative_sources: [decisions/0002-knowledge-architecture.md, decisions/0004-phase-1-amendment-verification-measurement-and-acceptance.md, decisions/0006-companion-schema-files.md, decisions/0007-top-level-schemas-directory.md]
+acceptance_criteria:
+  - the reversal from embedded front-matter back to a companion-file convention is justified with reference to real accumulated evidence (decisions/0006), not asserted as self-evidently simpler
+  - the move from a colocated companion file to a mirrored schemas/ tree is justified with reference to decisions/0007, not asserted as self-evidently simpler
+  - the drift risk a separate schema file reintroduces is named honestly and addressed by a stated mechanism (orphan/reintroduction detection), not dismissed
+  - at least one real Axiom Dev document has been checked against this schema by hand
