@@ -397,3 +397,67 @@ continue, this session in a later turn), then proceed through the same
 acceptance-matrix review and two-step merge/closeout sequence already
 described above. **Phase 1 remains Ready for human acceptance, not
 Completed.**
+
+## Fourth addendum (2026-11-21 — prompt 008 continued: Finding E's independent review completed, fix pushed)
+
+Preserving everything above, including all three earlier addenda, as
+written. The third addendum above was written while Finding E's
+independent review was still running; this addendum records what
+happened once it completed, rather than rewriting the third addendum
+to imply the result was already known.
+
+**What changed since the third addendum:**
+
+- **The independent review of Finding E's fix has completed: PASS, no
+  BLOCKING findings.** The reviewer independently reproduced the
+  original defect against the actual pre-fix commit (`10dd266`, not
+  trusting this session's description), confirmed the current diff
+  was exactly the described 16-line addition with no unrelated
+  changes, and re-ran every test suite and all four earlier Codex
+  corrections' regression files itself (A: 10/10, B: 17/17, C: 12/12,
+  D: 11/11; plus 82/82 full suite, 33/33 policy-evaluator, 11/11
+  governed documents `PASS`, zero orphaned schemas).
+- **Two MATERIAL-NONBLOCKING findings, both pre-existing and
+  deliberately left unfixed**, not newly introduced by this fix: M1,
+  the already-known `check_links` absolute-path gap (contract rule 6),
+  confirmed real by the reviewer's own direct reproduction; M2, newly
+  surfaced by the reviewer's own adversarial testing — an empty-string
+  `authoritative_sources` entry (and the equivalent empty-string body
+  link) silently passes, for the same structural reason
+  (`(repo_root / "").resolve()` resolves to `repo_root` itself, which
+  exists as a directory). Both recorded in
+  `planning/phase-01-foundation.md` §29 and in
+  `contracts/documentation-schema-validator.md` rules 5/6, recommended
+  as a single small follow-up fix once Phase 1 closes, not before.
+- **The fix was committed and pushed** as `1bd7f3a` (from baseline
+  `10dd266`).
+- **GitHub Actions confirmed passing on the actual commit this batch
+  produced** (`1bd7f3a`, not merely the prior baseline): a `web-fetch`
+  of run `#27` (run `44909076291`) returned, verbatim, "Status:
+  Success," 11s, all four jobs present, checked against the commit SHA
+  shown on the page.
+- **All five native Codex findings (A–E) are now corrected,
+  regression-tested, and independently verified** — the first time
+  this project has reached that state for every finding raised on PR
+  #1 to date.
+- **A fifth native Codex review, of commit `1bd7f3a`, has not been
+  requested.** Same blocker as before (no `gh`/token).
+
+**Final acceptance matrix** (supersedes the "Updated acceptance
+matrix" in the third addendum for the rows shown; all other rows from
+the original table remain as stated there):
+
+| # | Criterion | Status | Evidence | Remaining action |
+|---|---|---|---|---|
+| 6 | Deterministic testing | **MET**, including live GitHub Actions | 82/82 + 33/33 local; Actions run `#27` on `1bd7f3a` confirmed "completed successfully," plus 26 further consecutive successful runs on this branch | None |
+| 7 | Independent verification | MET | 16 independent-review dispatches across Phase 1 (`evidence/phase-1-log.md` running totals) | None |
+| 11 | Native Codex GitHub PR review | **PARTIAL** | Four reviews have run (commits `3a8c395`, `2ebac4c`, `6e75d2b`, `10dd266`), finding 5 real defects total, all corrected and independently verified | Fifth review of commit `1bd7f3a` — human must trigger it |
+| 12 | Codex findings and their disposition | **MET** for all five findings found so far (all corrected, regression-tested, independently re-verified with no blocking findings) | `planning/phase-01-foundation.md` §24, §26, §28, §29 | Disposition whatever a fifth review finds |
+| 16 | Final human acceptance | **NOT MET** | No approval sought — correctly, per `AGENTS.md` §11 | Human reviews this assessment before approving |
+
+**Updated recommendation (as of this addendum)**: unchanged in kind —
+comment `@codex review` on PR #1's latest commit (`1bd7f3a`), let a
+human disposition whatever it finds, then proceed through the same
+acceptance-matrix review and two-step merge/closeout sequence already
+described above. **Phase 1 remains Ready for human acceptance, not
+Completed.**

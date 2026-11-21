@@ -82,20 +82,24 @@ corrected and independently verified:
 | 1st | `3a8c395` | A: fenced-code-block heading false positive; B: unhandled `TypeError` on malformed severity | `162e5c6` | §24 |
 | 2nd | `2ebac4c` | C: heading-whitespace false positive (`\s+` matching a newline) | `0645af3` | §26 |
 | 3rd | `6e75d2b` | D: governed-document manifest not checked when a document's own schema exists | `e0094f7` | §28 (also found and fixed: a directory-as-manifest unhandled exception; a brief documentation overclaim this project corrected in the same batch) |
-| 4th | `10dd266` | E: `check_authoritative_sources` wrongly accepting an absolute path to a file inside the repository | this batch (§29) | dispatched |
+| 4th | `10dd266` | E: `check_authoritative_sources` wrongly accepting an absolute path to a file inside the repository | `1bd7f3a` (§29) | PASS, no blocking (§29) |
 
-**GitHub Actions confirmed passing** across all 25 runs on this branch
-to date (fetched directly from the Actions run listing, not a single
-spot-checked run) — the first time this project has seen the whole
-recent run history rather than one result. **The remaining open
-items**: a *fifth* native Codex review of the latest corrected commit
-has not been requested (no `gh`/token to post the request — confirmed
-repeatedly across five amendments, not assumed), and human acceptance
-has not been sought. See `evidence/phase-1-final-closeout.md` and its
-addenda for the current full acceptance matrix. Phase 1 cannot be
-marked Completed, merged, or archived until a human requests that
-review, dispositions whatever it finds, and reviews the result
-(`AGENTS.md` §11).
+**All five findings (A–E) are now corrected, regression-tested, and
+independently verified with no blocking findings**, at commit
+`1bd7f3a`. **GitHub Actions confirmed passing** on `1bd7f3a` (run
+`#27`) and across all 27 runs on this branch to date (fetched directly
+from the Actions run listing, not a single spot-checked run) — the
+first time this project has seen the whole recent run history rather
+than one result. **The remaining open items**: a *fifth* native Codex
+review of the latest corrected commit (`1bd7f3a`) has not been
+requested (no `gh`/token to post the request — confirmed repeatedly
+across five amendments, not assumed), two narrow, deliberately
+deferred, pre-existing gaps in the same bug family as Finding E remain
+open by design (see §29), and human acceptance has not been sought.
+See `evidence/phase-1-final-closeout.md` and its addenda for the
+current full acceptance matrix. Phase 1 cannot be marked Completed,
+merged, or archived until a human requests that review, dispositions
+whatever it finds, and reviews the result (`AGENTS.md` §11).
 
 ## Phase 2 — Real-world validation (proposed)
 

@@ -2036,6 +2036,15 @@ successful runs are listed for this branch with none failed or
 in-progress, the first time this project has seen the *whole* recent
 run history rather than a single spot-checked run.
 
+**GitHub Actions confirmed on the actual commit this batch produced**
+(`1bd7f3a`, pushed after the fix above and its independent review): a
+`web-fetch` of run `#27` (run `44909076291`) returned, verbatim,
+"Status: Success," 11s total, all four jobs
+(`policy-evaluator-tests`, `axiom-validator-tests`,
+`validate-governed-documentation`, `no-trailing-whitespace`) present
+with no failure indicated — confirmed against the commit SHA shown on
+the page, not merely the push timing.
+
 **Independent review of this correction:** dispatched (fresh-context
 subagent, this project's standard best-effort/level-2 isolation per
 `docs/agent-isolation.md` — named honestly by the reviewer itself:

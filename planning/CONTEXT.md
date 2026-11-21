@@ -104,12 +104,15 @@ actual code).
     unhandled exception, and a brief documentation overclaim).
   - Fourth native Codex review (commit `10dd266`): 1 further P2
     finding (`check_authoritative_sources` wrongly accepting an
-    absolute path to a file inside the repository) — corrected in this
-    batch (§29); independent review dispatched.
+    absolute path to a file inside the repository) — corrected at
+    `1bd7f3a`, independently reviewed in §29 (PASS, no blocking; 2
+    pre-existing material-nonblocking gaps found and deliberately
+    deferred).
   - Fifth review: not yet requested.
-  - **GitHub Actions confirmed passing** across all 25 runs listed for
-    this branch to date (fetched directly from the Actions run
-    listing, not one spot-checked run) — zero failed or in-progress.
+  - **GitHub Actions confirmed passing** on `1bd7f3a` (run `#27`) and
+    across all 27 runs listed for this branch to date (fetched
+    directly from the Actions run listing, not one spot-checked run) —
+    zero failed or in-progress.
 
 ## Next concrete action
 
