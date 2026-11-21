@@ -1,13 +1,3 @@
----
-audience: new contributors, agents resuming work, and anyone evaluating the project
-purpose: orient a reader to what Axiom Dev is, its current status, and where to find governing detail
-required_sections: [Mission, Fundamental hypothesis, Development methodology, Repository map, Licence]
-authoritative_sources: [AGENTS.md, planning/ROADMAP.md, planning/CONTEXT.md]
-acceptance_criteria:
-  - every stage status claim matches planning/ROADMAP.md at time of reading
-  - the repository map lists every top-level governance file and planning directory that actually exists
----
-
 # Axiom Dev
 
 Axiom Dev is the primary product of the Axiom project: an attempt to find the
@@ -17,18 +7,17 @@ maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
 > **Status: Phase 1 is substantially done but deliberately left open.**
-> Stages 1.0, 1.1, 1.2, 1.4, and 1.5 are done with independently
-> re-verified evidence. Stage 1.3's deterministic piece is done and
-> tested; its live Codex integration is genuinely blocked (no
-> `OPENAI_API_KEY`, no `gh`/repo-admin access to configure required
-> checks). An independent closeout assessment
-> ([`evidence/phase-1-closeout.md`](evidence/phase-1-closeout.md))
-> found 15 of 17 Definition-of-Done items met, recommends leaving Phase
-> 1 open on that one named blocker rather than marking it complete. See
-> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the
-> current state and
-> [`planning/ROADMAP.md`](planning/ROADMAP.md) for what is planned, in
-> progress, or done.
+> A corrective amendment (`decisions/0005`, `decisions/0006`) fixed
+> documentation drift, moved documentation schemas from embedded
+> front-matter into companion `.schema.yaml` files, strengthened the
+> validator, completed deterministic CI, and changed Phase 1's
+> independent-review requirement to **native Codex GitHub PR review** —
+> not yet performed, since no PR has ever been opened on this branch (no
+> `gh` CLI or token). `planning/ROADMAP.md` now covers the long-term
+> direction beyond Phase 1 (proposed, not yet authorised); see
+> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state and
+> [`planning/phase-01-foundation.md`](planning/phase-01-foundation.md)
+> §16–§22 for Phase 1's full evidence and status.
 
 ## Mission
 
@@ -104,14 +93,15 @@ for how to propose and land a change.
 | `CLAUDE.md` | Claude Code–specific adaptations of `AGENTS.md`. |
 | `CONTRIBUTING.md` | How to propose, implement and land a change. |
 | `CHANGELOG.md` | Human-readable record of notable changes. |
-| `planning/ROADMAP.md` | Phase/stage status: proposed, planned, in progress, completed, deferred, blocked. |
+| `planning/ROADMAP.md` | Concise, long-term roadmap: Phase 1 (in progress) plus Phases 2–4 (proposed direction, not yet authorised). |
 | `planning/CONTEXT.md` | Current phase, latest work, and the next concrete action. |
-| `planning/phase-01-foundation.md` | The implementation-ready Phase 1 plan (Stages 1.0–1.5). |
+| `planning/phase-01-foundation.md` | The implementation-ready Phase 1 plan (Stages 1.0–1.5) and its two amendments' full detail. |
 | `planning/prompts/` | Original planning prompts, preserved verbatim with provenance. |
 | `planning/retros/` | Phase retrospectives, created as phases complete. |
+| `planning/archive/` | Index of archived (Completed) phases — currently empty; see `docs/phase-archiving.md`. |
 | `decisions/` | Sequentially numbered Architecture Decision Records. |
-| `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema). |
-| `docs/governed-documents.txt` | The minimal manifest of documents that must carry a passing schema (contract rule 15). |
+| `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema, phase archiving). |
+| `docs/governed-documents.txt` | The minimal manifest of documents that must carry a passing companion schema (contract rule 15). |
 | `contracts/` | Required behaviour, written and reviewed before the implementation it governs. |
 | `evidence/` | Verification outcomes and the Phase 1 measurement log. |
 | `.github/pull_request_template.md` | Checklist a PR description must address. |
@@ -119,9 +109,10 @@ for how to propose and land a change.
 | `.github/deferred/` | The API-backed Codex review workflow, deferred (not deleted) in favour of native Codex GitHub PR review for Phase 1 — see `decisions/0005`. |
 | `.github/scripts/` | The Stage 1.3 policy evaluator and its own test suite — preserved, reusable if the deferred automated gate is reconsidered. |
 | `.github/codex/prompts/review.md` | The review instructions written for the deferred API-backed workflow. |
-| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules, refactored from an initial single-file implementation; schema field-type/content and governed-manifest checks added as a corrective amendment). |
-| `tests/` | Fixtures (valid + deliberately invalid, one per contract rule) and tests for the validator, across two test files — the original, checksum-protected `test_axiom_validator.py` and the newer `test_axiom_validator_schema_content.py`. |
+| `src/axiom_validator/` | The first Axiom Dev component: a knowledge/documentation schema validator (parsing/rules/reporting modules; reads companion `<doc>.md.schema.yaml` files, not front-matter, since `decisions/0006`). |
+| `tests/` | Fixtures (valid + deliberately invalid, one per contract rule, as `.md`/`.md.schema.yaml` pairs) and tests for the validator, across two test files — `test_axiom_validator.py` and `test_axiom_validator_schema_content.py`. |
 | `requirements.txt` | The one runtime dependency (PyYAML) the validator needs. |
+| `*.md.schema.yaml` (alongside a governed `*.md` file) | That document's declarative schema — see `docs/documentation-schema.md`. |
 
 Every directory in the originally-proposed Stage 1.0 scaffold now has
 real content — none remain deliberately empty.

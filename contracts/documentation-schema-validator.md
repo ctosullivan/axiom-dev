@@ -1,13 +1,3 @@
----
-audience: whoever implements, refactors, or independently verifies the Stage 1.4 validator
-purpose: fix the validator's required behaviour before implementation exists, so later work has something fixed to be checked against
-required_sections: [Scope, Contract, Non-goals, Traceability]
-authoritative_sources: [docs/documentation-schema.md, planning/phase-01-foundation.md]
-acceptance_criteria:
-  - every behaviour below is phrased so a test can assert it directly
-  - this contract predates the Stage 1.4 implementation it governs (decisions/0004, Amendment B)
----
-
 # Contract: documentation/knowledge validator
 
 Status: **Accepted, pre-implementation.** This is the contract Stage 1.4's
@@ -19,12 +9,26 @@ not a silent edit inside the implementation PR
 (`planning/phase-01-foundation.md` §4, Stage 1.4 "Anti-circularity
 mechanics").
 
+**Note on rules 1–15 below, added by the "Contract revision" section
+further down (prompt 004, `decisions/0006`):** rules 1–15 describe the
+validator's original embedded-front-matter mechanics (rules 1–9) and
+their Amendment C field-validation extension (rules 10–15). They are
+preserved **verbatim, as historical record** of what Stage 1.4 and the
+prompt 003 batch actually specified and built at the time — not edited
+to read as though companion schema files had always been the
+convention. The "Contract revision" section states what the validator
+actually checks **now**; where the two disagree, the revision governs
+current behaviour.
+
 ## Scope
 
 The validator checks one Markdown document with an optional YAML
 front-matter block, as defined by `docs/documentation-schema.md`, against
 its own declared schema. It does not check any document *without* a
 front-matter block — such documents are out of scope, not failures.
+**(Historical — see "Contract revision" below: the validator now reads
+the schema from a companion `.schema.yaml` file, not embedded
+front-matter.)**
 
 ## Contract
 
@@ -178,6 +182,92 @@ each new rule — see `tests/test_axiom_validator_schema_content.py` and
 empty_required_sections,empty_acceptance_criteria,
 placeholder_acceptance_criteria}.md`,
 `tests/fixtures/valid/empty_authoritative_sources.md`.
+
+## Contract revision (prompt 004 Amendments A/C — companion schema files, 2026-11-21)
+
+Status: **Accepted, authorised contract evolution — not a
+behaviour-preserving refactor.** Per
+`planning/prompts/004-documentation-schema-and-roadmap-amendment.md`
+§6: "Amend the accepted documentation-validator contract before
+changing implementation behaviour... This is an authorised contract
+evolution, not a behaviour-preserving refactor." Written and committed
+before the corresponding implementation change, per the same
+contract-first discipline `decisions/0004` established for the original
+contract. See `decisions/0006` for the architectural decision this
+implements and `evidence/schema-migration.md` for the document
+migration this revision requires.
+
+**What changes:** where the schema for a document lives, and how the
+validator finds it. **What does not change:** the substantive
+field-validation requirements themselves (rules 10–15 above) — a
+document's `audience`/`purpose`/`required_sections`/
+`authoritative_sources`/`acceptance_criteria` must satisfy exactly the
+same constraints as before; only their storage location moves.
+
+1. **Companion schema path.** For a document at `<path>.md`, its schema
+   (if any) lives at `<path>.md.schema.yaml`, in the same directory,
+   with no separate registry — the relationship is computed from the
+   document's own path alone. **Supersedes rule 1's "front-matter
+   block" framing.**
+2. **No companion schema file exists for a given document** → `SKIPPED`,
+   *unless* the document's path is listed in `docs/governed-documents.txt`
+   (rule 15, unchanged in substance — only its trigger condition moves
+   from "no front-matter" to "no companion schema file"), in which case
+   it is `FAIL`, naming the document as governed with no schema.
+   **Supersedes rule 1 and rule 15's trigger condition.**
+3. **A companion schema file exists but is not valid YAML, or is valid
+   YAML but not a mapping** → `INVALID_SCHEMA`, naming the parse error.
+   **Supersedes rule 2.**
+4. **A companion schema file exists and parses, but is missing a
+   required field, has a field of the wrong type, or has empty required
+   content** → `INVALID_SCHEMA`, exactly as rules 3 and 10–14 already
+   specify — unchanged logic, now operating on the companion file's
+   parsed content instead of front-matter's.
+5. **Required sections, authoritative sources, and body links** are
+   checked against the *document's full text* (there is no front-matter
+   to split off any more — the whole file is body) — unchanged logic
+   (rules 4–7), applied to the whole file instead of a post-front-matter
+   substring. For a migrated document this produces identical results to
+   before migration, since the only text removed was the front-matter
+   block itself.
+6. **Overall PASS/FAIL combination and error reporting** — unchanged
+   (rules 8–9).
+7. **NEW — Embedded front-matter reintroduction.** A document whose text
+   begins with a `---\n...\n---\n` block (the old convention) is `FAIL`,
+   naming it as a deprecated-convention reintroduction — **never**
+   parsed as if it were the current schema, even if a companion
+   `.schema.yaml` file also happens to exist alongside it. Directly
+   implements prompt 004 Amendment C: "do not silently support two
+   competing schema conventions indefinitely."
+8. **NEW — Orphaned schema detection.** A `<path>.md.schema.yaml` file
+   with no corresponding `<path>.md` document is `FAIL`, naming the
+   orphan. **Scope note:** this check is inherently repository-wide (it
+   requires knowing that *no* document exists at a given path, not
+   checking one named document), so it runs as part of the CLI's batch
+   `main()` entry point scanning `repo_root`, not inside `validate_file`,
+   which checks exactly one named document and has no way to assert a
+   negative about the rest of the repository from a single call.
+9. **Non-governed document with a companion schema present must still be
+   validated.** A document's governed-manifest status only changes what
+   happens when its schema is *absent* (rule 2 above); if a companion
+   schema file exists, it is always checked, governed or not — this was
+   already true of embedded front-matter (any document with front-matter
+   got checked) and remains true of companion files.
+
+**Non-goal, added to this revision:** rule 7's embedded-front-matter
+detection fires on *any* `---`-delimited block at the start of a file —
+it cannot and does not try to distinguish "this was the documentation
+schema convention" from "this file legitimately uses a `---`-delimited
+block for something else" (e.g. `planning/prompts/`'s preserved-prompt
+provenance headers — `id`/`title`/`status`/`date_received`/etc., a
+different, intentional convention that was never part of the
+documentation-schema system and is not governed). Such files report
+`FAIL` under rule 7, which is a correct, harmless, if slightly
+imprecisely-worded result for them — they are not validated by any CI
+step (not in `docs/governed-documents.txt`), and nothing in this project
+treats that `FAIL` as a defect requiring migration. Distinguishing the
+two cases would require guessing at a block's semantic intent, which
+this mechanical validator deliberately does not do.
 
 ## Traceability
 

@@ -1,0 +1,7 @@
+audience: anyone looking for a completed, archived phase's historical record
+purpose: top-level index of archived phases, each entry linking to its own planning/archive/phase-NN/README.md
+required_sections: [Archived phases]
+authoritative_sources: [planning/ROADMAP.md, docs/phase-archiving.md]
+acceptance_criteria:
+  - every phase listed here as archived is also marked Completed in planning/ROADMAP.md
+  - no phase appears here before it has been human-approved as Completed

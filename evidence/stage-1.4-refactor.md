@@ -1,13 +1,3 @@
----
-audience: whoever reviews or later touches the validator's internal structure
-purpose: record the Stage 1.4 behaviour-preserving refactor's before/after verification and defect ledger
-required_sections: [What changed, Before/after verification, Defect ledger, Independent review]
-authoritative_sources: [contracts/documentation-schema-validator.md, evidence/stage-1.4-baseline.md, planning/phase-01-foundation.md]
-acceptance_criteria:
-  - the before/after test comparison is against the exact locked baseline in evidence/stage-1.4-baseline.md, not a re-derived one
-  - the defect ledger is populated honestly, including an empty category if nothing was found there
----
-
 # Stage 1.4 refactor: before/after verification and defect ledger
 
 Per `planning/phase-01-foundation.md` §4 Stage 1.4, a cosmetic refactor

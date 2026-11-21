@@ -1,13 +1,3 @@
----
-audience: anyone executing a Phase 1 stage or substantive change, human or agent
-purpose: make the UNDERSTAND-SPECIFY-ASSESS IMPACT-BUILD-VERIFY-RECONCILE lifecycle concrete enough to execute without inventing missing steps
-required_sections: [Lifecycle, Phase acceptance and reconciliation]
-authoritative_sources: [AGENTS.md, decisions/0003-independent-verification.md]
-acceptance_criteria:
-  - every lifecycle step states an entry and an exit criterion
-  - the phase-acceptance procedure names who/what performs each step, not just what should happen
----
-
 # Development lifecycle
 
 Expands `AGENTS.md` §1's six-word summary into entry/exit criteria per

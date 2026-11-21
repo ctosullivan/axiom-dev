@@ -1,0 +1,7 @@
+audience: whoever implements, refactors, or independently verifies the Stage 1.4 validator
+purpose: fix the validator's required behaviour before implementation exists, so later work has something fixed to be checked against
+required_sections: [Scope, Contract, Non-goals, Traceability]
+authoritative_sources: [docs/documentation-schema.md, planning/phase-01-foundation.md]
+acceptance_criteria:
+  - every behaviour below is phrased so a test can assert it directly
+  - this contract predates the Stage 1.4 implementation it governs (decisions/0004, Amendment B)

@@ -1,13 +1,3 @@
----
-audience: whoever performs or reviews the Stage 1.4 refactor
-purpose: record the protected pre-refactor baseline — fixture checksums and real test output — that the refactor must not silently change
-required_sections: [Protected fixture checksums, Pre-refactor test run, Real-document dogfooding finding, Pre-implementation-review findings fixed before baseline lock]
-authoritative_sources: [contracts/documentation-schema-validator.md, planning/phase-01-foundation.md]
-acceptance_criteria:
-  - the checksums below are the ones a post-refactor run must match, or the refactor has changed behaviour
-  - the test output below was actually captured from a real run, not written from memory
----
-
 # Stage 1.4 baseline (pre-refactor)
 
 Captured 2026-11-21, after the initial (monolithic) implementation of

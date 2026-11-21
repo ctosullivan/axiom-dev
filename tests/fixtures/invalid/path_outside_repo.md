@@ -1,12 +1,3 @@
----
-audience: test
-purpose: exercise FAIL for an authoritative_sources path that resolves outside the repository
-required_sections: [Body]
-authoritative_sources: [../outside-the-repository.md]
-acceptance_criteria:
-  - fails because the path resolves above the repository root, regardless of whether anything exists there
----
-
 # Path outside repository fixture
 
 ## Body

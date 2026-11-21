@@ -3,12 +3,14 @@
 type/non-emptiness checks and the governed-documents manifest).
 
 Deliberately a **separate file** from tests/test_axiom_validator.py,
-which is checksum-protected as part of the Stage 1.4 refactor baseline
-(evidence/stage-1.4-baseline.md) and must not be edited to add this
-amendment's coverage — see planning/phase-01-foundation.md Sec 17,
-prompt 003 Amendment C ("new validation behaviour must be introduced
-through an explicit, independently reviewed contract amendment with its
-own regression tests").
+originally so it would not touch the Stage 1.4 refactor's checksum-
+protected baseline (evidence/stage-1.4-baseline.md) while adding
+coverage — see planning/phase-01-foundation.md Sec 17, prompt 003
+Amendment C. That checksum-protection convention was retired as a live
+gate by `decisions/0006` (prompt 004): fixtures in this file were
+migrated from embedded front-matter to companion `.schema.yaml` files
+in that same, explicitly authorised and independently reviewed change —
+see evidence/schema-migration.md.
 
 Run with:
     PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -95,20 +97,22 @@ class TestEmptyAuthoritativeSourcesIsValid(unittest.TestCase):
 
 
 class TestGovernedDocumentScope(unittest.TestCase):
-    """Rule 15: a path listed in the governed manifest with no front-matter
-    is FAIL, not SKIPPED. Uses an explicit governed_manifest override so
-    this test does not depend on the real docs/governed-documents.txt
-    contents, which may change independently of this rule's logic."""
+    """Rule 15: a path listed in the governed manifest with no companion
+    schema file (contract revision rule 2's trigger condition, formerly
+    "no front-matter") is FAIL, not SKIPPED. Uses an explicit
+    governed_manifest override so this test does not depend on the real
+    docs/governed-documents.txt contents, which may change independently
+    of this rule's logic."""
 
-    def test_governed_path_with_no_frontmatter_fails(self):
-        fixture = FIXTURES / "invalid" / "no_frontmatter.md"
+    def test_governed_path_with_no_schema_fails(self):
+        fixture = FIXTURES / "invalid" / "no_schema.md"
         rel = str(fixture.resolve().relative_to(REPO_ROOT.resolve()))
         result = validate_file(fixture, REPO_ROOT, governed_manifest={rel})
         self.assertEqual(result["result"], "FAIL")
         self.assertTrue(any("governed document" in e for e in result["errors"]))
 
-    def test_ungoverned_path_with_no_frontmatter_is_still_skipped(self):
-        fixture = FIXTURES / "invalid" / "no_frontmatter.md"
+    def test_ungoverned_path_with_no_schema_is_still_skipped(self):
+        fixture = FIXTURES / "invalid" / "no_schema.md"
         result = validate_file(fixture, REPO_ROOT, governed_manifest=set())
         self.assertEqual(result["result"], "SKIPPED")
         self.assertEqual(result["errors"], [])

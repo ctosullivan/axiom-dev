@@ -1,10 +1,7 @@
----
-audience: test
-purpose: [unterminated flow sequence to force a YAML parse error
----
-
 # Bad YAML fixture
 
-Per contract rule 2, the validator must report INVALID_SCHEMA with the
-parser's error location, and must not attempt section/link checks when
-the front-matter itself can't be parsed.
+Per contract revision rule 3 (companion schema files), the validator
+must report INVALID_SCHEMA with the parser's error location when the
+companion schema file (`bad_yaml.md.schema.yaml`) isn't valid YAML, and
+must not attempt section/link checks when the schema itself can't be
+parsed.

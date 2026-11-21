@@ -1,12 +1,3 @@
----
-audience: test fixture
-purpose: exercise the validator's PASS path — every rule should be satisfied
-required_sections: [Introduction, Details]
-authoritative_sources: [AGENTS.md]
-acceptance_criteria:
-  - this fixture passes every applicable rule in contracts/documentation-schema-validator.md
----
-
 # Complete fixture
 
 ## Introduction

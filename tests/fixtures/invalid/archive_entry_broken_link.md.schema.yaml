@@ -1,0 +1,6 @@
+audience: test fixture
+purpose: demonstrate that the existing validator catches a broken link in an archive-entry-shaped document, without claiming any real phase has been archived
+required_sections: [Completion evidence]
+authoritative_sources: [AGENTS.md]
+acceptance_criteria:
+  - this fixture fails because its one body link does not resolve, proving docs/phase-archiving.md's reused-mechanism verification claim rather than merely asserting it

@@ -1,0 +1,2 @@
+audience: test
+purpose: [unterminated flow sequence to force a YAML parse error

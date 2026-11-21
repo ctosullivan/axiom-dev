@@ -1,0 +1,7 @@
+audience: future sessions resuming this project, and anyone evaluating whether the methodology is worth its overhead
+purpose: retrospective on the Phase 1 execution pass covering Stages 1.0-1.5 — intended vs actual outcome, overhead, lessons
+required_sections: [Intended outcome, Actual outcome, Verification evidence, Unexpected findings, Process overhead, Lessons learned, Recommended methodology improvements]
+authoritative_sources: [planning/phase-01-foundation.md, evidence/phase-1-closeout.md, decisions/0001-development-governance.md]
+acceptance_criteria:
+  - this is a retrospective on real events in this execution, not a restatement of the plan
+  - Phase 1 is not described as complete, since it isn't

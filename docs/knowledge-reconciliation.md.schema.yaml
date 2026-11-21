@@ -1,0 +1,7 @@
+audience: anyone landing a change that touches behaviour, decisions, interfaces, or documented knowledge
+purpose: define the procedure for checking documentation and knowledge records against a real change, and prove it's been run at least once
+required_sections: [Procedure, Worked example]
+authoritative_sources: [AGENTS.md, docs/knowledge-placement.md]
+acceptance_criteria:
+  - the procedure is concrete enough to follow without inventing steps
+  - a real reconciliation pass against this repository is recorded below, not just described abstractly

@@ -342,16 +342,65 @@ could not be measured and why.
   **no longer** blockers — `decisions/0005` removed both as Phase 1
   requirements.
 
+## 2026-11-21 — Documentation schema and roadmap amendment (prompt 004)
+
+- **Development effort:** one orchestrating-session pass covering a new
+  ADR (`decisions/0006`), a contract revision
+  (`contracts/documentation-schema-validator.md`, 12 new rules),
+  validator code changes (`src/axiom_validator/{parsing,rules,__init__}.py`),
+  migration of 15 real documents and 20 test fixtures from embedded
+  front-matter to companion `.schema.yaml` files
+  (`evidence/schema-migration.md`), 4 new test fixtures/3 new test
+  methods, a rewritten `planning/ROADMAP.md`, a new phase-archiving
+  procedure (`docs/phase-archiving.md`, `planning/archive/README.md`),
+  and documentation/governance reconciliation across 4 `docs/` files.
+- **Real latent bug found and fixed by this session's own testing,
+  before independent review:** `rules.find_orphaned_schemas`, run
+  unmodified against the real repository root, would have flagged the
+  deliberately-orphaned test fixture
+  (`tests/fixtures/invalid/orphaned.md.schema.yaml`) as a real orphan on
+  every future CI run, forever — caught by actually running `main()`
+  against the real repo root before committing, not left as a
+  hypothetical. Fixed by excluding `tests/` from the repo-wide scan by
+  default.
+- **Real design gap found and fixed by this session's own testing:**
+  embedded-front-matter detection (contract revision rule 7) fires on
+  any `---`-delimited block, including `planning/prompts/`'s unrelated
+  provenance-metadata convention — not a code defect (those files were
+  never validated or claimed to pass), but the original error message
+  wording presumed every such block was a reintroduced documentation
+  schema. Fixed by rewording the message and adding an explicit
+  Non-goal to the contract revision, rather than attempting to guess a
+  block's semantic intent.
+- **Agent usage:** 1 independent-review dispatch covering migration
+  correctness, validator behaviour (including reviewer-constructed
+  counter-examples), the roadmap/archiving rewrite, and documentation
+  reconciliation — 131,094 tokens, 50 tool uses, 286.3s. No BLOCKING
+  findings; 2 ADVISORY bookkeeping/narrative inaccuracies found and
+  fixed (a wrong test-count sentence in this plan's §21; a stale
+  governed-document count in `evidence/schema-migration.md`) — both
+  caught by the reviewer re-deriving numbers directly (`git show`,
+  recounting test methods) rather than trusting this session's own
+  arithmetic.
+- **Not measured:** real API/token cost for native Codex review (still
+  no PR exists); wall-clock time for this session's own non-dispatched
+  work.
+- **Blocker, unchanged in kind:** no `gh` CLI, no GitHub token, no PR
+  ever opened. This amendment does not touch that blocker — it was out
+  of scope for prompt 004, which explicitly preserves `decisions/0005`'s
+  native-Codex-review decision unmodified (§11).
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 11 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout, 2 prompt-003 corrective batch (review + confirmation) |
-| Subagent tokens so far | 1,125,329 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 + 187,061 + 71,421 |
-| Blocking/real defects found by independent review (not self-caught) | 17 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout, 4 prompt-003 corrective batch (`planning/CONTEXT.md` staleness; §19/§20/evidence file missing; 3 `docs/axiom-validator.md` claims incl. the `repo_root` code defect; counted together as one batch finding-set below — see `planning/phase-01-foundation.md` §19 for the itemised 4 BLOCKING/FAILED groups) — all fixed and independently re-confirmed |
-| Advisory defects found and fixed or accepted | 10 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted), 2 prompt-003 corrective batch (accepted with recorded rationale) |
-| Real passing tests | 39 of 39 | 16 policy-evaluator + 23 axiom_validator (14 original + 9 Amendment C), all re-run independently and confirmed — the 14 original axiom_validator tests three times now (pre-refactor, post-refactor, post-Amendment-C), identical each time |
-| Real (non-synthetic) defects found in Axiom Dev's own documentation or code | 4 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout); `planning/CONTEXT.md` staleness against `decisions/0005` (prompt-003 batch); `validate_file`'s unresolved-`repo_root` defect, a real code bug, not only documentation (prompt-003 batch, found by actually running a documented usage example) |
+| Subagent dispatches so far | 12 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1, 1 Phase 1 closeout, 2 prompt-003 corrective batch (review + confirmation), 1 prompt-004 documentation-schema/roadmap batch |
+| Subagent tokens so far | 1,256,423 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 + 145,847 + 187,061 + 71,421 + 131,094 |
+| Blocking/real defects found by independent review (not self-caught) | 17 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5, 2 Phase-1-closeout, 4 prompt-003 corrective batch, 0 prompt-004 batch (clean — see `planning/phase-01-foundation.md` §22) — all fixed and independently re-confirmed |
+| Advisory defects found and fixed or accepted | 12 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted), 2 prompt-003 corrective batch, 2 prompt-004 batch (bookkeeping/narrative inaccuracies, fixed — see §22) |
+| Real passing tests | 43 of 43 | 16 policy-evaluator + 27 axiom_validator (23 before prompt 004 + 4 net-new for embedded-front-matter/orphaned-schema/archive-link-verification coverage), all re-run independently and confirmed |
+| Real (non-synthetic) defects found in Axiom Dev's own documentation or code | 5 | shorthand ADR citations (Stage 1.4 dogfooding); CONTRIBUTING.md future-tense staleness (Phase 1 closeout); `planning/CONTEXT.md` staleness against `decisions/0005` (prompt-003 batch); `validate_file`'s unresolved-`repo_root` defect (prompt-003 batch); `find_orphaned_schemas`'s would-fail-CI-forever defect against the real repo root (prompt-004 batch, found by this session's own testing before independent review) |
 | Amendment-D demonstrations fully demonstrated with real evidence | 7 of 8 (rows 1, 2, 4, 5, 6, 7, 8) | See `planning/phase-01-foundation.md` §10; row 3 is the one genuine, externally-blocked gap, now reframed by `decisions/0005` as "native Codex review on a real PR," not "automated gate rejection" |
 | Phase 1 Definition of Done (17 items, `planning/prompts/002-...md` §11) | 15 MET, 1 partially met, 1 not met | See `evidence/phase-1-closeout.md` (predates the prompt-003 corrective batch) |
 | Prompt 003's revised Definition of Done (16 items, `planning/phase-01-foundation.md` §18) | 10 MET, 1 locally-verified-only (CI not triggered on a real GitHub Actions run), 5 open (items 10–12: native Codex review, blocked on no `gh`/token; item 15: no holistic closeout dispatch has run yet, only narrowly-scoped checks and a confirmation pass; item 16: human approval, deliberately not sought by this session) | See `planning/phase-01-foundation.md` §18, §20 |
+| Prompt 004's Definition of Done (21 bullet items, `planning/prompts/004-...md` §13) | 19 MET, 1 locally-verified-only (GitHub Actions not triggered on a real run), 2 open (native Codex review and human approval — the same cross-cutting PR/`gh`-token blocker as prompt 003, not new work this amendment could resolve on its own) | See `planning/phase-01-foundation.md` §21, §22 |

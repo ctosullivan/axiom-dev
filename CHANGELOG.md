@@ -131,3 +131,35 @@ complete, on two named, real, external blockers.
 - `planning/phase-01-foundation.md` §17–§20 (corrective-amendment plan
   amendment, revised Definition of Done, independent review record, and
   batch status).
+
+### Changed (documentation schema and roadmap amendment)
+
+- `decisions/0006`: documentation schemas move from embedded Markdown
+  front-matter to companion `<document>.md.schema.yaml` files. 15 real
+  documents and 20 test fixtures migrated with Markdown bodies
+  byte-for-byte unchanged apart from front-matter removal
+  (`evidence/schema-migration.md`); `planning/prompts/001`–`004` (a
+  different, unrelated front-matter convention) correctly excepted.
+- `contracts/documentation-schema-validator.md` "Contract revision"
+  (12 new rules): companion-schema lookup, missing-schema SKIPPED/FAIL
+  split, embedded-front-matter-reintroduction detection, orphaned-schema
+  detection. Implemented in `src/axiom_validator/`, preserving its
+  modular architecture and public CLI/programmatic interface.
+- `planning/ROADMAP.md` rewritten from a detailed Stage 1.0–1.5 record
+  into a concise, long-term overview covering Phases 1 (in progress) and
+  2–4 (proposed direction, not authorised commitments).
+- `docs/phase-archiving.md` and `planning/archive/README.md`: a
+  documented, tested (not fabricated) phase-archiving procedure.
+  **Phase 1 is explicitly not archived.** The procedure's link-
+  verification claim was tested against a synthetic fixture, not merely
+  asserted.
+- `docs/documentation-schema.md`, `docs/axiom-validator.md`,
+  `docs/knowledge-placement.md`, `docs/knowledge-reconciliation.md`
+  updated to describe the companion-schema convention as current
+  policy; the superseded front-matter rationale preserved in
+  `decisions/0006`, not deleted.
+- Two real defects found and fixed by this session's own testing before
+  independent review: a repo-wide orphan scan that would have flagged
+  the deliberately-orphaned test fixture forever; an imprecise error
+  message for the (expected, harmless) case of an unrelated
+  `---`-delimited block in `planning/prompts/`.

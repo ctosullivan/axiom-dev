@@ -1,12 +1,3 @@
----
-audience: test
-purpose: exercise FAIL for a reference to a non-existent ADR number
-required_sections: [Body]
-authoritative_sources: [AGENTS.md]
-acceptance_criteria:
-  - fails because decisions/9999-does-not-exist.md is not a real ADR in this repository
----
-
 # Bad ADR reference fixture
 
 ## Body

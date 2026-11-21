@@ -1,0 +1,6 @@
+audience: test fixture
+purpose: exercise contract revision rule 8 — a companion schema file with no corresponding document is an orphan
+required_sections: [Body]
+authoritative_sources: [AGENTS.md]
+acceptance_criteria:
+  - this schema file is deliberately orphaned — there is no orphaned.md next to it

@@ -1,0 +1,8 @@
+audience: contributors and agents making any non-trivial change
+purpose: define where a given piece of project knowledge belongs, and what enforces that
+required_sections: [Classification, Placement table, Enforcement classes, Reconciliation hook]
+authoritative_sources: [AGENTS.md, decisions/0002-knowledge-architecture.md]
+acceptance_criteria:
+  - every knowledge category in the placement table maps to exactly one authoritative artifact kind
+  - every enforcement class states whether it blocks a change or is advisory
+  - this document itself has been checked against docs/documentation-schema.md

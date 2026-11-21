@@ -21,5 +21,7 @@ docs/knowledge-reconciliation.md
 docs/development-lifecycle.md
 docs/agent-isolation.md
 docs/axiom-validator.md
+docs/phase-archiving.md
 contracts/documentation-schema-validator.md
 contracts/codex-gate-policy-evaluator.md
+planning/archive/README.md

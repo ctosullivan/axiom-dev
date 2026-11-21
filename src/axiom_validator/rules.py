@@ -1,17 +1,23 @@
 """Validation rules for the Axiom Dev documentation/knowledge validator.
 
-Operates on already-parsed front-matter data and already-extracted
-headings/links (see parsing.py) — this module has no file-reading or
-Markdown-parsing regex of its own, only the ADR-path pattern and the
-rule logic, so the rules can be reasoned about independently of how a
-document was parsed. Split out of the original monolithic
-implementation as Stage 1.4's behaviour-preserving refactor; see
-planning/phase-01-foundation.md Stage 1.4.
+Operates on already-parsed schema data and already-extracted
+headings/links (see parsing.py) for most rules, so they can be reasoned
+about independently of how a document was parsed. Two exceptions read
+the filesystem directly, because what they check is inherently about
+files other than the one document being validated, not about already-
+parsed content: load_governed_manifest (docs/governed-documents.txt) and
+find_orphaned_schemas (a repository-wide scan for *.md.schema.yaml files
+with no corresponding document — contract revision rule 8, prompt 004).
+Split out of the original monolithic implementation as Stage 1.4's
+behaviour-preserving refactor; see planning/phase-01-foundation.md
+Stage 1.4.
 """
 from __future__ import annotations
 
 import re
 from pathlib import Path
+
+from .parsing import SCHEMA_SUFFIX
 
 REQUIRED_FIELDS = {
     "audience",
@@ -77,6 +83,36 @@ def check_field_types_and_content(data: dict) -> list[str]:
             errors.append("acceptance_criteria entries must be non-empty strings")
 
     return errors
+
+
+def find_orphaned_schemas(
+    repo_root: Path, exclude_prefixes: tuple[str, ...] = ("tests",)
+) -> list[Path]:
+    """Contract revision rule 8: every *.md.schema.yaml under repo_root
+    with no corresponding <path>.md document. Repository-wide by nature
+    (asserting "no document exists here" needs a full scan), so this is
+    called from main()'s batch entry point, not from validate_file.
+
+    exclude_prefixes: top-level path components (relative to repo_root)
+    to skip. Defaults to excluding tests/ — fixtures deliberately
+    include a real orphaned schema (tests/fixtures/invalid/orphaned.md.schema.yaml)
+    to test this very function; without this exclusion, scanning the
+    real repository root would report that fixture as a real orphan on
+    every CI run, forever — found by actually running main() against the
+    real repo root before committing, not left as a hypothetical.
+    Callers testing against FIXTURES directly (not the full repo root)
+    are unaffected, since "tests" is never the first path component
+    relative to FIXTURES itself.
+    """
+    orphans: list[Path] = []
+    for schema_path in sorted(repo_root.rglob(f"*{SCHEMA_SUFFIX}")):
+        rel_parts = schema_path.relative_to(repo_root).parts
+        if rel_parts and rel_parts[0] in exclude_prefixes:
+            continue
+        doc_path = schema_path.with_name(schema_path.name[: -len(SCHEMA_SUFFIX)])
+        if not doc_path.exists():
+            orphans.append(schema_path)
+    return orphans
 
 
 def load_governed_manifest(repo_root: Path) -> set[str]:

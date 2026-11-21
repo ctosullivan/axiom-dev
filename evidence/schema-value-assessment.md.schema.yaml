@@ -1,0 +1,7 @@
+audience: anyone deciding whether the documentation-schema convention is worth its overhead, and future sessions designing Phase 2
+purpose: assess, with paired real examples, what Axiom Dev's YAML-front-matter schema actually contributes to documentation quality versus what general planning instructions or independent review contribute instead
+required_sections: [Example 1 — Validator documentation, Example 2 — Knowledge placement, Example 3 — Development lifecycle, Evaluation rule, Open research hypothesis]
+authoritative_sources: [docs/axiom-validator.md, docs/knowledge-placement.md, docs/development-lifecycle.md, docs/documentation-schema.md, planning/phase-01-foundation.md]
+acceptance_criteria:
+  - each example distinguishes schema-enforced, schema-encouraged-but-unverified, general-planning-introduced, and independent-review-corrected qualities, not a single undifferentiated "the schema helped" claim
+  - the open research hypothesis is recorded verbatim, as a hypothesis, not answered by this document

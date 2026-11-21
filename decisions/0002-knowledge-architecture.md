@@ -116,6 +116,13 @@ while continuing to describe it as part of the system.
 
 - Exact schema sidecar format (or whether Axiom Dev needs sidecars at all
   versus a simpler convention) — left open for Stage 1.1's plan.
+  **Resolution history, added for continuity, not edited into the
+  original text above:** Stage 1.1 first resolved this against sidecars
+  (`docs/documentation-schema.md`, embedded front-matter); `decisions/0006`
+  later reversed that resolution back to a sidecar-style convention
+  (companion `.schema.yaml` files) once real use revealed the
+  readability cost. This item is resolved as of `decisions/0006`, not
+  by this ADR.
 - Validator design and scope — left open for Stage 1.1/1.4 (the validator
   is slated as the first substantive Axiom Dev component).
 - Whether/when a knowledge-base-ID apparatus becomes justified — left open,

@@ -1,13 +1,3 @@
----
-audience: anyone landing a change that touches behaviour, decisions, interfaces, or documented knowledge
-purpose: define the procedure for checking documentation and knowledge records against a real change, and prove it's been run at least once
-required_sections: [Procedure, Worked example]
-authoritative_sources: [AGENTS.md, docs/knowledge-placement.md]
-acceptance_criteria:
-  - the procedure is concrete enough to follow without inventing steps
-  - a real reconciliation pass against this repository is recorded below, not just described abstractly
----
-
 # Knowledge reconciliation
 
 This is the full procedure behind the "Reconciliation hook" named in
@@ -20,7 +10,9 @@ This is the full procedure behind the "Reconciliation hook" named in
 2. **Dependents.** For each changed file, list every other file whose
    claims assume the old state: cross-references (`§` citations, relative
    links), status tables (`planning/ROADMAP.md`), and any document whose
-   `authoritative_sources` front-matter field names the changed file.
+   `authoritative_sources` schema field (its companion `.schema.yaml`
+   file since `decisions/0006`; embedded front-matter at the time this
+   worked example below was run) names the changed file.
 3. **Check.** For each dependent, confirm its claim still holds against
    the new state. Three outcomes per dependent: still true (no action),
    false and fixed now (record what changed), or false and deliberately

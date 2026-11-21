@@ -1,5 +1,14 @@
 # Roadmap
 
+What Axiom Dev is trying to achieve, long-term: find the simplest
+practical methodology for AI-assisted software development that
+preserves project knowledge, supports independent verification, keeps
+documentation accurate as the system changes, and lets complex software
+evolve reliably across disconnected agent sessions — see `README.md`
+"Fundamental hypothesis." Phases below are the plan for testing that
+hypothesis progressively, each building on verified evidence from the
+one before, not on assumption.
+
 Status values and what they mean here:
 
 - **Proposed** — described in a plan or prompt, not yet reviewed/accepted.
@@ -7,138 +16,117 @@ Status values and what they mean here:
   recorded; no focused implementation plan written yet.
 - **In progress** — a focused plan exists and work is underway.
 - **Completed** — acceptance criteria met *with evidence*, confirmed by an
-  independent closeout (`AGENTS.md` §6). Writing the code/docs is not
-  sufficient on its own.
+  independent closeout (`AGENTS.md` §6) and approved by a human
+  (`AGENTS.md` §11). Writing the code/docs is not sufficient on its own.
 - **Deferred** — intentionally not pursued now; reason recorded.
 - **Blocked** — cannot proceed; blocker recorded.
 
-Full stage detail, dependencies and acceptance criteria:
-[`planning/phase-01-foundation.md`](phase-01-foundation.md).
+This file is deliberately concise — it answers "what's the plan and
+what's the current state," not "how did Phase 1 actually go." Detailed
+implementation plans, stage-by-stage specs, independent review records
+and evidence stay in their own files (linked below and from
+`planning/CONTEXT.md`), not duplicated here. Once a phase is archived
+(`docs/phase-archiving.md`), its roadmap entry shrinks to a short
+summary and an archive link — this entry has not happened for any phase
+yet (see "Archived phases" below).
+
+## Overview
+
+| Phase | Title | Status | Plan |
+|---|---|---|---|
+| 1 | Foundation | In progress | [`planning/phase-01-foundation.md`](phase-01-foundation.md) |
+| 2 | Real-world validation | Proposed | *(not yet written — becomes actionable once authorised and planned, `AGENTS.md` §2)* |
+| 3 | Methodology consolidation and reusable template | Proposed | *(not yet written)* |
+| 4 | Broader validation and release | Proposed | *(not yet written)* |
+
+Phases 2–4 are the long-term direction this project intends to pursue,
+proposed by
+`planning/prompts/004-documentation-schema-and-roadmap-amendment.md` §8
+— **not authorised implementation commitments.** Each becomes actionable
+only once its own focused plan is written, independently reviewed, and
+approved (`AGENTS.md` §2), exactly like every phase before it. No dates,
+measured benefits, or acceptance results are invented for any of them
+below — only what each phase is *for* and what evidence would close it.
 
 ## Phase 1 — Foundation
 
-| Stage | Description | Status |
-|---|---|---|
-| 1.0 | Repository bootstrap and governance | In progress — see below |
-| 1.1 | Knowledge and documentation methodology | In progress |
-| 1.2 | Agent development methodology | In progress |
-| 1.3 | Codex CI review gate | In progress — deterministic piece built and tested; live integration **blocked** (no `OPENAI_API_KEY`/cost decision) |
-| 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | In progress — done with evidence (build, review, fix, refactor, review); awaiting human sign-off |
-| 1.5 | Independent documentation reconstruction and closeout | In progress — reconstruction done; Phase 1 closeout assessment done (see below); recommends staying open |
+**Status: In progress — not Completed.** Establishes and tests the
+basic evidence-based development methodology: governance, knowledge
+placement, documentation schemas, behavioural contracts, independent
+review, deterministic CI, self-development, refactoring, and
+documentation reconstruction. Full stage-by-stage detail, dependencies,
+and acceptance criteria: [`planning/phase-01-foundation.md`](phase-01-foundation.md).
 
-Amended 2026-11-21 per `planning/prompts/002-phase-1-amend-and-implement.md`
-and `decisions/0004` — see `planning/phase-01-foundation.md` §0 for what
-changed. Further amended the same day by a corrective pass per
-`planning/prompts/003-phase-1-corrective-amendment.md` and `decisions/0005`
-(documentation-drift fixes, validator schema strengthening, deterministic
-CI completion, and replacing the API-backed Codex gate requirement with
-native Codex GitHub PR review) — see `planning/phase-01-foundation.md`
-§17/§18 for what changed and §19/§20 for its independent review and
-status.
+**Exit evidence required:** a working methodology, demonstrated through
+real internal use (not synthetic fixtures alone), independent
+verification of that use, and an accepted closeout. An independent
+closeout assessment has run
+(`evidence/phase-1-closeout.md`, `planning/phase-01-foundation.md` §16)
+and found 15 of 17 original Definition-of-Done items met with evidence,
+1 partially met, 1 genuinely blocked. A corrective amendment then fixed
+documentation drift, strengthened the validator, completed deterministic
+CI, and changed the independent-Codex-review requirement to native Codex
+GitHub PR review (`decisions/0005`; `planning/phase-01-foundation.md`
+§17–§20) — that batch's own revised 16-item Definition of Done
+(§18) stands at 10 MET, 1 locally-verified-only, 5 open. A further
+amendment moved documentation schemas to companion files and expanded
+this roadmap itself (`decisions/0006`; §21–§22) — its own 21-item
+Definition of Done (`planning/prompts/004-...md` §13) stands at 19 MET,
+1 locally-verified-only, 2 open. **The remaining open item common to
+all three assessments: no GitHub PR has ever been opened on this
+branch** (no `gh` CLI, no token, no passwordless `sudo` to install it —
+confirmed repeatedly, not assumed), so native Codex review has not run
+and human acceptance has not been sought. Phase 1 cannot be marked
+Completed, or archived, until that happens and a human reviews the
+result (`AGENTS.md` §11).
 
-**Phase 1 as a whole is not Completed.** An independent closeout
-assessment (`evidence/phase-1-closeout.md`,
-`planning/phase-01-foundation.md` §16) recommends leaving it open: 15 of
-17 Definition-of-Done items are met with independently-reproduced
-evidence, 1 is partially met, and 1 is genuinely blocked (Stage 1.3's
-live Codex integration — no `OPENAI_API_KEY`, no `gh`/repo-admin access
-to configure required checks, no real GitHub PR ever run through any
-gate). No stage above is marked Completed by this session — that is a
-human-approval action (`AGENTS.md` §11); this roadmap documents the
-evidence, a human decides.
+## Phase 2 — Real-world validation (proposed)
 
-### Stage 1.0 — Repository bootstrap and governance
+Apply the methodology to a substantive development task in an existing
+project — Ledgerkit is the preferred candidate
+(`planning/prompts/004-...md` §8). Potential activities: select a
+bounded, meaningful Ledgerkit objective; establish an independently
+reviewed behavioural contract; measure baseline development performance;
+execute the work using Axiom Dev; compare against a simpler conventional
+approach where a fair comparison is feasible; record defects, rework,
+effort, verification coverage and knowledge reuse; evaluate whether
+Axiom's procedures deliver value exceeding their overhead.
 
-Status: **In progress.** Scaffolding, governance files, initial ADRs, and
-the Phase 1 plan have been written in this session and are pending the
-independent review and commit/push called for by the bootstrap prompt.
-Stage 1.0 moves to Completed only after that review's findings are
-resolved and the independent-closeout bar in
-`planning/phase-01-foundation.md` is met — not merely because the files
-exist.
+**Exit evidence required:** a credible, reproducible real-world
+evaluation that distinguishes demonstrated improvements from unresolved
+hypotheses — not a claim of superiority over alternative methods made
+before that evidence exists.
 
-### Stage 1.3 — Codex CI review gate
+## Phase 3 — Methodology consolidation and reusable template (proposed)
 
-Status: **In progress, split per `decisions/0004`'s architectural split.**
-`.github/scripts/policy_evaluator.py` (the deterministic policy evaluator)
-is implemented against `contracts/codex-gate-policy-evaluator.md` and
-covered by 16 passing tests
-(`.github/scripts/tests/test_policy_evaluator.py`) exercising all six
-required scenarios from `planning/prompts/002-...md` §6. The
-`.github/workflows/deterministic-checks.yml` workflow runs this suite on
-every push/PR with no secrets required.
-**Superseded by `decisions/0005` (2026-11-21, prompt 003 Amendment A):**
-the API-backed live piece described below is no longer Phase 1's
-required mechanism for independent Codex review — it is deferred, not
-secretly satisfied. `.github/workflows/codex-review.yml` and
-`.github/codex/prompts/review.md` implemented that live integration to
-spec (researched against current OpenAI documentation — citations in the
-workflow file) but remained blocked: no `OPENAI_API_KEY` in this
-environment (a human cost/billing decision), and no repository-admin API
-access to make either workflow an actual GitHub "required status check."
-The workflow file is preserved, moved to
-`.github/deferred/codex-review.yml` so it no longer appears in GitHub
-Actions' run list (where its gated skip could be misread as part of
-normal CI status); `.github/scripts/policy_evaluator.py` and its tests
-remain active and are now also run in
-`.github/workflows/deterministic-checks.yml`'s `axiom-validator-tests`
-sibling jobs. **Phase 1's independent-review requirement is now native
-Codex GitHub PR review** on an actual opened PR — not yet performed, since
-no PR has ever been opened (no `gh`/token; see `planning/phase-01-foundation.md`
-§17/§18). The original automated-merge-gate requirement stays recorded as
-superseded and deferred, with reconsideration conditions in
-`decisions/0005`, not dropped silently.
+Refine the methodology based on Phase 2's actual findings. Potential
+activities: remove procedures Phase 2 showed to be unnecessary; simplify
+governance and documentation; consolidate reusable contracts, checks and
+workflows; produce an Axiom Dev starter/template repository; demonstrate
+that a fresh agent can use the template to develop and verify a bounded
+change.
 
-An independent review of this stage's code also found and fixed, before
-commit: a vacuous staleness check (the comparison was tautological
-because both sides read the same triggering-event value — fixed by
-sourcing the comparison SHA from a live GitHub API call instead) and a
-step that silently fabricated missing `status`/`schema_version` fields,
-which would have defeated the malformed-output fail-closed rule the
-moment the live path is enabled. See
-`planning/phase-01-foundation.md` §12.
+**Exit evidence required:** a reusable, documented development template
+with a successful independent adoption exercise.
 
-### Stage 1.4 — Axiom self-development and refactoring
+## Phase 4 — Broader validation and release (proposed)
 
-Status: **In progress — all planned work done with evidence; awaiting
-human sign-off to mark Completed (`AGENTS.md` §11).** The initial
-implementation of the knowledge/documentation validator was built,
-contracted, fixture-tested, and independently reviewed (two real defects
-found and fixed: an unenforced "no paths outside the repository" rule; a
-fenced-code-block heading false positive). A real, non-synthetic
-documentation defect was found and fixed via dogfooding (shorthand ADR
-citations in two Stage 1.1 docs). The pre-refactor baseline was locked
-(`evidence/stage-1.4-baseline.md`), then a genuine behaviour-preserving
-refactor was performed — `src/axiom_validator.py` split into
-`src/axiom_validator/{parsing,rules,reporting}.py` plus an orchestrator —
-with identical before/after test results (14/14, same tests) and a clean
-independent review (zero blocking findings; see
-`evidence/stage-1.4-refactor.md`). Amendment D demonstrations 4 and 7
-are now fully demonstrated (`planning/phase-01-foundation.md` §10).
+Evaluate the methodology across additional projects and development
+scenarios. Potential activities: cross-project trials; maintenance and
+refactoring exercises; documentation reconstruction after substantial
+change; comparison of verification approaches; usability/overhead
+assessment; a versioned release of the methodology and template.
 
-### Stage 1.5 — Independent documentation reconstruction and closeout
+**Exit evidence required:** a stable release with documented
+capabilities, limitations, and reproducible supporting evidence.
 
-Status: **In progress.** A restricted-evidence reconstruction (not full
-repository access — a stronger test than prior reviews) was run against
-the validator component, compared against `docs/axiom-validator.md`,
-and found/fixed two real gaps. Full record:
-`evidence/stage-1.5-reconstruction.md`,
-`planning/phase-01-foundation.md` §15. **The Phase 1 closeout assessment
-itself has not yet run** — this stage is not Completed until it does.
+## Archived phases
 
-## Directories deliberately not yet created
-
-Nothing remains deliberately uncreated in the originally-proposed
-scaffold — `src/` and `tests/` were created as part of Stage 1.4 with
-real content (not placeholders): `src/axiom_validator.py`, 10 fixture
-files and 14 tests under `tests/`. (`.github/scripts/tests/` is a
-separate thing — Stage 1.3's own CI-tooling test suite, distinct from the
-top-level `tests/` created for the Axiom component itself.)
-
-`evidence/` was created as part of the Phase 1 amendment (Amendment C,
-`decisions/0004`) with real initial content
-(`evidence/phase-1-log.md`). `docs/` and `contracts/` were created as
-part of Stage 1.1, also with real initial content, not placeholders.
-`.github/workflows/` and `.github/scripts/` were created as part of
-Stage 1.3, likewise with real, tested content for the deterministic
-piece.
+None yet. **Phase 1 is not archived** — per
+`planning/prompts/004-...md` §9's explicit restriction, it stays open
+and un-archived until its outstanding requirements (native Codex GitHub
+PR review, human acceptance) are met. See
+[`docs/phase-archiving.md`](../docs/phase-archiving.md) for the
+procedure that will apply once a phase is actually Completed, and
+[`planning/archive/README.md`](archive/README.md) for the (currently
+empty) archive index.

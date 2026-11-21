@@ -11,15 +11,25 @@ A corrective-amendment pass (`planning/prompts/003-...md`,
 `decisions/0005`) fixed documentation drift, strengthened the validator's
 schema checks, completed deterministic CI, and changed Phase 1's
 independent-Codex-review requirement to native Codex GitHub PR review —
-see `planning/phase-01-foundation.md` §17–§20. Phase 1 stays open, not
-marked Completed.** Everything is on `phase-1/stage-1.0-bootstrap`,
-pushed, unmerged (no PR opened — no `gh`/token, re-confirmed as part of
-the corrective pass, not merely carried forward from an earlier check).
+see `planning/phase-01-foundation.md` §17–§20. A further amendment
+(`planning/prompts/004-...md`, `decisions/0006`) moved every governed
+document's schema out of embedded front-matter into a companion
+`<doc>.md.schema.yaml` file, adapted the validator accordingly, expanded
+`planning/ROADMAP.md` into a concise multi-phase roadmap (Phases 2–4
+proposed, not authorised), and established (but did not use) a
+phase-archiving procedure — see §21–§22. Phase 1 stays open, not marked
+Completed; nothing in either amendment closes the one real remaining
+gap below.** Everything is on `phase-1/stage-1.0-bootstrap`, pushed,
+unmerged (no PR opened — no `gh`/token, re-confirmed again in the
+prompt 004 batch, not merely carried forward from an earlier check).
 
 ## Relevant decisions
 
-`decisions/0001`–`0005`. `decisions/0005` **partially supersedes**
-`decisions/0004`'s Stage 1.3 live-integration expectation — read both;
+`decisions/0001`–`0006`. `decisions/0005` **partially supersedes**
+`decisions/0004`'s Stage 1.3 live-integration expectation;
+`decisions/0006` supersedes `docs/documentation-schema.md`'s prior
+front-matter-vs-sidecar resolution of `decisions/0002`'s Unresolved item
+(not `decisions/0002` itself, which made no commitment either way).
 `decisions/0004`'s anti-circularity/measurement/demonstration content is
 otherwise unaffected and still governs Stages 1.1–1.5's evidence.
 

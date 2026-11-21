@@ -1,10 +1,3 @@
----
-audience: test
-purpose: exercise INVALID_SCHEMA for a front-matter missing a required field
-required_sections: [Body]
-authoritative_sources: [AGENTS.md]
----
-
 # Missing field fixture
 
 ## Body

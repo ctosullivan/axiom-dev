@@ -1,0 +1,7 @@
+audience: new contributors, agents resuming work, and anyone evaluating the project
+purpose: orient a reader to what Axiom Dev is, its current status, and where to find governing detail
+required_sections: [Mission, Fundamental hypothesis, Development methodology, Repository map, Licence]
+authoritative_sources: [AGENTS.md, planning/ROADMAP.md, planning/CONTEXT.md]
+acceptance_criteria:
+  - every stage status claim matches planning/ROADMAP.md at time of reading
+  - the repository map lists every top-level governance file and planning directory that actually exists

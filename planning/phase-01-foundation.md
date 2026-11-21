@@ -1243,3 +1243,176 @@ prompt 003 §13's reporting list:
   disposition its findings, and decide what to mark Completed
   (`AGENTS.md` §11). This corrective batch is ready for that human step;
   it does not substitute for it.
+
+## 21. Documentation schema and roadmap amendment (prompt 004)
+
+Authorising prompt:
+[`planning/prompts/004-documentation-schema-and-roadmap-amendment.md`](prompts/004-documentation-schema-and-roadmap-amendment.md).
+New ADR: [`decisions/0006`](../decisions/0006-companion-schema-files.md).
+This section amends — does not replace — the plan above, same
+append-and-supersede convention as §17. Prompt 004 required seven
+lettered amendments (A–G, a **third, separate sequence** from both
+`decisions/0004`'s Amendments A–D and prompt 003's Amendments A–G —
+always written "prompt 004 Amendment X" where ambiguous).
+
+**Prompt 004 Amendment A — separate documentation from its schema.**
+Resolved by `decisions/0006`: every governed/schema-bearing document's
+schema moves from embedded front-matter to a companion
+`<document>.md.schema.yaml` file, computed deterministically from the
+document's own path (no registry). Implemented in
+`src/axiom_validator/{parsing,rules,__init__}.py`; contract-first per
+the "Contract revision" section added to
+`contracts/documentation-schema-validator.md` before the implementation
+changed.
+
+**Prompt 004 Amendment B — migrate existing documentation.** 15 real
+documents (`README.md`, 6 under `docs/`, 2 under `contracts/`, 5 under
+`evidence/`, 1 retrospective) and 20 test fixtures migrated; 4 files
+(`planning/prompts/001`–`004`) correctly excepted as a different,
+unrelated front-matter convention (provenance metadata, not a
+documentation schema). Full itemised record, including the
+`git diff --stat` verification that every real document's Markdown body
+is byte-for-byte unchanged apart from front-matter removal:
+`evidence/schema-migration.md`.
+
+**Prompt 004 Amendment C — adapt the documentation validator.** New
+contract revision rules 16–27 (companion-path lookup, missing-schema
+SKIPPED/FAIL split, embedded-front-matter reintroduction detection,
+orphaned-schema detection) implemented without replacing the validator's
+modular architecture — `parsing.py`/`rules.py`/`__init__.py` each
+changed in place, `reporting.py`/`__main__.py` unchanged. The public CLI
+and `validate_file`/`main` call shapes are preserved; their *return
+values* for previously-front-matter-bearing documents intentionally
+change, as an authorised contract evolution, not a silent compatibility
+break. One real latent bug was found and fixed during this work, before
+any independent review: `find_orphaned_schemas` run against the real
+repository root would have flagged the deliberately-orphaned test
+fixture on every future CI run, forever — fixed by excluding `tests/`
+from the repo-wide scan by default (`rules.find_orphaned_schemas`).
+
+**Prompt 004 Amendment D — tests and CI.** All 12 required test
+scenarios covered: valid document (existing), missing schema for a
+governed document (existing, retargeted), missing schema for a
+non-governed document (existing, retargeted + renamed
+`no_frontmatter.md` → `no_schema.md`), malformed YAML (existing,
+retargeted), missing required fields / incorrect field types / empty
+required values (existing, retargeted — 5 fixtures), missing required
+headings / broken authoritative-source references / links escaping the
+repository / existing ADR-reference behaviour (existing, retargeted — 4
+fixtures), orphaned schemas (new fixture + new test), accidental
+embedded front-matter (new fixture + new test). 27/27 tests pass (up
+from 23 before this amendment — independently recounted, since the
+first draft of this sentence said 26/3 and was internally inconsistent
+on its own arithmetic: `git show HEAD:tests/test_axiom_validator.py`
+had 14 test methods and
+`git show HEAD:tests/test_axiom_validator_schema_content.py` had 9,
+baseline 23; the 4 net-new methods are
+`TestEmbeddedFrontmatterReintroduced` (1),
+`TestOrphanedSchema` (2), and `TestArchiveEntryLinkVerification` (1,
+actually introduced by Amendment F below, not D) — caught by
+independent review, not self-corrected first).
+`.github/workflows/deterministic-checks.yml`'s existing
+`axiom-validator-tests` and `validate-governed-documentation` jobs
+needed no structural change — the same commands now exercise the new
+convention, including the orphan scan, which runs automatically as a
+side effect of `main()`'s existing batch pass. No `OPENAI_API_KEY` or
+paid invocation required, unchanged.
+
+**Prompt 004 Amendment E — expand the roadmap.** `planning/ROADMAP.md`
+rewritten from a detailed Stage 1.0–1.5 record into a concise overview
+(status table + Phase 1 summary pointing here for detail + Phases 2–4
+as explicitly-labelled proposals, no invented dates/benefits/results).
+The detailed Phase 1 history this replaced is not lost — it already
+lived in this file (§0–§20), which the new roadmap links to rather than
+duplicates.
+
+**Prompt 004 Amendment F — establish phase archiving.** Procedure
+documented in `docs/phase-archiving.md` (schema-governed); index created
+at `planning/archive/README.md` (schema-governed, currently empty).
+**Phase 1 is explicitly not archived** — `docs/phase-archiving.md`
+Non-goals states this plainly, matching prompt 004 §9's restriction.
+The procedure's "archive entries link to real artifacts" verification
+claim was **tested**, not merely asserted: a fixture shaped like a
+future archive entry, with one deliberately broken link
+(`tests/fixtures/invalid/archive_entry_broken_link.md`), confirms the
+existing validator's link-resolution check catches it
+(`TestArchiveEntryLinkVerification`) — proving the reused mechanism
+works without fabricating a completed phase to archive for real.
+
+**Prompt 004 Amendment G — documentation and governance reconciliation.**
+`decisions/0006` documents the original front-matter rationale
+(quoted, not restated as though never true), the readability
+disadvantage that motivated reversing it, the companion-file
+alternative, the explicit file-maintenance cost, why deterministic
+validation's role is unchanged in kind, and why semantic review remains
+necessary. `docs/documentation-schema.md` (Convention section),
+`docs/axiom-validator.md` (Architecture/Usage/Limitations),
+`docs/knowledge-placement.md` and `docs/knowledge-reconciliation.md`
+(prose references) updated to describe current policy accurately;
+`decisions/0002`'s Unresolved item annotated (not edited in substance)
+to point to `decisions/0006` for continuity. `planning/prompts/004-...md`
+itself preserved verbatim with provenance, alongside 001–003.
+
+**Preserved, per prompt 004 §11:** `decisions/0005`'s native-Codex-review
+decision is unaffected by this batch — no `OPENAI_API_KEY` requested,
+`.github/deferred/codex-review.yml` still deferred, no claim of
+automated AI merge enforcement anywhere in this batch's changes.
+
+## 22. Independent review record — documentation schema and roadmap batch (prompt 004)
+
+Dispatched: a fresh, non-forked `general-purpose` agent with no prior
+conversation context, given the repository directly and a four-check
+brief (migration correctness, validator behaviour, roadmap/archiving,
+documentation/governance reconciliation) — best-effort isolation, level
+2 of `docs/agent-isolation.md`'s taxonomy, named that way in the
+reviewer's own report. 50 tool uses, 131,094 tokens, 286.3s.
+
+**No BLOCKING findings in any of the four checks.** The reviewer went
+beyond re-reading this plan's and `evidence/schema-migration.md`'s own
+claims: it independently re-ran `git diff --stat` on all 15 migrated
+real documents (not just the 7-file sample this plan cited), confirmed
+3+ documents' companion-schema content byte-for-byte against the
+deleted front-matter, constructed 4 of its own adversarial test
+scenarios beyond this project's existing fixtures (a schema file that's
+valid YAML but a list, not a mapping; a document with *both* embedded
+front-matter and a companion file present simultaneously, confirming no
+silent fallback; `--repo-root` resolution invoked from a subdirectory;
+an orphaned schema created in `/tmp` outside the `tests/` exclusion, to
+confirm the exclusion is scoped correctly and not simply "always skip
+orphans"), cross-checked `decisions/0006`'s quoted "original rationale"
+against `git show HEAD:docs/documentation-schema.md`'s actual prior
+text to rule out strawmanning, and confirmed `decisions/0002`'s edit is
+annotation-only via `git log -p`.
+
+**Two ADVISORY findings, both bookkeeping/narrative inaccuracies in
+this plan's own and `evidence/schema-migration.md`'s record-keeping —
+neither affecting actual behaviour, test results, or decision
+substance:**
+
+1. This plan's §21 Amendment D paragraph originally claimed "27/27
+   tests pass (up from 26 before this amendment; the net-new count is 3
+   test methods...)" — internally inconsistent on its own arithmetic
+   (26 + 3 ≠ 27) and the baseline was wrong. The reviewer recounted
+   directly (`git show HEAD:tests/test_axiom_validator*.py` against the
+   working tree): actual baseline 23, actual net-new 4 methods
+   (`TestEmbeddedFrontmatterReintroduced`,
+   `TestOrphanedSchema` × 2, `TestArchiveEntryLinkVerification`).
+   **Fixed** — §21 above now states the corrected figures and the
+   correction itself, rather than silently replacing the wrong number.
+2. `evidence/schema-migration.md` stated "all 9 governed documents
+   report `PASS`" in its Verification section, written before Amendment
+   F added `docs/phase-archiving.md` and `planning/archive/README.md`
+   to the manifest (11 entries as of this plan's current state). **Not
+   actually wrong at the time it was written** (a timing snapshot, not
+   a fabrication) but stale relative to the finished state. **Fixed** —
+   that file now states both counts and why they differ.
+
+**Minor observation, not actioned as a defect:**
+`planning/prompts/004-...md` was untracked in git at review time —
+expected, since nothing in this batch had been committed yet; resolved
+by the commit this record accompanies.
+
+**Verdict (reviewer's own words, condensed):** "Every mechanism-level
+claim I could independently execute... reproduced exactly as the
+repository's own records describe... nothing BLOCKING was found in this
+pass."

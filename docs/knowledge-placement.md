@@ -1,14 +1,3 @@
----
-audience: contributors and agents making any non-trivial change
-purpose: define where a given piece of project knowledge belongs, and what enforces that
-required_sections: [Classification, Placement table, Enforcement classes, Reconciliation hook]
-authoritative_sources: [AGENTS.md, decisions/0002-knowledge-architecture.md]
-acceptance_criteria:
-  - every knowledge category in the placement table maps to exactly one authoritative artifact kind
-  - every enforcement class states whether it blocks a change or is advisory
-  - this document itself has been checked against docs/documentation-schema.md
----
-
 # Knowledge placement policy
 
 This is the full version of the placement table in `AGENTS.md` §7, which
@@ -104,7 +93,7 @@ correction:
 
 | Control | Level |
 |---|---|
-| `src/axiom_validator/` — front-matter presence, required sections, path/link resolution, ADR-reference existence, field type/non-emptiness (Amendment C), governed-document scope | 4 — executed by CI (`.github/workflows/deterministic-checks.yml`), **not** a required merge check |
+| `src/axiom_validator/` — companion-schema presence, required sections, path/link resolution, ADR-reference existence, field type/non-emptiness, governed-document scope, orphaned-schema and reintroduced-front-matter detection (`decisions/0006`) | 4 — executed by CI (`.github/workflows/deterministic-checks.yml`), **not** a required merge check |
 | `.github/scripts/policy_evaluator.py` — Codex-finding policy decisions | 4 — executed by CI, not a required merge check; its live Codex input source is deferred (`decisions/0005`) |
 | Sequential ADR numbering | 1 — policy only (`AGENTS.md` §3). **Nothing in this repository mechanically checks that ADR numbers are sequential or gap-free** — the validator's `ADR_PATH_RE` only checks that a *referenced* ADR number resolves to a real file, which is a different, narrower check than "the ADR sequence has no gaps." Do not read the validator's existing-ADR-reference check as sequential-numbering enforcement. |
 | Complete documentation correctness (semantic accuracy of claims) | 6 — semantic/editorial only, by design; see `docs/knowledge-reconciliation.md` and the Amendment D semantic-review procedure (`planning/phase-01-foundation.md` §17, §19) |
@@ -134,8 +123,9 @@ the validator does or is intended to do.
 
 ## Manual validation record
 
-Checked by hand against this document's own front-matter schema
-(`docs/documentation-schema.md`'s convention), itemized per acceptance
+Checked by hand against this document's own companion schema file
+(`docs/knowledge-placement.md.schema.yaml`, per
+`docs/documentation-schema.md`'s convention), itemized per acceptance
 criterion rather than asserted in the abstract — independent review found
 the prior, unitemized version of this claim left two of the three
 criteria `UNCERTAIN`:

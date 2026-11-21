@@ -1,13 +1,3 @@
----
-audience: whoever assesses Phase 1 closeout or extends the validator's documentation later
-purpose: record the Stage 1.5 independent documentation reconstruction exercise and its findings/dispositions
-required_sections: [Permitted evidence boundary, Reconstruction summary, Comparison findings and dispositions, Isolation honesty note]
-authoritative_sources: [docs/axiom-validator.md, contracts/documentation-schema-validator.md, planning/phase-01-foundation.md]
-acceptance_criteria:
-  - the permitted-evidence boundary is stated explicitly, with the actual files the agent read recorded as an audit trail, not assumed
-  - every finding has a disposition (fixed, or explicitly accepted with reasoning)
----
-
 # Stage 1.5: independent documentation reconstruction
 
 Per `planning/phase-01-foundation.md` §4 Stage 1.5 and the "no synthetic
