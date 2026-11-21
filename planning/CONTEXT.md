@@ -36,6 +36,20 @@ check not run when a schema exists) — it was an implementation defect
 against an already-correctly-specified contract rule, not a changed
 decision.
 
+## Independent review pending (as of commit `e0094f7`)
+
+The Finding D correction was committed and pushed before its dispatched
+independent review finished (the orchestrating turn hit a usage limit).
+**That review's findings have not been read, resolved, or recorded
+anywhere in this repository yet.** Before treating this batch as
+independently verified or citing a review result for Finding D, a
+future session must: retrieve that review's result, resolve any real
+findings it reports, and record it as a new section in
+`planning/phase-01-foundation.md` (the next available number). Until
+then, Finding D's fix is **self-verified only** (72/72 local tests,
+confirmed GitHub Actions success) — not yet independently confirmed,
+unlike findings A–C.
+
 ## Outstanding issues (the real, named blockers)
 
 1. **No `gh` CLI, GitHub token, or passwordless `sudo` to install

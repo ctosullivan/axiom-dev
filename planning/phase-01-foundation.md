@@ -1870,13 +1870,13 @@ still pass unchanged.
 | A — fenced-code heading false positive | `src/axiom_validator/parsing.py` | `162e5c6` | `tests/test_fenced_code_blocks.py` (10) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
 | B — malformed severity `TypeError` | `.github/scripts/policy_evaluator.py` | `162e5c6` | `.github/scripts/tests/test_policy_evaluator_severity_types.py` (17) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
 | C — heading whitespace crosses newline | `src/axiom_validator/parsing.py` | `0645af3` | `tests/test_heading_whitespace.py` (12) | §26 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
-| D — manifest integrity not checked when schema exists | `src/axiom_validator/__init__.py` | [this batch's commit, recorded in §28 once pushed] | `tests/test_manifest_integrity.py` (10) | See §28 | Suggested reply below; not confirmed resolved on GitHub |
+| D — manifest integrity not checked when schema exists | `src/axiom_validator/__init__.py` | `e0094f7` | `tests/test_manifest_integrity.py` (10) | Dispatched, not yet reviewed as of this commit — see planning/CONTEXT.md | Suggested reply below; not confirmed resolved on GitHub |
 
 **Suggested reply text for Finding D's GitHub thread (prompt 007 §12),
 prepared, not posted** — this session has no `gh`/token/API access to
 post or resolve a thread:
 
-> "Fixed in commit [recorded in §28 once pushed] —
+> "Fixed in commit `e0094f7` —
 > `src/axiom_validator/__init__.py`'s `validate_file` now loads and
 > checks `schemas/governed-documents.txt` unconditionally (unless an
 > explicit `governed_manifest` override is given), before branching on
@@ -1885,7 +1885,7 @@ post or resolve a thread:
 > schema wrongly `PASS` even with no manifest file at all. Regression
 > tests: `tests/test_manifest_integrity.py` (10 tests, all 8 required
 > scenarios from the review comment's own reproduction recipe).
-> Independent verification: see `planning/phase-01-foundation.md` §28."
+> Independent verification: dispatched; not yet recorded as of this commit — check planning/CONTEXT.md for the current state before citing a result."
 
 No contract amendment was needed (the contract already specified this
 rule correctly; only the implementation didn't match it) — recorded
