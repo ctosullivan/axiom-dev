@@ -57,6 +57,20 @@ None of these are shortcuts taken — each is a named, verified-real
 external blocker, re-confirmed directly in this corrective pass (not
 taken on a prior session's word).
 
+## Recent human action
+
+The repository owner pushed a commit directly to this branch on GitHub
+(`ba9c592`, "docs: add evidence-based Codex review rules") adding
+`AGENTS.md` §13 — explicit review priorities and finding-report shape
+for native Codex PR review (contract integrity, verification
+independence, knowledge/documentation integrity, enforcement/failure
+behaviour), reiterating `decisions/0005`'s "advisory, not a mechanical
+gate" framing. Merged cleanly into this branch (`033dfe6`), no conflicts
+— this session's prompt 004 batch did not touch `AGENTS.md`. This is
+real engagement from the human on the native-Codex-review setup, but it
+does not by itself mean a PR now exists; this session has no way to
+query GitHub's API to check (no `gh`/token, confirmed again).
+
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin`. Check
