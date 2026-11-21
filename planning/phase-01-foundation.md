@@ -1690,20 +1690,63 @@ finding, to post directly on PR #1:
   `.github/scripts/tests/test_policy_evaluator_severity_types.py` (17
   tests). Independently re-verified in §24 (no blocking findings) and
   re-run again in this batch — still passing."
-- **Finding C (heading whitespace):** "Fixed in [this batch's commit
-  SHA, recorded in §26 once pushed] — `HEADING_RE`'s marker/text
-  separator changed from `\s+` to `[ \t]+`, plus a related tightening
-  (captured text must start with a non-whitespace character) found
-  while verifying this fix's own required scenarios. Regression tests:
-  `tests/test_heading_whitespace.py` (12 tests, all 9 required
-  scenarios + CRLF coverage + the related case). Independent
-  verification: see §26."
+- **Finding C (heading whitespace):** "Fixed in commit `0645af3` —
+  `HEADING_RE`'s marker/text separator changed from `\s+` to `[ \t]+`,
+  plus a related tightening (captured text must start with a
+  non-whitespace character) found while verifying this fix's own
+  required scenarios. Regression tests: `tests/test_heading_whitespace.py`
+  (12 tests, all 9 required scenarios + CRLF coverage + the related
+  case). Independent verification: see §26 — no blocking findings,
+  including 12 of the reviewer's own adversarial scenarios beyond the
+  required set."
 
 These are suggested texts for the human to post and then mark each
 thread Resolved on GitHub's own terms — this record does not claim any
 thread is actually resolved, since this session cannot observe or
 change that state (prompt 006 §10: "Never claim a thread has been
 resolved unless its actual GitHub state confirms that").
+
+**Suggested PR #1 description update (prompt 006 §9) — prepared, not
+posted**, for the repository owner to paste over the current
+description:
+
+> **Phase 1 — Foundation.** Establishes and tests a lightweight,
+> evidence-based AI-assisted development methodology: governance,
+> knowledge placement, documentation schemas, behavioural contracts,
+> independent review, deterministic CI, self-development of a real
+> component, a genuine refactor, and independent documentation
+> reconstruction. Full plan: `planning/phase-01-foundation.md`. Key
+> ADRs: `decisions/0001`–`0007`.
+>
+> **Native Codex review findings and corrections:**
+> 1. Fenced-code-block heading false positive
+>    (`src/axiom_validator/parsing.py`) — fixed, commit `162e5c6`,
+>    `tests/test_fenced_code_blocks.py` (10 tests).
+> 2. Policy-evaluator `TypeError` on malformed severity
+>    (`.github/scripts/policy_evaluator.py`) — fixed, commit `162e5c6`,
+>    `.github/scripts/tests/test_policy_evaluator_severity_types.py`
+>    (17 tests).
+> 3. Heading-whitespace false positive (`\s+` matching a newline,
+>    `src/axiom_validator/parsing.py`) — fixed, commit `0645af3`,
+>    `tests/test_heading_whitespace.py` (12 tests).
+>
+> **Deterministic verification:** 62/62 validator tests, 33/33
+> policy-evaluator tests, all 11 governed documents `PASS`, zero
+> orphaned schemas — all re-run after each correction, not assumed.
+> GitHub Actions' actual run result on the latest commit is not
+> independently confirmed from the authoring session (no API access).
+>
+> **Independent verification:** every correction in this PR was
+> reviewed by a fresh-context agent before being treated as final —
+> see `planning/phase-01-foundation.md` §19, §22, §24, §26 for each
+> review's findings and disposition. All best-effort (not mechanically
+> enforced) isolation, named as such throughout.
+>
+> **Outstanding:** a third native Codex review of the latest commit
+> (request with `@codex review`); the three existing review threads'
+> resolution on GitHub; human acceptance. See
+> `evidence/phase-1-final-closeout.md` and its addendum for the full
+> acceptance matrix. **Do not merge without explicit human approval.**
 
 ## 26. Independent review record — heading-whitespace correction (prompt 006)
 
