@@ -1,17 +1,50 @@
 # Phase 1 — Foundation
 
-Authorising prompt: [`planning/prompts/001-phase-1-bootstrap.md`](prompts/001-phase-1-bootstrap.md).
+Authorising prompts:
+[`planning/prompts/001-phase-1-bootstrap.md`](prompts/001-phase-1-bootstrap.md)
+(original bootstrap) and
+[`planning/prompts/002-phase-1-amend-and-implement.md`](prompts/002-phase-1-amend-and-implement.md)
+(amendment, supersedes the bootstrap-only restriction and authorises full
+Stage 1.0–1.5 implementation).
 Related ADRs: [`decisions/0001`](../decisions/0001-development-governance.md),
 [`decisions/0002`](../decisions/0002-knowledge-architecture.md),
-[`decisions/0003`](../decisions/0003-independent-verification.md).
+[`decisions/0003`](../decisions/0003-independent-verification.md),
+[`decisions/0004`](../decisions/0004-phase-1-amendment-verification-measurement-and-acceptance.md).
 
-This is the implementation-ready Phase 1 plan required by the bootstrap
-prompt. **Completing Stage 1.0 does not complete Phase 1.** Phase 1 closes
+This is the implementation-ready Phase 1 plan, amended per prompt 002.
+**Completing Stage 1.0 does not complete Phase 1.** Phase 1 closes
 only when Stage 1.5's dogfooding exercise closes out successfully against
-the acceptance requirements in §8 below. Stages 1.1–1.5 are specified here
-to the depth needed to establish dependencies, scope, and acceptance
-criteria — each still requires its own focused plan, written and reviewed,
-immediately before that stage's implementation starts (`AGENTS.md` §2).
+the acceptance requirements in §8, §9 and §10 below. Stages 1.1–1.5 are
+specified here to the depth needed to establish dependencies, scope, and
+acceptance criteria — each still requires its own focused plan, written
+and reviewed, immediately before that stage's implementation starts
+(`AGENTS.md` §2).
+
+## 0. Amendment record (prompt 002, 2026-11-21)
+
+Prompt 002 required four amendments to this plan, resolved as follows
+(full rationale in `decisions/0004`):
+
+- **Amendment A (minimise bootstrap overhead):** assessed against the
+  existing plan and found largely already satisfied (see `decisions/0001`,
+  §2 below). One gap closed: §4's stage specs are tightened below so that
+  no stage documents a capability's behaviour as OBSERVED/VERIFIED before
+  that capability actually exists and has been run for real — "detailed
+  technical documentation... alongside the functionality it describes,"
+  not ahead of it.
+- **Amendment B (strengthen independent verification):** Stage 1.3 and
+  1.4's specs below now require protected/baseline fixtures, independently
+  reviewed acceptance criteria predating implementation, an explicit
+  detected/missed/introduced defect ledger, and hard separation between
+  test results, Codex findings and human acceptance as distinct evidence
+  artifacts — not a reviewer re-deriving the implementer's own assumptions.
+- **Amendment C (measurement from the beginning):** `evidence/phase-1-log.md`
+  (new, §9 below) starts recording real effort/cost/defect/rework/reuse
+  data from this amendment onward — not retroactively for Stage 1.0, which
+  predates the log and is not re-measured after the fact.
+- **Amendment D (explicit acceptance demonstrations):** eight concrete
+  demonstrations (§10 below), each mapped to the stage that produces it
+  and tracked as not-yet-demonstrated until real evidence exists.
 
 ## 1. Objective and expected value
 
@@ -222,12 +255,34 @@ itself.
 - **Verification method:** the test cases above, run for real against a
   real PR; independent review of the gate's fail-closed behaviour
   specifically (does an API error or timeout silently pass?).
+- **Architectural split (Amendment B):** the gate has two separable
+  pieces, and this plan tracks them separately rather than as one
+  monolithic "the gate works" claim: (1) a **deterministic policy
+  evaluator** — ordinary, locally testable code that takes a structured
+  review-finding document as input and decides pass/block/fail-closed; this
+  needs no live Codex call to build or unit-test, and its tests are
+  deterministic CI from the moment they exist; (2) the **live integration**
+  — the actual GitHub Action invoking Codex against a real PR and feeding
+  its output to (1). (1) can be built, tested and evidenced without any
+  external credentials. (2) requires real GitHub repository configuration
+  (secrets, required status checks, possibly admin API access) and, if
+  Codex calls are paid, a cost decision — per the authorising prompt, "do
+  not bypass protection if configuration fails; report the blocker" rather
+  than substituting a local simulation for live GitHub evidence. If (2) is
+  blocked by missing credentials/access/cost-authorisation, that is
+  recorded as an open item here and in `planning/CONTEXT.md`, not
+  papered over by (1)'s test suite passing.
 - **Documentation implications:** `docs/` gets the gate's actual behaviour
   documented as OBSERVED/VERIFIED only after the test cases above have
   actually been run — not as INTENDED language describing a design.
 - **Completion criteria:** both required-check test cases demonstrated
   with evidence; independent closeout confirms fail-closed behaviour
   specifically, since this is the gate most likely to silently fail open.
+  If only the deterministic evaluator (piece 1) is evidenced and the live
+  integration (piece 2) is blocked, this stage's exit criterion ("real
+  GitHub PR evidence demonstrates both successful and blocked outcomes")
+  is **not met** and must be recorded as open, per Amendment D
+  demonstration 3 (§10).
 
 ### Stage 1.4 — Axiom self-development and refactoring
 
@@ -245,6 +300,48 @@ itself.
   independent review of the refactor; before/after behavioural
   verification showing the contracts still hold; a knowledge-placement
   assessment of the result; documentation reconciliation.
+- **Anti-circularity mechanics (Amendment B), binding on this stage:**
+  - *Contracts and acceptance criteria* are written and independently
+    reviewed (fresh context) **before** implementation starts — the
+    reviewer checks the contract/fixtures, not the implementer's code,
+    and has not seen the implementation yet.
+  - *Fixtures* include both known-valid documents (should pass) and
+    deliberately defective ones (should fail, with a specific expected
+    error) — not only happy-path examples.
+  - *Protected expected outputs*: once a contract/fixture set is accepted,
+    its files live under a path recorded with a checksum in
+    `evidence/` at acceptance time. A later PR (implementation or
+    refactor) that changes a protected file's checksum without a separate,
+    explicitly reviewed "contract change" commit explaining why is a
+    verification failure. **Named honestly, per the same standard
+    `decisions/0003` §3 sets for isolation claims: this is a procedural
+    control, not a mechanical one** — nothing in this environment
+    currently computes the checksum and blocks the PR automatically; a
+    human or independent reviewer has to actually check it. It becomes
+    mechanical the moment Stage 1.4's validator (or a CI hook) is taught
+    to compare the checksum itself and fail the check on mismatch — until
+    then, calling it "mechanical enforcement" would be exactly the
+    mislabeling `AGENTS.md` §9's "not weakened unilaterally" rule and
+    `decisions/0003` exist to prevent.
+  - *Independent evaluation* of the initial implementation happens from a
+    fresh context, checking the implementation against the protected
+    contract — not against the implementer's own test narrative.
+  - *Baseline before refactor*: the full test suite's pass/fail output
+    against the protected fixtures is captured to `evidence/` before any
+    refactor commit, so "before" is a real recorded artifact, not a
+    retrospective claim.
+  - *Before/after verification* reruns the identical protected fixture
+    suite post-refactor; any difference in result is a regression, full
+    stop, regardless of how the refactor is explained.
+  - *Defect ledger*: `evidence/` records, per implementation and per
+    refactor: defects the test suite detected, defects independent review
+    found that tests missed, and (if any) defects the refactor itself
+    introduced. An empty ledger is a claim that needs the same evidence
+    as a populated one.
+  - *Evidence separation*: test-suite results, Codex/independent-review
+    findings, and the human merge-acceptance decision are recorded as
+    three distinct artifacts/sections — never merged into one "it passed"
+    line.
 - **Non-goals:** no feature growth beyond what the validator needs to
   validate Stage 1.1's schema; the refactor is not an excuse to add scope.
 - **Dependencies:** Stages 1.1 (schema to validate against), 1.2
@@ -458,3 +555,151 @@ Stage 1.0 (only) is Completed when, with evidence:
 Marking Stage 1.0 Completed in `planning/ROADMAP.md` itself is a human
 approval action per `AGENTS.md` §11 — this plan documents that the
 criteria above are met; it does not self-certify completion.
+
+## 9. Evidence and measurement (Amendment C)
+
+Living log: [`evidence/phase-1-log.md`](../evidence/phase-1-log.md),
+started at the point of this amendment (2026-11-21) — not
+back-filled for Stage 1.0, which predates it.
+
+Tracked, where actually measurable:
+
+- Development effort: wall-clock/turn count for substantive work units.
+- Agent usage: subagent dispatches, their token counts and durations
+  (available directly from this session's own dispatch notifications).
+- CI/review overhead: once Stage 1.3 exists, time/cost per PR for
+  deterministic checks + Codex review.
+- Defects: detected by tests, detected only by independent review, missed
+  by both (if later discovered), introduced by a refactor.
+- Rework: plan or implementation revisions required after review.
+- Documentation maintenance effort: how much a given code change's
+  required doc update actually cost.
+- Knowledge reuse: concrete instances where a later stage used a decision,
+  contract or convention recorded by an earlier one, cited by file.
+- Failure cases and unresolved uncertainty: recorded as such, not
+  smoothed into a success narrative.
+
+**Not invented:** this project has no access to real token-cost billing
+figures, no wall-clock instrumentation beyond what a session can observe
+directly, and no baseline from a non-Axiom comparison arm. Where a metric
+in the prompt's list (e.g. "agent usage and costs") isn't actually
+observable in this environment, the log says so explicitly rather than
+estimating a number and presenting it as measured.
+
+## 10. Explicit acceptance demonstrations (Amendment D)
+
+Each demonstration below is required, real-repository evidence — a
+synthetic fixture built to pass is not a substitute (prompt 002 §4,
+Amendment D, final line; consistent with the retained CodeCompass "no
+synthetic substitute" rule in §2 above). Status is tracked here and
+updated only when real evidence exists; "Not yet demonstrated" is the
+honest default, not a gap to hide.
+
+| # | Demonstration | Produced by | Status |
+|---|---|---|---|
+| 1 | A fresh agent resumes development using repository knowledge alone | Stage 1.0 exit criterion, re-exercised explicitly | Not yet demonstrated |
+| 2 | One requirement traced: instruction → plan → decision → implementation → verification | `contracts/documentation-schema-validator.md`, traced from `planning/prompts/001...md` §5 → `decisions/0002` → this plan's Stage 1.4 → the contract | **Partially demonstrated** — chain exists through the contract (prompt → decision → plan → contract); implementation and verification legs pending Stage 1.4 |
+| 3 | A deliberately defective PR is rejected by the required CI gate | Stage 1.3, live integration piece | Not yet demonstrated — depends on Stage 1.3's live-integration blocker status (§4) |
+| 4 | A meaningful refactor preserves independently established behaviour | Stage 1.4 | Not yet demonstrated |
+| 5 | Knowledge placement and documentation consistency evaluated against real changes | Ongoing from Stage 1.1 onward, against each substantive change | **Partially demonstrated** — this batch's own independent review (§11) found and fixed two real placement/format inconsistencies in live Stage 1.1 content, not a synthetic exercise |
+| 6 | Documentation independently reconstructed from permitted evidence | Stage 1.5 | Not yet demonstrated |
+| 7 | Knowledge from earlier work reused in a later task | Cross-stage; candidate: Stage 1.4 reusing Stage 1.1's schema/placement conventions and Stage 1.2's verification procedure | Not yet demonstrated |
+| 8 | Methodology overhead recorded and assessed | `evidence/phase-1-log.md` (§9), assessed at Stage 1.5 closeout | In progress from this amendment onward |
+
+Phase 1 cannot close (§7) while any row above remains "Not yet
+demonstrated" without an explicit, recorded reason the gap is acceptable
+to leave open (e.g. a genuine external blocker, not a scheduling
+convenience).
+
+## 11. Independent review record — amendment + Stage 1.1 batch
+
+Dispatched: a fresh, non-forked agent with no prior conversation context,
+given the repository directly (same best-effort isolation level as §6 —
+not strict; see `decisions/0003` §3). Scope: the amendment (§0, §9, §10,
+`decisions/0004`, `planning/prompts/002-...md`) and Stage 1.1's first real
+content (`docs/documentation-schema.md`, `docs/knowledge-placement.md`,
+`docs/knowledge-reconciliation.md`, `contracts/documentation-schema-validator.md`,
+and the `README.md`/`planning/CONTEXT.md`/`planning/ROADMAP.md`/`CHANGELOG.md`
+updates), all uncommitted at review time.
+
+### Findings and dispositions
+
+**BLOCKING-1 — `authoritative_sources` entries in `docs/knowledge-placement.md`
+and `docs/knowledge-reconciliation.md` used a format
+(`AGENTS.md §7`, and a reference to CodeCompass's own `decisions/0094`,
+which doesn't exist in this repository) that the validator contract
+(`contracts/documentation-schema-validator.md`) would fail against its
+own Stage 1.1 content.** **Disposition: fixed** — both front-matter
+blocks now use bare, repository-relative paths only
+(`docs/knowledge-placement.md`, `docs/knowledge-reconciliation.md`); the
+contract itself (rules 5 and 7) was also tightened to state explicitly
+that entries must be bare paths with no section suffix, that paths
+outside this repository belong in prose not in this field, and that rule
+7 is a refinement of rules 5/6 (matched paths/links only), not a
+full-text scan that would flag a prose mention of another project's ADR
+number.
+
+**BLOCKING-2 — Amendment B's checksum-based protected-fixture mechanism
+was described as "mechanical enforcement" in `decisions/0004` and this
+file, when nothing in this environment actually computes or compares a
+checksum automatically; it is a procedure a reviewer has to actually
+perform.** The reviewer correctly identified this as the exact mislabeling
+`decisions/0003` §3 was written to prevent for isolation claims — the same
+standard applies to enforcement claims. **Disposition: fixed** — both
+documents now call this a procedural control, name what would make it
+mechanical (Stage 1.4's validator or a CI hook actually comparing the
+checksum), and state plainly that it isn't that yet.
+
+**ADVISORY — `docs/documentation-schema.md`'s manual validation record
+claimed README's repository map was "found complete" against `ls` output,
+but it omitted `.github/pull_request_template.md`, a real governance
+file.** **Disposition: fixed** — the row was added to README.md's table,
+and the validation record now says the first pass missed it and names
+that this review caught the gap, rather than silently correcting the
+claim to read as if it had been complete from the start.
+
+**ADVISORY — the `docs/knowledge-reconciliation.md` worked example is a
+real reconciliation with a real, verified fix, but a weak test of the
+procedure's value, since the drift it found was introduced and caught
+within the same session rather than surviving a session boundary.**
+**Disposition: fixed (caveat added)** — the document now states this
+limitation explicitly and points to Stage 1.5's independent reconstruction
+as the stronger test.
+
+**ADVISORY — Amendment A's resolution in `decisions/0004` mostly asserts
+the existing plan already satisfies it, adding only one small new rule.**
+**Disposition: accepted as recorded, no further action** — the reviewer
+called this defensible but the thinnest of the four amendments; noted
+here rather than padded with additional process to look more substantial
+than it is.
+
+**ADVISORY — `evidence/phase-1-log.md`'s subagent token/duration figures
+can't be independently re-derived from repository artifacts alone, since
+no raw dispatch log is retained.** **Disposition: accepted as recorded,
+no further action** — the figures are in-session data available only to
+the orchestrating session at the time; this is a real, named limitation
+on the evidence log's own evidentiary strength, not a defect to fix.
+
+**ADVISORY — contract rule 4 (heading match) didn't address duplicate
+headings or heading level.** **Disposition: fixed** — the contract now
+states explicitly that a match at any heading level counts, and duplicate
+headings with the same text are not an error.
+
+**No issues found** — all `AGENTS.md §N` and `planning/phase-01-foundation.md §N`
+cross-references resolve; `decisions/0002`'s "Unresolved" item is
+correctly left unedited (append-only) with its resolution placed in the
+newer `docs/documentation-schema.md` instead; scope discipline holds
+completely (no `src/`, `tests/`, `.github/workflows/`, or any code exists
+anywhere in the tree); ADR numbering (0001–0004) is sequential with no
+gaps.
+
+### Overall verdict (reviewer's own words, condensed)
+
+"The governance/planning layer is substantively strong... Amendments A, C,
+D are genuinely satisfied with checkable content... But the two BLOCKING
+findings are real: the Stage 1.1 documents already violate the format the
+Stage 1.4 validator contract will enforce against them, and Amendment B's
+flagship anti-circularity mechanism is labeled 'mechanical' when it is
+currently only procedural — the exact mislabeling this project's own ADR
+0003 was written to prevent. Fix those two before committing; everything
+else is advisory polish." Both are fixed as recorded above.

@@ -20,11 +20,15 @@ Full stage detail, dependencies and acceptance criteria:
 | Stage | Description | Status |
 |---|---|---|
 | 1.0 | Repository bootstrap and governance | In progress — see below |
-| 1.1 | Knowledge and documentation methodology | Planned |
+| 1.1 | Knowledge and documentation methodology | In progress |
 | 1.2 | Agent development methodology | Planned |
 | 1.3 | Codex CI review gate | Planned |
 | 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | Planned |
 | 1.5 | Independent documentation reconstruction and closeout | Planned |
+
+Amended 2026-11-21 per `planning/prompts/002-phase-1-amend-and-implement.md`
+and `decisions/0004` — see `planning/phase-01-foundation.md` §0 for what
+changed.
 
 **Phase 1 as a whole is not Completed until Stage 1.5's dogfooding exercise
 closes out successfully.** Stage 1.0 completing does not imply Phase 1
@@ -49,8 +53,13 @@ criteria, not implementation authorisation.
 
 ## Directories deliberately not yet created
 
-`docs/`, `contracts/`, `evidence/`, `src/`, `tests/`, `.github/workflows/`
-do not exist in this repository yet. They are scoped to the stage that
-gives them real content (see `planning/phase-01-foundation.md`) and are
-intentionally absent until then, per the bootstrap prompt's instruction not
-to create placeholder structure.
+`src/`, `tests/`, `.github/workflows/` do not exist in this repository
+yet. They are scoped to Stage 1.3 (`.github/workflows/`) and Stage 1.4
+(`src/`, `tests/`) and are intentionally absent until those stages give
+them real content (see `planning/phase-01-foundation.md`), per the
+bootstrap prompt's instruction not to create placeholder structure.
+
+`evidence/` was created as part of the Phase 1 amendment (Amendment C,
+`decisions/0004`) with real initial content
+(`evidence/phase-1-log.md`). `docs/` and `contracts/` are being created
+as part of Stage 1.1, also with real initial content, not placeholders.

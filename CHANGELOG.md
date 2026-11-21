@@ -18,6 +18,13 @@ This project does not yet have a release; entries accumulate under
   knowledge and documentation architecture), `decisions/0003` (independent
   verification and agent responsibilities).
 - `.github/pull_request_template.md`.
+- Phase 1 amendment (prompt 002): `decisions/0004` (anti-circularity
+  verification mechanics, measurement, explicit acceptance
+  demonstrations); `planning/prompts/002-phase-1-amend-and-implement.md`;
+  `evidence/phase-1-log.md`.
+- Stage 1.1 first real content: `docs/documentation-schema.md`,
+  `docs/knowledge-placement.md`, `docs/knowledge-reconciliation.md`,
+  `contracts/documentation-schema-validator.md`.
 
 No substantive Axiom Dev software exists yet. This release establishes
 process only.

@@ -1,3 +1,13 @@
+---
+audience: new contributors, agents resuming work, and anyone evaluating the project
+purpose: orient a reader to what Axiom Dev is, its current status, and where to find governing detail
+required_sections: [Mission, Fundamental hypothesis, Development methodology, Repository map, Licence]
+authoritative_sources: [AGENTS.md, planning/ROADMAP.md, planning/CONTEXT.md]
+acceptance_criteria:
+  - every stage status claim matches planning/ROADMAP.md at time of reading
+  - the repository map lists every top-level governance file and planning directory that actually exists
+---
+
 # Axiom Dev
 
 Axiom Dev is the primary product of the Axiom project: an attempt to find the
@@ -6,10 +16,10 @@ preserves important project knowledge, supports independent verification,
 maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
-> **Status: Phase 1, Stage 1.0 (repository bootstrap and governance).**
-> This repository currently contains governance, planning and decision
-> records only. No substantive Axiom Dev software has been implemented yet.
-> See [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state and
+> **Status: Phase 1, Stages 1.0–1.1 in progress.** Governance (1.0) and the
+> knowledge/documentation methodology (1.1) are being established. No
+> substantive Axiom Dev software has been implemented yet. See
+> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state and
 > [`planning/ROADMAP.md`](planning/ROADMAP.md) for what is planned, in
 > progress, or done.
 
@@ -93,11 +103,15 @@ for how to propose and land a change.
 | `planning/prompts/` | Original planning prompts, preserved verbatim with provenance. |
 | `planning/retros/` | Phase retrospectives, created as phases complete. |
 | `decisions/` | Sequentially numbered Architecture Decision Records. |
+| `docs/` | Human-facing methodology documentation (knowledge placement, documentation schema). |
+| `contracts/` | Required behaviour, written and reviewed before the implementation it governs. |
+| `evidence/` | Verification outcomes and the Phase 1 measurement log. |
+| `.github/pull_request_template.md` | Checklist a PR description must address. |
 
-Directories named in the Phase 1 plan but not yet present (`docs/`,
-`contracts/`, `evidence/`, `src/`, `tests/`, `.github/workflows/`) are
-intentionally deferred to the stages that give them real content — see
-`planning/phase-01-foundation.md` for why each is scoped where it is.
+Directories named in the Phase 1 plan but not yet present (`src/`,
+`tests/`, `.github/workflows/`) are intentionally deferred to Stage 1.3/1.4,
+which give them real content — see `planning/phase-01-foundation.md` for
+why each is scoped where it is.
 
 ## Licence
 
