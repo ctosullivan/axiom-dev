@@ -55,7 +55,17 @@ This project does not yet have a release; entries accumulate under
   (14/14, same tests), zero blocking findings from independent review —
   see `evidence/stage-1.4-refactor.md`.
 
+- Stage 1.5: `docs/axiom-validator.md` (human-facing validator
+  documentation — a real knowledge-placement gap found via a
+  pre-Stage-1.5 self-check, since the component had a contract and
+  evidence but no human-facing explanation); a restricted-evidence
+  independent documentation reconstruction
+  (`evidence/stage-1.5-reconstruction.md`) found and fixed two real
+  gaps in that doc (two missing non-goals; one true claim misplaced in
+  the wrong section).
+
 First real software, first real passing tests, first real (non-synthetic)
-defect found in this project's own documentation by its own tooling, and
+defect found in this project's own documentation by its own tooling,
 first genuine behaviour-preserving refactor with a clean independent
-review.
+review, and first independent documentation reconstruction run against a
+deliberately restricted evidence set.

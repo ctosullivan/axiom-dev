@@ -193,14 +193,69 @@ could not be measured and why.
   changes" — this time caught by checking the project's own placement
   rules against itself, not by an independent reviewer or a failing test.
 
+## 2026-11-21 — Stage 1.5 independent documentation reconstruction
+
+- **Development effort:** one orchestrating-session pass. Defined the
+  permitted-evidence boundary explicitly, dispatched a two-phase
+  reconstruction (blind reconstruction, then compare against the real
+  doc), reviewed its findings, fixed `docs/axiom-validator.md` (two
+  missing non-goals, one misplaced-but-true claim moved and
+  independently re-verified before being kept), wrote
+  `evidence/stage-1.5-reconstruction.md`.
+- **Agent usage:** one reconstruction dispatch — 79,349 tokens, 22 tool
+  uses, 179.7s duration.
+- **Defects/gaps found by the reconstruction, not by self-check:** 2
+  real (missing non-goals; misplaced claim), both fixed; 1 correctly
+  classified by the agent itself as unverifiable-from-its-restricted-evidence
+  rather than wrong (accepted, no fix needed — the claim was true and
+  appropriately scoped outside the component's own contract/evidence).
+- **No staleness or historical-rationale-as-current-justification
+  found** — checked specifically, per the task's own instructions.
+- **Isolation note:** this is the first exercise in this project built
+  around a restricted evidence set (not full repository access) rather
+  than just a fresh context — a stronger approximation of real
+  documentation reconstruction, still named as best-effort, not
+  mechanical (`evidence/stage-1.5-reconstruction.md` "Isolation honesty
+  note").
+
+## 2026-11-21 — Amendment D demonstration 1 (fresh agent resumes from repository knowledge alone)
+
+- **What was run:** a fresh agent, given no context beyond "start working
+  on this repository," was asked to identify the project, its
+  methodology, current status, key decisions, and next action, using
+  only repository contents.
+- **Result: a real finding, not a clean pass — which is more valuable
+  evidence, not less** (per the project's own repeated principle that a
+  clean result on the first attempt deserves more scrutiny). The agent
+  correctly reconstructed the project, mission, methodology, all four
+  ADRs, and the Stage 1.0–1.4 status accurately from `README.md`,
+  `AGENTS.md`, `decisions/`, and `planning/ROADMAP.md`. It also caught a
+  **genuine, real, transient inconsistency**: this test was run while
+  Stage 1.5's reconstruction work existed in the working tree but had
+  not yet been committed, so the committed `planning/CONTEXT.md` and
+  `planning/ROADMAP.md` still described Stage 1.5 as "Planned"/not
+  started, while uncommitted files already showed it done. The agent
+  correctly flagged this as "the one place where reading the docs alone
+  would mislead," named it as a real instance of the exact failure mode
+  `AGENTS.md` §4/§5 (current CONTEXT.md, same-commit doc sync) exist to
+  prevent, and correctly judged it as mid-session work-in-progress
+  rather than a methodology failure.
+- **Disposition: fixed by committing this same batch** (the one
+  containing this log entry) — the inconsistency the test found no
+  longer exists once this commit lands. The finding itself, and the
+  fact that it was found by a genuinely fresh agent during a real
+  working session rather than a staged clean-room exercise, is recorded
+  here rather than smoothed over.
+- **Agent usage:** 79,707 tokens, 16 tool uses, 72.9s duration.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |
 |---|---|---|
-| Subagent dispatches so far | 6 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor) |
-| Subagent tokens so far | 561,944 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 |
-| Blocking defects found by independent review (not self-caught) | 9 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor — all fixed |
-| Advisory defects found and fixed or accepted | 7 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor |
+| Subagent dispatches so far | 8 | 2 Stage 1.0, 1 amendment/1.1, 1 Stage 1.2/1.3, 2 Stage 1.4 (initial + refactor), 1 Stage 1.5 reconstruction, 1 Amendment-D demo 1 |
+| Subagent tokens so far | 721,000 | 209,592 + 128,322 + 98,748 + 62,324 + 62,958 + 79,349 + 79,707 |
+| Blocking/real defects found by independent review (not self-caught) | 11 | 2 Stage 1.0, 2 amendment/1.1, 3 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 2 Stage 1.5 — all fixed |
+| Advisory defects found and fixed or accepted | 8 | 1 Stage 1.0, 2 amendment/1.1, 2 Stage 1.2/1.3, 2 Stage 1.4 initial, 0 Stage 1.4 refactor, 1 Stage 1.5 (accepted) |
 | Real passing tests | 30 of 30 | 16 policy-evaluator + 14 axiom_validator, both re-run independently and confirmed (twice, for axiom_validator — before and after the refactor, identical) |
 | Real (non-synthetic) defects found in Axiom Dev's own documentation | 1 | shorthand ADR citations in docs/documentation-schema.md, docs/knowledge-placement.md — Amendment D demonstration 5 |
-| Stages with a recorded, real (non-synthetic) Amendment-D demonstration | 2 fully (rows 4, 7), 2 partially (rows 2, 5), 1 in progress (row 8) | See `planning/phase-01-foundation.md` §10 |
+| Amendment-D demonstrations fully demonstrated with real evidence | 6 of 8 (rows 1, 2, 4, 5, 6, 7) | See `planning/phase-01-foundation.md` §10; row 3 blocked (Stage 1.3 live gate), row 8 assessed at Phase 1 closeout |

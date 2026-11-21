@@ -597,12 +597,12 @@ honest default, not a gap to hide.
 
 | # | Demonstration | Produced by | Status |
 |---|---|---|---|
-| 1 | A fresh agent resumes development using repository knowledge alone | Stage 1.0 exit criterion, re-exercised explicitly | Not yet demonstrated |
-| 2 | One requirement traced: instruction → plan → decision → implementation → verification | `contracts/documentation-schema-validator.md`, traced from `planning/prompts/001...md` §5 → `decisions/0002` → this plan's Stage 1.4 → the contract | **Partially demonstrated** — chain exists through the contract (prompt → decision → plan → contract); implementation and verification legs pending Stage 1.4 |
+| 1 | A fresh agent resumes development using repository knowledge alone | `evidence/phase-1-log.md` 2026-11-21 entry | **Demonstrated** — correctly reconstructed project/methodology/ADRs/status from repo contents alone, and caught a real transient CONTEXT.md/ROADMAP.md staleness mid-session (fixed in the same commit as this row) |
+| 2 | One requirement traced: instruction → plan → decision → implementation → verification | The "reject a document missing a required section" requirement: `planning/prompts/001-...md` §5 → `decisions/0002` → this plan's Stage 1.4 → `contracts/documentation-schema-validator.md` rule 4 → `src/axiom_validator/rules.py`'s `check_required_sections` → `tests/test_axiom_validator.py`'s `TestMissingSection` (passing) → `evidence/stage-1.4-baseline.md`/`stage-1.4-refactor.md` | **Demonstrated** — full chain, every link a real file, not asserted |
 | 3 | A deliberately defective PR is rejected by the required CI gate | Stage 1.3, live integration piece | Not yet demonstrated — depends on Stage 1.3's live-integration blocker status (§4) |
 | 4 | A meaningful refactor preserves independently established behaviour | Stage 1.4 (`evidence/stage-1.4-refactor.md`) | **Demonstrated** — real structural split, identical before/after test results, independently verified |
-| 5 | Knowledge placement and documentation consistency evaluated against real changes | Ongoing from Stage 1.1 onward, against each substantive change | **Partially demonstrated** — this batch's own independent review (§11) found and fixed two real placement/format inconsistencies in live Stage 1.1 content, not a synthetic exercise |
-| 6 | Documentation independently reconstructed from permitted evidence | Stage 1.5 | Not yet demonstrated |
+| 5 | Knowledge placement and documentation consistency evaluated against real changes | §11 (Stage 1.1 format fix), Stage 1.4 dogfooding (real ADR-citation defect), Stage 1.5 reconstruction (missing-doc gap + 2 Limitations fixes) | **Demonstrated** — four independent, real (non-synthetic) instances across three different stages |
+| 6 | Documentation independently reconstructed from permitted evidence | Stage 1.5 (`evidence/stage-1.5-reconstruction.md`) | **Demonstrated** — restricted-evidence reconstruction, compared, 2 real findings fixed, 1 correctly accepted as out-of-scope-for-the-evidence-given |
 | 7 | Knowledge from earlier work reused in a later task | Stage 1.4 reused Stage 1.1's documentation-schema convention (every Stage 1.4 evidence/contract document carries the front-matter format Stage 1.1 defined, and is itself validated by the Stage 1.4 tool against that convention) and Stage 1.2's lifecycle/isolation vocabulary (every review record names its isolation level using Stage 1.2's taxonomy) | **Demonstrated** — concrete, citable instances, not just a stated intention |
 | 8 | Methodology overhead recorded and assessed | `evidence/phase-1-log.md` (§9), assessed at Stage 1.5 closeout | In progress from this amendment onward |
 
@@ -827,3 +827,31 @@ independently reviewed, before/after behaviour verified identical. Per
 `AGENTS.md` §11, marking it Completed in `planning/ROADMAP.md` is still a
 human approval action — this record documents the evidence for that
 approval, it does not self-certify.
+
+## 15. Stage 1.5 — independent documentation reconstruction
+
+Full record: `evidence/stage-1.5-reconstruction.md` (verification
+outcomes belong in `evidence/`, not duplicated at length here). Summary:
+a fresh agent was given a restricted permitted-evidence set (validator
+source, tests, contract, Stage 1.4 evidence files — explicitly excluding
+`docs/`, `planning/`, `decisions/`, `AGENTS.md`, git history) and asked
+to reconstruct the validator's purpose, architecture, usage, and
+limitations blind, then compare against the real `docs/axiom-validator.md`.
+The reconstruction was accurate on every verifiable point. The
+comparison found three real items: one unverifiable-but-true provenance
+claim (correctly classified by the agent as a gap in its restricted
+evidence, not an error — no fix needed); two real non-goals missing
+from the doc's own Limitations section (fixed); and one true claim
+placed in the wrong section — project-roadmap context mixed into a list
+that should only describe the validator's own behavioural limitations
+(fixed, and the underlying claim was independently verified — `grep`
+confirmed no workflow references `axiom_validator` — before being kept,
+not merely moved). Isolation level: best-effort, same as all prior
+reviews; named explicitly in `evidence/stage-1.5-reconstruction.md`'s
+"Isolation honesty note."
+
+This satisfies Amendment D demonstration 6
+(`docs/axiom-validator.md`/`planning/phase-01-foundation.md` §10,
+updated to Demonstrated) and is also a second real instance of
+demonstration 5 (documentation consistency evaluated against real
+changes, not synthetic ones).

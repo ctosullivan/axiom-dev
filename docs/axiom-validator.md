@@ -90,6 +90,12 @@ result = validate_file(Path("README.md"), Path("."))
 
 ## Limitations
 
+Limitations of the validator's own behaviour (all from
+`contracts/documentation-schema-validator.md`'s Non-goals, which this
+document is required to stay consistent with as its own cited
+authoritative source — an independent reconstruction exercise found two
+of these four missing from an earlier draft of this section):
+
 - No enforcement of which documents must carry a schema — an unschema'd
   document is `SKIPPED`, not flagged.
 - Does not check whether `acceptance_criteria` statements are actually
@@ -97,6 +103,8 @@ result = validate_file(Path("README.md"), Path("."))
   consistent with the document's claims — both are semantic/editorial
   concerns out of scope for a mechanical check
   (`docs/knowledge-placement.md`).
+- No network access — it never fetches or checks a remote URL.
+- No auto-fixing — it only reports; it never rewrites a document.
 - Rule 5's "bare path" check only recognises a `§` suffix as the
   section-marker example the contract itself gives; other conventions
   (e.g. a line-number suffix) wouldn't be caught. Documented, not fixed —
@@ -106,8 +114,13 @@ result = validate_file(Path("README.md"), Path("."))
   filename) is reported the same way as a wholly non-existent ADR number
   — both are "non-existent" by the file-existence test this validator
   actually runs, even though a human would call the former "close."
-- No CI integration of its own yet — Stage 1.3's Codex gate and this
-  validator are separate pieces of the methodology; nothing currently
-  wires this validator into `.github/workflows/` to run automatically on
-  every PR. That would be a reasonable future Stage 1.x addition, not
-  something this document should claim already exists.
+
+## Status in the broader methodology
+
+Separate from the validator's own limitations above: nothing currently
+wires this validator into `.github/workflows/` to run automatically on
+every PR (verified: no workflow file references `axiom_validator`).
+Stage 1.3's Codex-review gate is a different, independent piece of the
+same methodology — see `planning/phase-01-foundation.md` for how the
+two relate. CI-wiring this validator would be a reasonable future
+addition; this document doesn't claim it already exists.

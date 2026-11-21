@@ -24,7 +24,7 @@ Full stage detail, dependencies and acceptance criteria:
 | 1.2 | Agent development methodology | In progress |
 | 1.3 | Codex CI review gate | In progress — deterministic piece built and tested; live integration **blocked** (no `OPENAI_API_KEY`/cost decision) |
 | 1.4 | Axiom self-development and refactoring (first real component + behaviour-preserving refactor) | In progress — initial implementation done, reviewed, fixed; refactor not yet started |
-| 1.5 | Independent documentation reconstruction and closeout | Planned |
+| 1.5 | Independent documentation reconstruction and closeout | In progress — reconstruction done; Phase 1 closeout assessment pending |
 
 Amended 2026-11-21 per `planning/prompts/002-phase-1-amend-and-implement.md`
 and `decisions/0004` — see `planning/phase-01-foundation.md` §0 for what
@@ -95,12 +95,15 @@ independent review (zero blocking findings; see
 `evidence/stage-1.4-refactor.md`). Amendment D demonstrations 4 and 7
 are now fully demonstrated (`planning/phase-01-foundation.md` §10).
 
-### Stage 1.5
+### Stage 1.5 — Independent documentation reconstruction and closeout
 
-Status: **Planned.** Requires its own focused implementation plan,
-written and reviewed before work starts (`AGENTS.md` §2) — the detail in
-`planning/phase-01-foundation.md` establishes dependencies and acceptance
-criteria, not implementation authorisation.
+Status: **In progress.** A restricted-evidence reconstruction (not full
+repository access — a stronger test than prior reviews) was run against
+the validator component, compared against `docs/axiom-validator.md`,
+and found/fixed two real gaps. Full record:
+`evidence/stage-1.5-reconstruction.md`,
+`planning/phase-01-foundation.md` §15. **The Phase 1 closeout assessment
+itself has not yet run** — this stage is not Completed until it does.
 
 ## Directories deliberately not yet created
 
