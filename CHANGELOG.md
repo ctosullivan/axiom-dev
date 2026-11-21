@@ -1,10 +1,25 @@
 # Changelog
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-This project does not yet have a release; entries accumulate under
-`Unreleased` until Phase 1 produces something releasable.
+This project does not yet have a versioned release; unreleased entries
+remain under `Unreleased` until a release is explicitly prepared.
 
 ## [Unreleased]
+
+### 2026-11-22 — Phase transition
+
+- Phase 1 marked Completed by explicit owner decision after PR #1 merged;
+  acceptance exceptions retained in a separate evidence record and
+  linked logical archive (no historical closeout rewritten).
+- Recast roadmap: Phase 2 reusable template with Ledgerkit/hledger
+  comparative wiki, local knowledge API, stable claim/artifact IDs,
+  deterministic CI drift controls and full-lifecycle dogfooding, with
+  **no Phase 2 A/B test of the template**.
+- Phase 3 now reserves optional MCP and controlled A/B evaluation of
+  agent/knowledge-retrieval strategies when Axiom Assure is ready.
+- Simplified `CLAUDE.md` to provider-specific operating instructions;
+  updated current context, archive conventions and documentation schemas.
+
 
 ### Added
 
