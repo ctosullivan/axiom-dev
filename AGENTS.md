@@ -227,3 +227,55 @@ Changes to `AGENTS.md` are themselves governed by this process: propose via
 a plan, get human review, and if the change reverses or materially alters a
 prior methodology decision, record it as a new ADR superseding the old one
 rather than quietly editing history.
+
+## 13. Codex pull request review
+
+Codex provides independent, evidence-based review of substantive pull requests. Review the actual changes against accepted contracts, relevant ADRs, tests, implementation and project documentation. Do not rely solely on the implementer's descriptions or verification claims.
+
+### Review priorities
+
+**1. Behavioural contract integrity**
+
+Identify changes that violate accepted behavioural contracts, introduce regressions or silently alter established interfaces.
+
+Pay particular attention to changes where implementation, tests and expected results are modified together. Verify that acceptance criteria were independently established or that changes to them were explicitly authorised.
+
+**2. Verification independence**
+
+Identify circular verification, inadequate regression coverage, unsupported claims of behavioural equivalence and situations where tests cannot detect the defects they claim to exclude.
+
+Distinguish observed behaviour from independently verified behaviour.
+
+**3. Knowledge and documentation integrity**
+
+Identify inconsistencies between implementation, contracts, ADRs, documentation and current project status.
+
+Check whether documentation affected by a change has been reconciled. Flag obsolete claims, unsupported architectural explanations and functionality described as operational without evidence.
+
+**4. Enforcement and failure behaviour**
+
+Identify situations where required validation can be bypassed, malformed inputs are accepted, failed checks appear successful or procedural controls are incorrectly described as mechanically enforced.
+
+### Review findings
+
+For each material finding, provide:
+
+- The affected file and location.
+- The violated contract, invariant or documented requirement.
+- Supporting evidence or a reproducible counterexample.
+- The potential consequence.
+- A proportionate corrective recommendation.
+
+Distinguish confirmed defects from uncertainty.
+
+Prioritise correctness, contract preservation and evidence integrity over stylistic preferences. Avoid duplicating deterministic checks already performed by CI.
+
+### Review authority
+
+Codex review is independent advisory verification, not automatic approval or a mechanically enforced merge gate.
+
+P0/P1 findings require resolution or explicit human disposition before acceptance. Other findings require proportionate consideration.
+
+Human approval remains required for governance changes, phase completion and merging.
+
+The Phase 1 review mechanism is native Codex GitHub PR review, as established by `decisions/0005`. API-backed automated Codex CI gating remains deferred.
