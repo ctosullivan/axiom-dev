@@ -81,8 +81,8 @@ needs repo-admin access) named explicitly.
 ## Current branch / PR
 
 - Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` through commit
-  `38bbb58`. Stage 1.4's initial implementation above is **not yet
-  committed**.
+  `07d5548` (verified: `git log`, `git push` output). Stage 1.4's initial
+  implementation is now committed and pushed; the refactor is not.
 - PR: still not opened. Creation URL:
   `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
