@@ -48,9 +48,11 @@ review before merge.
 
 ## Current branch / PR
 
-- Branch: `phase-1/stage-1.0-bootstrap` (pushed to `origin`).
-- PR: not yet opened — see Outstanding issues. Compare URL:
-  `https://github.com/ctosullivan/axiom-dev/compare/main...phase-1/stage-1.0-bootstrap`
+- Branch: `phase-1/stage-1.0-bootstrap`, pushed to `origin` at commit
+  `0307e83` (verified: `git log`, `git push` output).
+- PR: not yet opened — see Outstanding issues. GitHub's own
+  push output gave this creation URL:
+  `https://github.com/ctosullivan/axiom-dev/pull/new/phase-1/stage-1.0-bootstrap`
 
 ## Next concrete action
 
