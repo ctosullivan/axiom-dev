@@ -1607,3 +1607,155 @@ independently closed out until that evidence-count discrepancy is
 corrected — everything else checked here supports proceeding once it
 is." That correction is the fix recorded above; no other blocking gap
 remains open from this review.
+
+## 25. Final Codex correction — heading whitespace (prompt 006)
+
+Authorising prompt:
+[`planning/prompts/006-final-phase-1-correction-and-closeout.md`](prompts/006-final-phase-1-correction-and-closeout.md).
+Baseline recorded before implementation: branch
+`phase-1/stage-1.0-bootstrap`, HEAD `2ebac4c` (clean working tree,
+matching the prompt's "Last confirmed PR head" exactly). A `web-fetch`
+attempt against the live PR page for the second Codex review's exact
+text returned a truncated page (~40K of 78K characters) and an
+unverified model-extracted summary for the rest — **recorded honestly
+as partially unconfirmed**, not treated as ground truth. What the
+fetch *did* establish with enough confidence to act on, cross-checked
+against the prompt's own detailed description (title "Restrict heading
+whitespace to the same line," file `src/axiom_validator/parsing.py`,
+P2, anchored to commit `2ebac4c`): a third finding exists and matches
+what this session then verified directly against the actual code.
+Per this project's standing practice, the live PR fetch is corroborating
+context, not the basis for the fix — the fix is based on reproducing
+the defect against the real code.
+
+**Reproduced before any change:** `git show 2ebac4c:src/axiom_validator/parsing.py`,
+loaded in isolation, confirmed `extract_headings("#\nRequired\n")`
+returned `{"Required"}` against the actual pre-fix code — the exact
+false positive both the prompt and the (partially unconfirmed) Codex
+comment describe: `HEADING_RE`'s `\s+` separator matches a newline,
+letting a bare `#` marker with no text of its own "absorb" an unrelated
+paragraph on the next line as its heading text.
+
+**Corrected** by changing the marker/text separator from `\s+` to
+`[ \t]+` (horizontal whitespace only). **A related, narrower artifact
+found while independently verifying this fix's own 9 required
+scenarios, not a separate Codex finding:** a bare `#` marker followed
+only by trailing whitespace and nothing else (`"#  \n"`) still matched
+after the first change, capturing a single space character that
+`.strip()` then reduced to an empty string — so `extract_headings`
+could return `{""}` for a line with no real heading text at all. Not
+exploitable as a false `PASS` (contract rule 12 already requires
+`required_sections` entries to be non-empty strings, so no real
+document could declare an empty-string requirement), but still a line
+with no real heading contributing a spurious result. Fixed in the same
+change by requiring the captured text's first character to be
+non-whitespace (`\S` instead of `.` at the start of the capture group).
+
+All 9 required regression scenarios plus CRLF line-ending coverage and
+the related empty-heading case implemented in a new, dedicated file
+(`tests/test_heading_whitespace.py`, 12 tests), following this
+project's established convention of giving each corrective fix its own
+test file rather than editing an earlier one. One new fixture pair
+(`tests/fixtures/invalid/heading_whitespace_next_line.md` +
+`tests/fixtures/schemas/invalid/heading_whitespace_next_line.md.schema.yaml`)
+exercises required scenario 8 end-to-end through `validate_file`, not
+just the parsing function directly.
+
+**Verification:** full suite 62/62 (50 before this batch + 12 new),
+policy-evaluator suite unaffected at 33/33, all 11 governed documents
+still `PASS`, zero orphaned schemas. The two earlier Codex corrections
+(fenced-code-block handling; severity-type validation) were re-run
+as part of the same full-suite pass, not assumed still passing from an
+earlier record — `tests/test_fenced_code_blocks.py` and
+`.github/scripts/tests/test_policy_evaluator_severity_types.py` both
+still pass unchanged.
+
+**Thread disposition (prompt 006 §10) — prepared, not posted:** this
+session has no `gh`/token/API access to reply on or resolve a GitHub
+review thread. Suggested reply text for the repository owner, one per
+finding, to post directly on PR #1:
+
+- **Finding A (fenced-code-block handling):** "Fixed in commit
+  `162e5c6` — `src/axiom_validator/parsing.py`'s fence stripper now
+  tracks fence character/length/closing validity line-by-line instead
+  of matching only exactly-3-backtick fences. Regression tests:
+  `tests/test_fenced_code_blocks.py` (10 tests, all 9 required
+  scenarios + 1 extra). Independently re-verified in
+  `planning/phase-01-foundation.md` §24 (no blocking findings) and
+  re-run again in this batch (§25) — still passing."
+- **Finding B (severity validation):** "Fixed in commit `162e5c6` —
+  `.github/scripts/policy_evaluator.py`'s `evaluate()` now validates
+  `isinstance(severity, str)` before the set-membership test.
+  Regression tests:
+  `.github/scripts/tests/test_policy_evaluator_severity_types.py` (17
+  tests). Independently re-verified in §24 (no blocking findings) and
+  re-run again in this batch — still passing."
+- **Finding C (heading whitespace):** "Fixed in [this batch's commit
+  SHA, recorded in §26 once pushed] — `HEADING_RE`'s marker/text
+  separator changed from `\s+` to `[ \t]+`, plus a related tightening
+  (captured text must start with a non-whitespace character) found
+  while verifying this fix's own required scenarios. Regression tests:
+  `tests/test_heading_whitespace.py` (12 tests, all 9 required
+  scenarios + CRLF coverage + the related case). Independent
+  verification: see §26."
+
+These are suggested texts for the human to post and then mark each
+thread Resolved on GitHub's own terms — this record does not claim any
+thread is actually resolved, since this session cannot observe or
+change that state (prompt 006 §10: "Never claim a thread has been
+resolved unless its actual GitHub state confirms that").
+
+## 26. Independent review record — heading-whitespace correction (prompt 006)
+
+Dispatched: a fresh, non-forked `general-purpose` agent with no prior
+conversation context — best-effort isolation, level 2 of
+`docs/agent-isolation.md`'s taxonomy, named that way in the reviewer's
+own report. 33 tool uses, 111,140 tokens, 187.5s.
+
+**No BLOCKING findings.** The reviewer independently reproduced the
+pre-fix defect from `git show 2ebac4c:...` (not from reading the diff),
+confirmed the current regex's exact behaviour by reading it directly,
+re-ran both full test suites itself (62/62, 33/33 — matching this
+plan's own figures), and constructed 12 of its own adversarial
+scenarios beyond every required/existing one — including checking
+whether Python's `\s` matches Unicode whitespace like U+00A0 (it does,
+but only on the unchanged trailing `\s*$` side, which was never the bug
+class this fix addresses, not a new defect), vertical tab, form feed,
+7+ `#` characters, and tab-only content after `#` (also correctly
+caught by the `\S`-first-character fix, not just the space-only case
+this plan's own write-up emphasised). It judged treating this as a bug
+fix rather than a contract amendment to be the right call, since rule 4
+never specified same-line semantics and the fix makes the
+implementation match the contract's plain intent more faithfully, not
+a changed one.
+
+**Two MATERIAL-NONBLOCKING findings, both documentation
+cross-reference hygiene, not correctness:**
+
+1. This plan's own §25 (and `evidence/phase-1-final-closeout.md`'s
+   addendum, and `planning/ROADMAP.md`/`planning/CONTEXT.md`) forward-
+   referenced "§26" before it existed — the reviewer correctly read
+   this as an anticipated reference to its own review being recorded
+   here, not a pre-existing dangling link, but flagged it as something
+   that must actually resolve once this section landed. **Fixed —
+   this section is that §26.**
+2. `README.md`'s status banner still pointed to
+   "`planning/phase-01-foundation.md` §16–§24" — stale by one batch,
+   since §25 (this correction) was the most relevant section for what
+   the banner was summarising. **Fixed** — widened to §16–§26.
+
+**One ADVISORY, not actioned:** `contracts/documentation-schema-validator.md`
+rule 4 could state explicitly that a required heading's marker and
+text must be on the same line, for future precision — its current
+silence on this did not cause the bug and isn't required for the rule
+to be satisfiable, so this is recorded as a possible future
+refinement, not a defect requiring a contract amendment now.
+
+**Verdict (reviewer's own words, condensed):** "The heading-whitespace
+correction itself is genuinely fixed, correctly verified against both
+the original defect and a dozen adversarial cases of my own
+construction, fully covered by passing regression tests, and does not
+regress either earlier Codex correction or the broader governed-document
+validation... neither [documentation finding] blocks Phase 1 from being
+in a 'ready for human acceptance' state once those two small reference
+fixes are made." Both are made in this section and the next edit.

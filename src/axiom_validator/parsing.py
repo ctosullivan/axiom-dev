@@ -25,7 +25,31 @@ from pathlib import Path
 import yaml
 
 FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
-HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*$", re.MULTILINE)
+# The separator between the heading marker and its text must be
+# horizontal whitespace ONLY ([ \t]), never \s — \s matches newlines,
+# which previously let "#\nRequired\n" (a bare "#" marker with no text
+# of its own, followed by an unrelated paragraph) satisfy a required
+# heading named "Required". Found by native Codex review of PR #1
+# ("Restrict heading whitespace to the same line"), reproduced directly
+# before this fix: extract_headings("#\nRequired\n") returned
+# {"Required"} against the pre-fix pattern. The trailing `\s*$` is
+# unaffected by this fix and does not need the same change — with
+# MULTILINE, `$` matches just before each line's own newline, so `.`
+# (which never matches `\n`) already keeps the captured text within one
+# line, and `\s*` there only ever absorbs trailing horizontal whitespace
+# or a lone trailing `\r` (CRLF), never a real line break.
+#
+# The captured group requires its first character to be non-whitespace
+# (\S, not .) — found necessary while independently verifying this same
+# fix's own regression scenarios: "#  \n" (a "#" marker followed only by
+# trailing spaces, no real text) previously still matched, capturing a
+# single space that .strip() then reduced to an empty string, so
+# extract_headings could return {""} for a line with no real heading
+# text at all. A required_sections entry can never legitimately be an
+# empty string (contract rule 12), so this was never exploitable as a
+# false PASS — but it was never a real heading either, and nothing
+# should match a line that has none.
+HEADING_RE = re.compile(r"^#{1,6}[ \t]+(\S.*?)\s*$", re.MULTILINE)
 INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
 LINK_RE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 

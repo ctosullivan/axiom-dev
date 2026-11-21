@@ -7,17 +7,20 @@ maintains accurate documentation, and lets complex software evolve reliably
 across successive, disconnected development sessions.
 
 > **Status: Phase 1 is substantially done but deliberately left open.**
-> A corrective amendment (`decisions/0005`, `decisions/0006`) fixed
-> documentation drift, moved documentation schemas from embedded
-> front-matter into companion `.schema.yaml` files, strengthened the
-> validator, completed deterministic CI, and changed Phase 1's
-> independent-review requirement to **native Codex GitHub PR review** —
-> not yet performed, since no PR has ever been opened on this branch (no
-> `gh` CLI or token). `planning/ROADMAP.md` now covers the long-term
-> direction beyond Phase 1 (proposed, not yet authorised); see
-> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state and
+> Documentation schemas now live under a dedicated
+> [`schemas/`](schemas/) directory, mirrored by document path
+> (`decisions/0006`, `decisions/0007`). Phase 1's independent-review
+> requirement is **native Codex GitHub PR review**
+> (`decisions/0005`) — [PR #1](https://github.com/ctosullivan/axiom-dev/pull/1)
+> is open and has had two native Codex reviews so far; every finding
+> either stands corrected with regression evidence or is in progress.
+> `planning/ROADMAP.md` covers the long-term direction beyond Phase 1
+> (Phases 2–4 proposed, not yet authorised). See
+> [`planning/CONTEXT.md`](planning/CONTEXT.md) for the current state,
+> [`evidence/phase-1-final-closeout.md`](evidence/phase-1-final-closeout.md)
+> for the latest acceptance assessment, and
 > [`planning/phase-01-foundation.md`](planning/phase-01-foundation.md)
-> §16–§22 for Phase 1's full evidence and status.
+> §16–§26 for Phase 1's full evidence and status.
 
 ## Mission
 

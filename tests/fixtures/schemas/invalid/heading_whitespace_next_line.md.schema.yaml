@@ -1,0 +1,6 @@
+audience: test fixture
+purpose: exercise the fix for native Codex review finding C — a bare "#" marker followed by text on the next line must not satisfy a required heading
+required_sections: [Required]
+authoritative_sources: [AGENTS.md]
+acceptance_criteria:
+  - this fixture fails because "Required" is a paragraph on the line after a bare "#" marker, never a real heading

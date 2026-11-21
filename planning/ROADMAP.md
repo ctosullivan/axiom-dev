@@ -72,19 +72,24 @@ GitHub PR review (`decisions/0005`; `planning/phase-01-foundation.md`
 amendment moved documentation schemas to companion files and expanded
 this roadmap itself (`decisions/0006`; §21–§22) — its own 21-item
 Definition of Done (`planning/prompts/004-...md` §13) stands at 19 MET,
-1 locally-verified-only, 2 open. **PR #1 now exists and is open**
-(<https://github.com/ctosullivan/axiom-dev/pull/1>) — a first native
-Codex review ran on it and found 2 P2 findings (0 P0/P1); a final
-remediation batch corrected both, with its own independent review
-finding no blocking code defects (`decisions/0007`; §23–§24). **The
-remaining open items**: a *second* native Codex review of the
-corrected commit has not been requested (no `gh`/token to post the
-request from this session — confirmed repeatedly, not assumed), and
-human acceptance has not been sought. See
-`evidence/phase-1-final-closeout.md` for the current full acceptance
-matrix. Phase 1 cannot be marked Completed, merged, or archived until
-a human requests that second review, dispositions its findings, and
-reviews the result (`AGENTS.md` §11).
+1 locally-verified-only, 2 open. **PR #1 exists and is open**
+(<https://github.com/ctosullivan/axiom-dev/pull/1>) and has now had
+**two native Codex reviews**: the first (on commit `3a8c395`) found 2
+P2 findings — a fenced-code-block heading false positive and an
+unhandled `TypeError` on malformed severity values — both corrected
+with regression tests and independent verification (`decisions/0007`;
+§23–§24). The second (on commit `2ebac4c`) found 1 further P2 finding
+— a heading-whitespace false positive (`\s+` matching a newline between
+a bare `#` marker and unrelated text on the next line) — also
+corrected, with its own regression tests and independent verification
+(§25–§26). **The remaining open items**: a *third* native Codex review
+of the latest corrected commit has not been requested (no `gh`/token to
+post the request from this session — confirmed repeatedly across three
+amendments, not assumed), and human acceptance has not been sought.
+See `evidence/phase-1-final-closeout.md` for the current full
+acceptance matrix. Phase 1 cannot be marked Completed, merged, or
+archived until a human requests that review, dispositions whatever it
+finds, and reviews the result (`AGENTS.md` §11).
 
 ## Phase 2 — Real-world validation (proposed)
 

@@ -210,3 +210,25 @@ complete, on two named, real, external blockers.
   or manifest files remain in it; checked directly, not assumed
   (`tests/test_schema_relocation.py`'s
   `TestNoStraySchemaFilesOutsideSchemasTree`).
+
+### Fixed (third native Codex review finding)
+
+- `src/axiom_validator/parsing.py`: `HEADING_RE`'s marker/text
+  separator used `\s+`, which matches newlines — a bare `#` marker
+  with no text of its own, followed by an unrelated paragraph, could
+  satisfy a required heading named after that paragraph's first word.
+  Found by a second native Codex GitHub review of PR #1. Fixed by
+  requiring horizontal whitespace only (`[ \t]+`); a related artifact
+  found while verifying the fix's own scenarios (a `#` marker followed
+  only by whitespace producing a spurious empty-string heading) fixed
+  in the same change. 12 new regression tests
+  (`tests/test_heading_whitespace.py`), covering all 9 required
+  scenarios plus CRLF line endings.
+- `README.md`, `schemas/governed-documents.txt`, `planning/ROADMAP.md`,
+  `planning/CONTEXT.md` corrected: all had fallen behind the actual PR
+  #1 / native-Codex-review state (one or more claimed "no PR has ever
+  been opened" after PR #1 had existed, been reviewed twice, and had
+  two of three findings already corrected).
+- `evidence/phase-1-final-closeout.md` gained a dated addendum
+  recording the second review's actual finding and this correction,
+  without rewriting the original assessment's own findings.

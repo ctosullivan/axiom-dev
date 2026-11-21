@@ -208,3 +208,54 @@ Everything in this assessment's scope that could be completed without
 GitHub write/admin access has been completed and independently
 verified. What remains is, by design, a human action this project's
 own governance reserves for a human.
+
+## Addendum (2026-11-21 — prompt 006, third Codex finding)
+
+Preserving everything above as written — this addendum updates status,
+it does not rewrite the original assessment to imply the third finding
+or this correction happened earlier than it did.
+
+**What changed since the assessment above was written:**
+
+- **The second native Codex review this assessment was waiting on
+  actually ran** (triggered by the repository owner or the connected
+  integration, on commit `2ebac4c`) and found **1 further P2 finding**
+  (Finding C — heading-whitespace false positive,
+  `src/axiom_validator/parsing.py`), 0 P0/P1. Confirmed by fetching the
+  live PR page directly; the page was partially truncated, so some
+  detail (exact total thread count, each thread's "Resolved" state) is
+  recorded as unconfirmed in `planning/phase-01-foundation.md` §25, not
+  assumed.
+- **Finding C is corrected**, independently reproduced against the
+  actual pre-fix code first (`git show 2ebac4c:...`), with 12 new
+  regression tests (`tests/test_heading_whitespace.py`) covering all 9
+  required scenarios, CRLF line endings, and one related, narrower
+  artifact found while verifying those scenarios (a bare `#` marker
+  followed only by whitespace previously produced a spurious
+  empty-string heading — fixed in the same change). See
+  `planning/phase-01-foundation.md` §25 for the full record and §26 for
+  this correction's own independent review.
+- **The original two findings (A, B) were re-verified, not merely
+  assumed still fixed**: the full test suite, including
+  `tests/test_fenced_code_blocks.py` and
+  `.github/scripts/tests/test_policy_evaluator_severity_types.py`, was
+  re-run as part of this same batch — both still pass.
+- **Updated test counts**: 62/62 validator tests (was 50/50), 33/33
+  policy-evaluator tests (unchanged).
+- **GitHub Actions' actual run result remains unconfirmed** from this
+  session — the same limitation recorded above, not newly introduced.
+- **A third native Codex review, of the latest corrected commit, has
+  not been requested.** Same blocker as before (no `gh`/token).
+- **The three GitHub review threads' actual "Resolved" state cannot be
+  confirmed or changed from this session.** Suggested reply text for
+  each, for the repository owner to post, is recorded in
+  `planning/phase-01-foundation.md` §25's "Thread disposition"
+  subsection — this session does not claim any thread is resolved.
+
+**Updated recommendation**: unchanged in kind from the original
+assessment — comment `@codex review` on PR #1's latest commit, let a
+human (or this session, in a later turn, once that review exists)
+disposition whatever it finds, then proceed through the same
+acceptance-matrix review and two-step merge/closeout sequence already
+described above. **Phase 1 remains Ready for human acceptance, not
+Completed.**
