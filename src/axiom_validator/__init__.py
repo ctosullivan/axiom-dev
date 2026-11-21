@@ -98,18 +98,30 @@ def validate_file(
     except parsing.PathEscapesMirrorRoot as exc:
         return reporting.build_report(path, "FAIL", [str(exc)])
 
+    # Manifest-missing fail-closed (contract revision 2 rule 4) must be
+    # checked unconditionally here, not only inside the "schema absent"
+    # branch below — found by native Codex review of PR #1 ("governed-
+    # document manifest integrity is not checked when a companion
+    # schema exists"): a document whose own schema file happens to
+    # exist could previously still return PASS even when
+    # schemas/governed-documents.txt was missing entirely, since the
+    # manifest was never loaded at all in that code path. Moving the
+    # load here means a missing manifest fails closed for *every*
+    # document checked through the default (non-overridden) path,
+    # regardless of whether that document's own schema exists.
+    if governed_manifest is not None:
+        manifest = governed_manifest
+    else:
+        try:
+            manifest = rules.load_governed_manifest(repo_root)
+        except rules.GovernedManifestMissing as exc:
+            return reporting.build_report(path, "FAIL", [str(exc)])
+
     if not schema_path.exists():
         try:
             rel = str(path.resolve().relative_to(repo_root))
         except ValueError:
             rel = str(path)
-        if governed_manifest is not None:
-            manifest = governed_manifest
-        else:
-            try:
-                manifest = rules.load_governed_manifest(repo_root)
-            except rules.GovernedManifestMissing as exc:
-                return reporting.build_report(path, "FAIL", [str(exc)])
         if rel in manifest:
             return reporting.build_report(
                 path,

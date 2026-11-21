@@ -469,6 +469,34 @@ could not be measured and why.
   session still cannot request a third native Codex review, reply to
   or resolve any GitHub review thread, or merge PR #1.
 
+## 2026-11-21 — Fourth Codex finding corrected (prompt 007)
+
+- **Development effort:** one orchestrating-session pass correcting
+  the one P2 finding from a third native Codex review
+  (governed-document manifest integrity not checked when a document's
+  own schema exists).
+- **Real defect found and fixed, with before/after evidence captured
+  directly:** an isolated temp directory with a valid document + valid
+  schema and no `schemas/governed-documents.txt` at all returned
+  `PASS` against the actual pre-fix code — reproduced before any
+  change, per the authorising prompt's own exact reproduction recipe.
+  Fixed by loading/checking the manifest unconditionally, before
+  branching on whether the document's own schema exists.
+- **A real, positive resolution of a previously-recorded evidence
+  limitation**: a `web-fetch` of the actual GitHub Actions run page
+  (`.../actions/runs/44891748857`) returned, verbatim, "Status: Success"
+  for commit `6e75d2b` — the first time this project has directly
+  confirmed a real CI run result rather than recording it as
+  unconfirmed.
+- **Agent usage:** 1 independent-review dispatch (token/tool counts
+  recorded once it completes).
+- **Not measured:** real API/token cost for native Codex review (ran
+  three times already via the connected integration); wall-clock time
+  for this session's own non-dispatched work.
+- **Blocker, unchanged in kind:** no `gh` CLI, no GitHub token — this
+  session still cannot request a fourth native Codex review, reply to
+  or resolve any GitHub review thread, or merge PR #1.
+
 ## Running totals (updated as entries are added)
 
 | Metric | Value | Basis |

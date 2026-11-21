@@ -252,10 +252,62 @@ or this correction happened earlier than it did.
   `planning/phase-01-foundation.md` §25's "Thread disposition"
   subsection — this session does not claim any thread is resolved.
 
-**Updated recommendation**: unchanged in kind from the original
-assessment — comment `@codex review` on PR #1's latest commit, let a
-human (or this session, in a later turn, once that review exists)
-disposition whatever it finds, then proceed through the same
-acceptance-matrix review and two-step merge/closeout sequence already
-described above. **Phase 1 remains Ready for human acceptance, not
-Completed.**
+**Updated recommendation (as of this addendum)**: unchanged in kind —
+comment `@codex review` on PR #1's latest commit, let a human (or this
+session, in a later turn, once that review exists) disposition
+whatever it finds, then proceed through the same acceptance-matrix
+review and two-step merge/closeout sequence already described above.
+**Phase 1 remains Ready for human acceptance, not Completed.**
+
+## Second addendum (2026-11-21 — prompt 007, fourth Codex finding)
+
+Preserving everything above, including the first addendum, as written.
+
+**What changed since the first addendum:**
+
+- **The third native Codex review this file's first addendum was
+  waiting on actually ran** (on commit `6e75d2b`) and found **1
+  further P2 finding** (Finding D — governed-document manifest
+  integrity not checked when a companion schema exists,
+  `src/axiom_validator/__init__.py`), 0 P0/P1. A `web-fetch` of the
+  live PR page this time corroborated the finding's own text closely
+  enough to cross-check against (not solely rely on) this session's
+  independent reproduction — see
+  `planning/phase-01-foundation.md` §27.
+- **Finding D is corrected**: `validate_file` now loads/checks
+  `schemas/governed-documents.txt` unconditionally (unless explicitly
+  overridden), before checking whether the document's own schema file
+  exists — not only inside the branch where it's absent. 10 new
+  regression tests (`tests/test_manifest_integrity.py`), covering all
+  8 required scenarios from the review's own reproduction recipe.
+- **GitHub Actions' actual run result is now confirmed**, resolving a
+  limitation both the original assessment and the first addendum
+  recorded as open: a `web-fetch` of
+  `https://github.com/ctosullivan/axiom-dev/actions/runs/44891748857`
+  returned, verbatim, "Status: Success" for `deterministic-checks.yml`
+  on commit `6e75d2b`, with all 4 expected jobs listed. This is the
+  first time this session has had direct confirmation rather than
+  recording the result as unconfirmed.
+- **Updated test counts**: 72/72 validator tests (was 62/62), 33/33
+  policy-evaluator tests (unchanged).
+- **All three earlier corrections (A, B, C) re-verified**, not assumed
+  still fixed — the full suite re-run in this same batch includes
+  their regression tests, all passing.
+- **A fourth native Codex review, of this latest corrected commit, has
+  not been requested.** Same blocker as before (no `gh`/token).
+- **All four GitHub review threads' actual "Resolved" state cannot be
+  confirmed or changed from this session.** Suggested reply text for
+  each is recorded in `planning/phase-01-foundation.md` §25 (findings
+  A–C) and §27 (finding D).
+- **No new ADR or contract amendment was required** for finding D —
+  it was an implementation defect against an already-correctly-specified
+  contract rule (`decisions/0007` contract revision 2 rule 4), not a
+  changed decision; a short implementation note was added to that
+  rule's existing text, not a new rule.
+
+**Updated recommendation**: unchanged in kind — comment `@codex review`
+on PR #1's latest commit, let a human disposition whatever it finds
+(or, if explicitly authorised to continue, this session in a later
+turn), then proceed through the same acceptance-matrix review and
+two-step merge/closeout sequence. **Phase 1 remains Ready for human
+acceptance, not Completed.**

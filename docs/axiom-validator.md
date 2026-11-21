@@ -78,15 +78,21 @@ behaviour-preserving refactor — `evidence/stage-1.4-refactor.md`) into:
 - **`__init__.py`** — orchestrates the above for one document
   (`validate_file`): detect embedded front-matter reintroduction first
   (immediate `FAIL`, never falls through to parsing it as a schema);
-  otherwise locate the schema file via `schema_path_for` (missing →
-  `SKIPPED`, or `FAIL` if the document is on the governed manifest, or
-  `FAIL` if the manifest file itself is missing and no explicit override
-  was given); parse it (`INVALID_SCHEMA` on failure); check required
-  fields, then field types/non-empty content (both short-circuit to
-  `INVALID_SCHEMA`); then sections/sources/links; then report. `main()`
-  additionally scans `<repo_root>/schemas/` for orphaned schemas after
-  validating the given paths — this is a repository-wide check, not a
-  per-document one, so it lives in the CLI entry point rather than
+  compute the schema path via `schema_path_for`; then — **unconditionally,
+  before checking whether that schema file exists** — load the governed
+  manifest unless an explicit override was given, `FAIL`ing immediately
+  if the manifest *file* itself is missing (found necessary by a third
+  native Codex review: this check previously ran only inside the
+  "schema absent" branch, so a document whose own schema existed could
+  wrongly `PASS` even with no manifest file at all); only then check
+  whether the schema file exists (missing → `SKIPPED`, or `FAIL` if the
+  document is on the governed manifest); parse it (`INVALID_SCHEMA` on
+  failure); check required fields, then field types/non-empty content
+  (both short-circuit to `INVALID_SCHEMA`); then sections/sources/links;
+  then report. `main()` additionally scans `<repo_root>/schemas/` for
+  orphaned schemas after validating the given paths — this is a
+  repository-wide check, not a per-document one, so it lives in the CLI
+  entry point rather than
   `validate_file`. `validate_file` resolves `repo_root` internally, and
   takes an optional `schema_mirror_root` (default: `repo_root`) for
   callers — like the test suite — that need their schema lookup

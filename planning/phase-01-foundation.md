@@ -1802,3 +1802,91 @@ regress either earlier Codex correction or the broader governed-document
 validation... neither [documentation finding] blocks Phase 1 from being
 in a 'ready for human acceptance' state once those two small reference
 fixes are made." Both are made in this section and the next edit.
+
+## 27. Final Codex correction — manifest integrity (prompt 007)
+
+Authorising prompt:
+[`planning/prompts/007-final-corrective-remediation-and-closeout-preparation.md`](prompts/007-final-corrective-remediation-and-closeout-preparation.md).
+Baseline recorded before implementation: branch
+`phase-1/stage-1.0-bootstrap`, HEAD `6e75d2b` (clean working tree,
+matching the prompt's "Last confirmed PR head" exactly). A `web-fetch`
+of the actual GitHub Actions run the prompt cited
+(`.../actions/runs/44891748857`) confirmed, verbatim from the page
+(not the truncated/summarised part): **Status Success**, 4 jobs shown
+with durations matching `deterministic-checks.yml`'s 4 jobs exactly
+(`policy-evaluator-tests`, `axiom-validator-tests`,
+`validate-governed-documentation`, `no-trailing-whitespace`). This is
+the first time this project has had direct, verbatim confirmation of a
+real GitHub Actions run result — every earlier closeout record
+(`evidence/phase-1-final-closeout.md` and its addendum) correctly
+recorded this as *unconfirmed*, not assumed passing; it is now
+confirmed, for this one specific commit, and recorded as such rather
+than silently backfilled into the earlier records. A second fetch of
+the live PR page (again partially truncated) found a Codex comment
+reviewing `6e75d2b` whose described finding
+("Check manifest integrity even when a companion schema exists...
+when a valid companion schema exists but `schemas/governed-documents.txt`
+is missing, `validate_file()` returns PASS") matches exactly what this
+session then independently reproduced against the real code — cross-checked,
+not assumed.
+
+**Reproduced before any change**, per the prompt's exact reproduction
+recipe: an isolated temp directory with a valid `foo.md` and a valid,
+parsing `schemas/foo.md.schema.yaml`, no `schemas/governed-documents.txt`
+at all, and `validate_file(path, repo_root)` called with no override —
+returned `{"result": "PASS"}` against the actual pre-fix code. Root
+cause confirmed by reading `src/axiom_validator/__init__.py` directly:
+the manifest-missing fail-closed check (`decisions/0007` contract
+revision 2 rule 4) was only ever reached inside the `if not
+schema_path.exists():` branch — a document whose own schema existed
+never triggered it at all.
+
+**Corrected** by moving the manifest load/check to run unconditionally
+(whenever `governed_manifest` is not explicitly overridden), before
+branching on whether the document's own schema file exists. No contract
+amendment or new ADR — per prompt 007 §2's explicit instruction, this
+is an implementation defect against an already-correctly-specified
+rule, not a changed decision; a short implementation note was added to
+the contract's existing rule 4 recording the bug and fix, not a new
+rule. All 8 required test-table scenarios implemented in a new,
+dedicated file (`tests/test_manifest_integrity.py`, 10 tests — the
+override scenario split into 3 sub-cases for clarity), following this
+project's established one-file-per-correction convention.
+
+**Verification:** full suite 72/72 (62 before this batch + 10 new),
+policy-evaluator suite unaffected at 33/33, all 11 governed documents
+still `PASS`, zero orphaned schemas, no trailing whitespace. The three
+earlier Codex corrections (fenced-code-block handling; severity-type
+validation; heading-whitespace) were re-run as part of the same
+full-suite pass, not assumed still passing — `tests/test_fenced_code_blocks.py`,
+`tests/test_heading_whitespace.py`, and
+`.github/scripts/tests/test_policy_evaluator_severity_types.py` all
+still pass unchanged.
+
+**Four-finding disposition table (prompt 007 §12):**
+
+| Finding | File | Correction commit | Regression tests | Independent verification | GitHub thread |
+|---|---|---|---|---|---|
+| A — fenced-code heading false positive | `src/axiom_validator/parsing.py` | `162e5c6` | `tests/test_fenced_code_blocks.py` (10) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
+| B — malformed severity `TypeError` | `.github/scripts/policy_evaluator.py` | `162e5c6` | `.github/scripts/tests/test_policy_evaluator_severity_types.py` (17) | §24 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
+| C — heading whitespace crosses newline | `src/axiom_validator/parsing.py` | `0645af3` | `tests/test_heading_whitespace.py` (12) | §26 (no blocking) | Suggested reply in §25; not confirmed resolved on GitHub |
+| D — manifest integrity not checked when schema exists | `src/axiom_validator/__init__.py` | [this batch's commit, recorded in §28 once pushed] | `tests/test_manifest_integrity.py` (10) | See §28 | Suggested reply below; not confirmed resolved on GitHub |
+
+**Suggested reply text for Finding D's GitHub thread (prompt 007 §12),
+prepared, not posted** — this session has no `gh`/token/API access to
+post or resolve a thread:
+
+> "Fixed in commit [recorded in §28 once pushed] —
+> `src/axiom_validator/__init__.py`'s `validate_file` now loads and
+> checks `schemas/governed-documents.txt` unconditionally (unless an
+> explicit `governed_manifest` override is given), before branching on
+> whether the document's own schema file exists — not only inside the
+> 'schema absent' branch, which is what let a document with a valid
+> schema wrongly `PASS` even with no manifest file at all. Regression
+> tests: `tests/test_manifest_integrity.py` (10 tests, all 8 required
+> scenarios from the review comment's own reproduction recipe).
+> Independent verification: see `planning/phase-01-foundation.md` §28."
+
+No contract amendment was needed (the contract already specified this
+rule correctly; only the implementation didn't match it) — recorded
+here so a reviewer doesn't go looking for one.

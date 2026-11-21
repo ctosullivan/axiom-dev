@@ -342,6 +342,18 @@ and the embedded-front-matter/orphan-detection rules' *existence*
    as "nothing is governed." A manifest file that exists but lists zero
    documents is unaffected by this rule and legitimately produces
    `SKIPPED` for an unschema'd, non-listed document, exactly as before.
+   **Implementation note (prompt 006's follow-up, found by a third
+   native Codex review of PR #1):** this rule's text was correct from
+   the moment it was written, but `validate_file` did not actually
+   satisfy it for every document — the manifest was only loaded inside
+   the branch taken when a document's *own* schema file was absent, so
+   a document whose schema existed and parsed cleanly could still
+   return `PASS` even with no manifest file at all. This was an
+   implementation defect against an already-correctly-specified rule,
+   not a contract change — fixed by loading/checking the manifest
+   unconditionally whenever `governed_manifest` is not explicitly
+   overridden, before branching on whether the document's own schema
+   exists.
 5. **NEW — Path safety.** Computing a schema path for a document that
    does not resolve under its mirror root is itself a reported failure
    (`PathEscapesMirrorRoot`), not a silently wrong or escaping path.

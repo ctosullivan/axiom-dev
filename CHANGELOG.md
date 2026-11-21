@@ -232,3 +232,24 @@ complete, on two named, real, external blockers.
 - `evidence/phase-1-final-closeout.md` gained a dated addendum
   recording the second review's actual finding and this correction,
   without rewriting the original assessment's own findings.
+
+### Fixed (fourth native Codex review finding)
+
+- `src/axiom_validator/__init__.py`: `validate_file` only loaded and
+  checked `schemas/governed-documents.txt` inside the branch taken
+  when a document's own schema file was *absent* — a document whose
+  schema existed and parsed cleanly could return `PASS` even when the
+  manifest file itself didn't exist at all. Found by a third native
+  Codex GitHub review of PR #1. Fixed by loading/checking the manifest
+  unconditionally (unless explicitly overridden) before branching on
+  schema existence. 10 new regression tests
+  (`tests/test_manifest_integrity.py`), covering all 8 required
+  scenarios. No new ADR or contract amendment — the contract already
+  specified this correctly; only the implementation didn't match it.
+- GitHub Actions' actual run result is now confirmed for the first
+  time in this project (`Status: Success` on commit `6e75d2b`, fetched
+  directly from the live Actions run page), resolving a previously
+  open evidence limitation.
+- `README.md`, `planning/ROADMAP.md`, `planning/CONTEXT.md`,
+  `evidence/phase-1-final-closeout.md` (second addendum) updated to
+  reflect PR #1's third review and this correction.
