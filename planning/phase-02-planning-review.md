@@ -893,8 +893,23 @@ findings**, both real.
    no documented session-ID environment variable — the design wrote
    "independently of hooks" without specifying how a `session_id`
    would reach them at all. **Fixed**: a `SessionStart` hook writes
-   the session ID to a small local handoff file
-   (`.axiom-local/current_session_id`); CLI-owned producers read it;
-   invocation outside any session (human at a terminal, CI) is an
-   explicit, named case producing `session_id: null`, not a
+   the session ID to a small local handoff file; CLI-owned producers
+   read it; invocation outside any session (human at a terminal, CI)
+   is an explicit, named case producing `session_id: null`, not a
    fabricated value.
+
+**Re-review requested on this fix** (commit `1b9904b`): **1 further
+P2 finding.** The handoff file (`.axiom-local/current_session_id`)
+was a single, shared, checkout-wide file — exactly the kind of state
+this project's own practice regularly breaks: a second concurrent
+session's `SessionStart` overwrites it, misattributing the first
+session's later events to the second, and nothing removed it after a
+session ended, so a later terminal invocation would read a stale ID
+rather than the promised `null`. **Fixed**: the handoff is now keyed
+per-session by the `claude` process's own PID
+(`.axiom-local/sessions/<claude_pid>.session_id`, found by a small
+deterministic process-ancestry walk both `SessionStart` and every
+CLI-owned producer perform independently), with `SessionEnd` removing
+its own file — concurrent sessions no longer collide, and a stale
+file only matters in the narrow, accepted edge case of a crashed
+session's PID being reused by an unrelated later process.

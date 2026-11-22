@@ -70,27 +70,64 @@ research confirms hooks do not receive cost/token fields; those come
 from a separate source (§4), joined by `session_id`/`git_revision`
 after the fact, not fabricated into the hook-based log.
 
-**Session-ID propagation to CLI-owned event producers — specified
-here, found missing by native Codex review (commit `441f4c8`'s
-finding on this exact gap).** `axiom-knowledge` (and the test-runner
-wrapper, and manual helpers) are plain processes — they do not
-receive hook stdin, and the capability research
-(`planning/phase-02-planning-review.md` §2.1) already confirmed no
-session-ID environment variable is documented. Writing these events
-"independently of hooks" (as this design requires, §1) does not by
-itself give them a `session_id` to write. **Fixed with the simplest
-adequate mechanism — a one-line hook-to-CLI handoff, not a new
-IPC layer**: a `SessionStart` hook writes the current `session_id` to
-`.axiom-local/current_session_id` (gitignored, like the event log
-itself); every CLI-owned event producer reads that file at write time
-and stamps its own `session_id` from it. **Explicit, named fallback
-for invocation outside any session** (a human at a terminal, a CI
-job, or any call before `SessionStart` has run): the file is absent,
-and the event's `session_id` is written as `null` — this is a
-legitimate, expected case, not an error, and it means such an event
-genuinely cannot be joined to session-level usage data (§4, §7.E) —
-accepted as a real, disclosed limitation of this mechanism rather
-than papered over with a fabricated ID.
+**Session-ID propagation to CLI-owned event producers.**
+`axiom-knowledge` (and the test-runner wrapper, and manual helpers)
+are plain processes — they do not receive hook stdin, and the
+capability research (`planning/phase-02-planning-review.md` §2.1)
+already confirmed no session-ID environment variable is documented.
+Writing these events "independently of hooks" (as this design
+requires, §1) does not by itself give them a `session_id` to write.
+
+**Corrected twice now, both times by native Codex review on the
+previous fix.** The first fix (commit `441f4c8`'s finding) added a
+single shared handoff file, `.axiom-local/current_session_id`. A
+second review (commit `1b9904b`'s finding) found that fix itself
+broken under exactly the kind of concurrency this project's own
+practice actually produces (multiple subagent/session dispatches
+against one checkout): a second session's `SessionStart` overwrites
+the one shared file, misattributing the first session's later CLI
+events to the second; and nothing removed or expired the file after a
+session ended, so a later terminal invocation would read a stale ID
+instead of getting the promised `null`.
+
+**Fixed with a per-session-scoped handoff, not a single shared
+file:** the handoff is keyed by the **PID of the `claude` process
+itself** — stable for one session's lifetime, distinct across
+concurrent sessions, and discoverable by any of that session's own
+child processes without a shared, overwritable name.
+
+- `SessionStart` writes `.axiom-local/sessions/<claude_pid>.session_id`
+  (the directory, like `.axiom-local/` itself, is gitignored),
+  finding `<claude_pid>` by walking its own process ancestry
+  (`/proc/<pid>/stat`'s parent-PID field, or equivalent) until it
+  finds the nearest ancestor whose process name matches the `claude`
+  binary — a small, deterministic function, not new infrastructure.
+- Any CLI-owned event producer does the **same** ancestry walk from
+  its own PID at invocation time, arriving at the same `claude_pid`
+  (since the CLI is itself always invoked as a descendant of that
+  session's `claude` process), and reads that session-specific file.
+  Two concurrent sessions resolve to two different PIDs and therefore
+  two different files — no collision.
+- `SessionEnd` **removes** its own `<claude_pid>.session_id` file —
+  so a later invocation after the session genuinely ended finds
+  nothing for that PID (and that PID is, in any case, no longer a
+  live `claude` process for a fresh ancestry walk to find).
+- **Explicit, named fallback, unchanged in kind**: invocation outside
+  any Claude Code session (a human at a terminal, a CI job, a call
+  before `SessionStart` has run, or one after `SessionEnd` already
+  ran) finds no matching file — `session_id` is written as `null`,
+  a legitimate, expected case, not an error, meaning such an event
+  genuinely cannot be joined to session-level usage data (§4, §7.E).
+  Accepted as a real, disclosed limitation, not papered over.
+- **Orphaned files** (a session that crashes without running
+  `SessionEnd`) are a known, accepted gap — stale, but harmless: a
+  later invocation under a *different* PID never reads a different
+  session's stale file (PIDs are not reused while the stale file's
+  own process is still being walked past), and a genuinely reused PID
+  colliding with a leftover file from a much earlier, unrelated
+  session is accepted as a narrow, low-probability edge case, not
+  solved with additional machinery before it is shown to matter in
+  practice.
 
 ### Event categories (evaluated against the authorising prompt's §8 table)
 

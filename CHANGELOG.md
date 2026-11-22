@@ -512,3 +512,10 @@ not-yet-bumped and just-bumped-with-stale-scope-manifest); CLI-owned
 events had no actual source for `session_id` (fixed: a `SessionStart`
 hook writes a small local handoff file CLI producers read, with an
 explicit `null` fallback for invocation outside any session).
+
+Re-review on that fix (commit `1b9904b`) found 1 further P2: the
+session-ID handoff file was a single, shared, checkout-wide file —
+broken under concurrent sessions (second session's `SessionStart`
+overwrites it) and never expired after a session ended. Fixed: the
+handoff is now keyed per-session by the `claude` process's own PID,
+with `SessionEnd` removing its own file.
