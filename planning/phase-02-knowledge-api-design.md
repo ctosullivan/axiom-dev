@@ -741,10 +741,17 @@ prompt's §3 required set, by name:
   compatibility_target: "1.52.3"}`, change record
   `path: "upstream:hledger"`, `base: "1.52.3"`, `head: "1.52.4"` →
   flagged, reason `"upstream revision changed from 1.52.3 to 1.52.4"`.
-  A claim already pinned at `"1.52.4"` or later for the same upstream
-  change is **not** flagged — the mechanism only detects changes its
-  captured dependency actually permits it to detect, per the
-  authorising prompt's own qualifier.
+  **Corrected per native Codex review, commit `c4c41a9`'s finding on
+  this exact bullet**: a claim already pinned at `"1.52.4"` is **not**
+  automatically "nothing left to flag" — §4's two-case upstream rule
+  (added in an earlier round) still flags it if its scope manifest's
+  `source_pin` doesn't also equal `"1.52.4"` (the
+  "just-bumped-with-stale-scope-manifest" case). This retained-but-
+  now-stale bullet asserted the single-case version of the rule after
+  the two-case version had already replaced it in §4 — an internal
+  contradiction, not a restatement. Only a claim with **no** scope
+  manifest, or one whose manifest is already current, is genuinely
+  not flagged once pinned at `head`.
 - **An unrelated change with no dependency** (a path no claim's §3f
   fields reference at all) → no entries in the result; this is the
   false-positive check Stage 2.4's drift demonstration

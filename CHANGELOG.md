@@ -525,3 +525,25 @@ Five rounds total; every finding fixed in the commit immediately
 following its round; three of five rounds were follow-on gaps in the
 previous round's own fix (session-ID correlation, in progressively
 deeper layers) before converging.
+
+## P1 finding on PR #4's `ci-required` gate (CI enforcement added separately)
+
+The repository owner's own `ci-required` aggregate-gate addition (not
+this session's work) was reviewed and found 1 P1: no deterministic
+test existed for the gate's merge-decision logic, violating
+`AGENTS.md` §8.
+
+- **Fixed**: extracted the gate's inline-YAML logic into
+  `.github/scripts/ci_required_gate.py` (byte-identical behaviour) and
+  added 11 regression tests covering success/failure/skipped/
+  cancelled dependencies and the real workflow's `needs:` list.
+- **CI caught a real defect in that fix**: the new test's `pyyaml`
+  import wasn't installed in the `policy-evaluator-tests` job. Fixed
+  with the same `pip install -r requirements.txt` step the other jobs
+  already use.
+- Re-review found 2 further P2s on earlier Phase 2 planning content:
+  a stale contract-test bullet contradicting an already-corrected
+  upstream-detection rule (fixed); and a real, confirmed gap in
+  native-register identity/reference integrity checking for Stage 2.3
+  (deferred — out of scope for this round, recorded in
+  `planning/phase-02-planning-review.md` §10, not silently dropped).

@@ -935,3 +935,65 @@ this record names plainly rather than glossing over: native Codex
 review on this planning package found progressively deeper layers of
 the same underlying problem (CLI-owned events correlating correctly
 to a session) across three consecutive rounds before converging.
+
+## 10. P1 finding on PR #4's `ci-required` gate, and two follow-on P2s
+
+The repository owner's own `@codex review` request on commit
+`574382c` (which added the `ci-required` aggregate CI gate,
+`AGENTS.md` §14's bounded corrective cycle, and the GitHub-side
+required-check setup — none of this session's own work) found **1 P1
+finding**: `AGENTS.md` §8 requires a deterministic test for every
+behavioural change, and the aggregate gate's merge-decision logic
+(embedded inline in the workflow YAML) had none — "a repository-wide
+search for `ci-required`/`NEEDS_JSON` finds only the workflow and
+documentation."
+
+**Fixed** (commit `b4f3ecd`): extracted the gate's logic into
+`.github/scripts/ci_required_gate.py` (byte-identical behaviour,
+verified directly before and after) and added 11 regression tests
+(`.github/scripts/tests/test_ci_required_gate.py`) covering success,
+failure, skipped and cancelled dependency results, and asserting the
+real workflow YAML's `needs:` list for `ci-required` contains exactly
+the four required jobs in both directions.
+
+**CI self-caught a real defect in that fix** (commit `b4f3ecd`,
+confirmed failing): the new test imports `pyyaml` to parse the
+workflow file, but the `policy-evaluator-tests` job (which runs this
+test suite) never installed project dependencies — `ci-required`
+itself correctly blocked on this, which is exactly the regression
+detection this PR exists to add. **Fixed** (commit `c4c41a9`): added
+the same `pip install -r requirements.txt` step the other two jobs
+already use.
+
+**Re-review on that fix** (commit `c4c41a9`) found **2 further P2s**,
+both about `planning/phase-02-knowledge-api-design.md`'s content from
+earlier rounds (§6–9), not the `ci-required` gate itself:
+
+1. **Fixed.** A contract-test bullet (§6, the upstream-detection
+   fixture) still asserted the single-case version of the
+   upstream-pin rule ("a claim already pinned at head is not
+   flagged") after §4's two-case rule (added in an earlier round, §9
+   above) had already superseded it — a genuine, confirmed internal
+   contradiction between two sections of the same document, not a
+   restatement. Corrected to state the actual, current two-case rule.
+2. **Deferred, not fixed — real finding, out of scope for this
+   corrective round.** §6.0's claim that native-backed claims'
+   identity/reference integrity (duplicate ID, dangling
+   `resolved_into`/`resolves`, etc.) is "governed by Ledgerkit's own
+   schema and CI" is not actually true in practice — this very file's
+   own §3 (Advisory 6) already confirmed Ledgerkit has no CI
+   validation of its compat-register at all, only a documented human
+   convention. §6.0 was relying on a safety net already independently
+   confirmed absent. This is real: `impacted()`/`get()` as designed
+   cannot detect, for example, two native records sharing an ID.
+   **Disposition**: this requires designing actual native-register
+   integrity checks for Stage 2.3, a nontrivial addition to the
+   knowledge-API/CI design, not a one-paragraph correction — out of
+   scope for the narrowly-authorised task this round (adding
+   regression tests for the `ci-required` gate specifically).
+   Recorded here, not silently dropped; needs its own focused
+   amendment before Stage 2.3 build.
+
+Verification after both fixes: 44/44 `.github/scripts/tests` (was 33),
+82/82 `tests/`, all governed documents `PASS`, no trailing whitespace,
+CI green on `c4c41a9` including `ci-required` itself (all 5 jobs).
