@@ -29,12 +29,24 @@ dependency or the project's purpose.
 
 ## Current focus and constraints
 
-- Current documentation amendment branch:
-  `docs/phase-2-evidence-first-vertical-slice`, based on `main`.
-  Inspect actual HEAD and PR state rather than trusting this text.
-- Review [this refinement plan](phase-02-roadmap-refinement.md),
-  [Phase 2 proposal](phase-02-template.md), and the current roadmap
-  for evidence/semantic consistency before owner-approved merge.
+- `docs/phase-2-evidence-first-vertical-slice` (PR #3) merged on
+  2026-11-22. **Current branch:**
+  `planning/phase-2-stage-2.1-ledgerkit-oracle`, based on `main` at
+  `53d818b`. Inspect actual HEAD and PR state rather than trusting
+  this text.
+- This branch makes Stage 2.1 and Phase 2's cross-cutting designs
+  implementation-ready: `planning/phase-02-stage-2.1-plan.md` (task,
+  oracle, fixtures), `planning/phase-02-adoption-design.md` (skill,
+  file layout), `planning/phase-02-knowledge-api-design.md` (claim
+  model, API, and — found missing by independent review and now fixed
+  — the adapter contract for reading Ledgerkit's own existing
+  compat-register rather than duplicating it),
+  `planning/phase-02-measurement-design.md` (logging/telemetry),
+  `planning/phase-02-architecture.md` (diagram), and
+  `planning/phase-02-planning-review.md` (full independent review: 2
+  BLOCKING findings, both fixed in this same batch). **This is still
+  a plan, not an implementation** — no skill, API, wiki entry, CI
+  check or logger has been built.
 - Phase 2's wiki, knowledge API, identity/drift gate and template
   **do not yet exist**; do not imply they have been implemented.
 - The core should be Git/files plus a small read-only local API
@@ -58,7 +70,9 @@ dependency or the project's purpose.
 sets the accepted Phase 2/3 direction. This roadmap refinement changes
 **sequencing and proposed scope, not the accepted architectural decision**.
 
-**Next action:** independent review and CI inspection of this
-documentation PR, followed by explicit human approval to merge.
-Then **inspect the actual Ledgerkit/hledger baseline and prepare a
-Stage 2.1 contract and independent oracle before any API coding**.
+**Next action:** human review and approval of this planning-only PR
+(Stage 2.1 plan, four cross-cutting designs, independent review). Only
+after approval does Stage 2.1 BUILD work start — reproducing Ledgerkit's
+EC-022 fixture matrix and implementing the fix in `_parse_posting`
+(`planning/phase-02-stage-2.1-plan.md` §3, §7). No implementation
+begins before that approval, per `AGENTS.md` §11.

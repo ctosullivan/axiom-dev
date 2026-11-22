@@ -51,7 +51,7 @@ learning from the real consumer.
 
 | Stage | Evidence-producing milestone | Exit demonstration |
 |---|---|---|
-| **2.1** Select a Ledgerkit case | Inspect Ledgerkit/hledger versions, choose a bounded semantic compatibility problem, freeze a behavioural contract and independent oracle | Reproducible fixture, scope, failure cases, reviewer and explicit value/overhead questions |
+| **2.1** Select a Ledgerkit case | **Planned in full detail** — `planning/phase-02-stage-2.1-plan.md` selects Ledgerkit's own EC-022 (balance-assignment elision parsing), with an independently reproduced root cause and an exact-commit hledger oracle, reviewed with 2 BLOCKING findings fixed (`planning/phase-02-planning-review.md`) | Reproducible fixture, scope, failure cases, reviewer and explicit value/overhead questions — plan reviewed; BUILD not yet authorised |
 | **2.2** Minimal comparative knowledge | Create a readable Ledgerkit ↔ hledger wiki slice, stable IDs for governed artifacts/material claims, referenced sources/evidence and a small **local knowledge API** | A fresh session can deterministically retrieve a scoped claim with provenance and limitations |
 | **2.3** Deterministic integrity and drift | Add contract-tested CI for IDs, references, source revisions, evidence integrity and change-to-claim impact | Seeded mechanical faults fail; source changes flag relevant claims; no automatic semantic verdict |
 | **2.4** Full lifecycle dogfooding | Make a meaningful Ledgerkit change, independently verify it, then change a source on which recorded knowledge depends | Axiom flags potentially stale knowledge and supports evidenced reconciliation that another agent can reuse |
@@ -102,8 +102,11 @@ agent uses the revised knowledge for a subsequent task. This
 demonstrates the *whole lifecycle*, not just independent API features.
 
 See [the Phase 2 plan](phase-02-template.md) for stage contracts,
-negative cases, non-goals and independent closeout criteria. This
-remains a **planned** phase, not an implemented package.
+negative cases, non-goals and independent closeout criteria, and that
+plan's own links to the now-concrete Stage 2.1 task plan, adoption
+design, knowledge-API design, measurement design, architecture diagram
+and independent review. This remains a **planned** phase, not an
+implemented package — none of Stage 2.1's BUILD work has started.
 
 ## Phase 3 — Experiment-led assurance and MCP adapter (Proposed)
 

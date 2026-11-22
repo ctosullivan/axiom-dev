@@ -7,6 +7,36 @@ criteria; it is not permission to implement** until each focused increment,
 its independent acceptance oracle and contracts have been reviewed under
 `AGENTS.md` §2.
 
+**Implementation-ready detail for Stage 2.1 and the cross-cutting
+designs it depends on now exists** in dedicated documents, produced
+against actual inspection of `~/projects/ledgerkit` and
+`~/projects/hledger` and actual Claude Code capability research (not
+written in the abstract):
+
+- [`planning/phase-02-stage-2.1-plan.md`](phase-02-stage-2.1-plan.md) —
+  the selected Ledgerkit task (balance-assignment elision, EC-022),
+  root cause, independent oracle, fixture matrix, acceptance criteria.
+- [`planning/phase-02-adoption-design.md`](phase-02-adoption-design.md) —
+  the Claude Code skill, file layout, and install/update/removal
+  mechanism.
+- [`planning/phase-02-knowledge-api-design.md`](phase-02-knowledge-api-design.md) —
+  the Claim/Source/Evidence model, stable identity, and the four
+  `get`/`find`/`related`/`impacted` operations with error semantics
+  and contract tests.
+- [`planning/phase-02-measurement-design.md`](phase-02-measurement-design.md) —
+  the JSONL event log, existing-telemetry reuse, usefulness
+  classification and scorecard.
+- [`planning/phase-02-architecture.md`](phase-02-architecture.md) —
+  the minimal component diagram.
+- [`planning/phase-02-planning-review.md`](phase-02-planning-review.md) —
+  independent review of this whole planning package.
+
+**This still is not implementation authorisation.** The stage sequence,
+scope and acceptance criteria below remain this document's own; the
+five documents above make Stage 2.1 and its cross-cutting designs
+concrete enough to execute once reviewed and human-approved, per
+`AGENTS.md` §2/§11.
+
 ## Objective and expected value
 
 Demonstrate that a *small, conventional, evidence-based knowledge system*
@@ -53,6 +83,12 @@ preceding dogfooding.
 ## Scope and delivery sequence
 
 ### 2.1 — Choose a meaningful Ledgerkit problem and oracle
+
+**Done, as a plan — see `planning/phase-02-stage-2.1-plan.md`.** The
+task is selected (balance-assignment elision, Ledgerkit's own EC-022),
+against actually-inspected code and an actually-runnable, exact-commit
+hledger oracle. What follows in this section is retained as the
+general requirement the concrete plan satisfies, not superseded by it.
 
 Inspect a bounded area of Ledgerkit and hledger, e.g. posting/balancing,
 query or register semantics, and choose a **real development change**

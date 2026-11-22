@@ -326,3 +326,48 @@ complete, on two named, real, external blockers.
   finding's scope — recorded in
   `contracts/documentation-schema-validator.md` and
   `planning/phase-01-foundation.md` §29.
+
+## Phase 2 planning — Stage 2.1 and cross-cutting designs made implementation-ready
+
+Planning only; no code, skill, API, wiki record, CI check or logger
+was implemented by this change.
+
+### Added
+
+- `planning/phase-02-stage-2.1-plan.md`: selects Ledgerkit's own
+  documented EC-022 (balance-assignment elision parsing,
+  `ledgerkit/parser.py`) as the Stage 2.1 dogfooding task, with an
+  independently re-derived root cause, both failure modes reproduced
+  against the actual pinned hledger binary (commit-matched to
+  `~/projects/hledger` HEAD), a required fixture matrix, acceptance
+  criteria, and the decision to defer to Ledgerkit's own existing
+  `dev-docs/compat-register/` rather than duplicating it.
+- `planning/phase-02-adoption-design.md`: the Claude Code skill
+  (`.claude/skills/axiom-work/SKILL.md`), consumer file layout,
+  install/upgrade/removal mechanism, and non-Claude-agent equivalence.
+- `planning/phase-02-knowledge-api-design.md`: the Claim/Source/
+  Evidence model, stable identity (reusing Ledgerkit's own
+  `LK-<KIND>-<AREA>-<NNN>` scheme where one already exists), the
+  four-operation `get`/`find`/`related`/`impacted` API with error
+  semantics and contract tests, and an explicit adapter contract for
+  normalising an existing non-Axiom register's fields into Axiom's
+  common view without altering or duplicating the source record.
+- `planning/phase-02-measurement-design.md`: the `.axiom-local/events.jsonl`
+  format, existing Claude Code telemetry reuse (hooks, `/usage`,
+  OpenTelemetry), privacy/retention/opt-out rules, knowledge-usefulness
+  classification and the per-task scorecard.
+- `planning/phase-02-architecture.md`: the minimal component diagram.
+- `planning/phase-02-planning-review.md`: full independent review of
+  this planning package — 2 BLOCKING findings (a cited-but-nonexistent
+  provenance file; a generic claim schema that didn't line up
+  field-for-field with the real register it commits to reading), both
+  fixed in this same batch, plus 3 MATERIAL-NONBLOCKING and 2 ADVISORY
+  findings, dispositioned.
+
+### Changed
+
+- `planning/phase-02-template.md`: points to the five documents above;
+  §2.1 marked done-as-a-plan.
+- `planning/ROADMAP.md`, `planning/CONTEXT.md`: reconciled to reflect
+  the now-concrete Stage 2.1 plan and cross-cutting designs. Phase 2
+  remains **Planned**; no stage is marked In progress or Completed.
