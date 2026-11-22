@@ -82,7 +82,9 @@ jobs:
           echo "No trailing whitespace in tracked Markdown."
 
   # Stable, single GitHub required-check target; configure branch protection
-  # separately. Do not add CI jobs above without adding them to needs below.
+  # separately. Do not add CI jobs above without adding them to needs below
+  # AND to REQUIRED_JOBS in .github/scripts/ci_required_gate.py (a test
+  # asserts the two stay in sync - .github/scripts/tests/test_ci_required_gate.py).
   ci-required:
     name: ci-required
     if: ${{ always() }}
@@ -93,25 +95,11 @@ jobs:
       - no-trailing-whitespace
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
       - name: Require success from every dependent job
         env:
           NEEDS_JSON: ${{ toJSON(needs) }}
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          import sys
-
-          results = json.loads(os.environ["NEEDS_JSON"])
-          nonpassing = {
-              job: info["result"]
-              for job, info in results.items()
-              if info["result"] != "success"
-          }
-          for job, info in results.items():
-              print(f"{job}: {info['result']}")
-          if nonpassing:
-              print("Required CI dependencies did not all succeed:", nonpassing)
-              sys.exit(1)
-          print("All required CI dependencies succeeded.")
-          PY
+        run: python3 .github/scripts/ci_required_gate.py
