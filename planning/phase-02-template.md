@@ -306,3 +306,6 @@ writing one focused behavioural contract and test case.
 
 Phase 3's Assure-backed agent/retrieval experiments are separate and
 remain conditional on a demonstrably adequate independent harness.
+ADR 0008 additionally requires Phase 3 to deliver an optional-to-consumers
+MCP adapter over this Phase 2 knowledge API; this creates no Phase 2
+runtime dependency.
