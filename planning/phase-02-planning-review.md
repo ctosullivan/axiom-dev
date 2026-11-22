@@ -913,3 +913,25 @@ CLI-owned producer perform independently), with `SessionEnd` removing
 its own file — concurrent sessions no longer collide, and a stale
 file only matters in the narrow, accepted edge case of a crashed
 session's PID being reused by an unrelated later process.
+
+**Re-review requested on this fix** (commit `449ddea`): **0 findings
+— clean.** Four successive rounds of native Codex review, each
+immediately re-requested on the commit that fixed the previous
+round's findings, converged on a design with no further findings:
+
+| Round | Commit | Findings |
+|---|---|---|
+| 1 | `e83df4b` | 2 P2 (revision-space conflation in `impacted()`; logging opt-out didn't cover CLI writes) |
+| 2 | `cdc3fb8` | 1 P2 (skill missing task correlation) |
+| 3 | `441f4c8` | 2 P2 (upstream-detection gap; no session-ID source for CLI events) |
+| 4 | `1b9904b` | 1 P2 (session handoff broken under concurrent sessions) |
+| 5 | `449ddea` | **0 — clean** |
+
+Every finding across all five rounds was real and specific (none
+disputed as a false positive), each was fixed in the commit
+immediately following its round, and three of the five rounds (2, 3,
+4) were follow-on gaps in the *previous* round's own fix — a pattern
+this record names plainly rather than glossing over: native Codex
+review on this planning package found progressively deeper layers of
+the same underlying problem (CLI-owned events correlating correctly
+to a session) across three consecutive rounds before converging.

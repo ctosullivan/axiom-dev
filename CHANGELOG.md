@@ -519,3 +519,9 @@ broken under concurrent sessions (second session's `SessionStart`
 overwrites it) and never expired after a session ended. Fixed: the
 handoff is now keyed per-session by the `claude` process's own PID,
 with `SessionEnd` removing its own file.
+
+Re-review on that fix (commit `449ddea`): **0 findings — clean.**
+Five rounds total; every finding fixed in the commit immediately
+following its round; three of five rounds were follow-on gaps in the
+previous round's own fix (session-ID correlation, in progressively
+deeper layers) before converging.
