@@ -1019,3 +1019,15 @@ correction, and now this one) — each round fixed a real, narrower
 defect in the previous round's fix, converging on a more precise
 statement each time. Re-verified: 44/44 + 82/82, all governed
 documents `PASS`.
+
+**Re-review on that fix** (commit `3a7c46d`): **1 finding — the
+already-deferred native-integrity gap, recurring unchanged, exactly
+as expected** (it was deliberately not fixed, with a recorded
+disposition above, so Codex correctly flags it again on every
+subsequent head until that disposition changes). No new defect this
+round — the `ci-required` gate's own test coverage, and the two
+follow-on contradictions in the upstream rule, are now stable across
+a repeat review. Per `AGENTS.md` §14 step 7's three-corrective-round
+default, this is the natural stopping point for this task: the one
+remaining open finding is an explicitly disclosed, out-of-scope
+limitation, not an unresolved defect this round failed to fix.
