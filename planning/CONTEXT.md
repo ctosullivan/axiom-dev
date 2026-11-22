@@ -35,21 +35,24 @@ dependency or the project's purpose.
   `53d818b`. Inspect actual HEAD and PR state rather than trusting
   this text.
 - This branch makes Stage 2.1 and Phase 2's cross-cutting designs
-  implementation-ready, corrected twice after independent review:
-  `planning/phase-02-stage-2.1-plan.md` (contract-only — ends at the
-  reviewed oracle/fixture matrix, does not fix EC-022; explicit
-  "Handoff to Stage 2.4" for the actual fix), `planning/phase-02-adoption-design.md`
-  (skill, file layout, and the merged architecture diagram),
-  `planning/phase-02-knowledge-api-design.md` (claim model, API, and a
-  conservative native-register adapter that keeps Ledgerkit's own
-  status/relationship fields separate from Axiom's derived view rather
-  than overstating them), `planning/phase-02-measurement-design.md`
-  (logging/telemetry, with explicit skill-activation-vs-knowledge-use-
-  vs-assessed-usefulness distinctions), and
-  `planning/phase-02-planning-review.md` (two rounds of independent
-  review, both recorded as dated addenda, nothing rewritten to look
-  flawless in hindsight). `planning/phase-02-architecture.md` no
-  longer exists — merged into the adoption design. **This is still a
+  implementation-ready, corrected three times after independent
+  review: `planning/phase-02-stage-2.1-plan.md` (contract-only — ends
+  at the reviewed oracle/fixture matrix, does not fix EC-022; explicit
+  "Handoff to Stage 2.4" with a three-condition drift demonstration),
+  `planning/phase-02-adoption-design.md` (skill, file layout including
+  the new optional `knowledge/scope-manifests/`, and the merged
+  architecture diagram), `planning/phase-02-knowledge-api-design.md`
+  (claim model, API, and a conservative native-register adapter with
+  a scope gate — a claim can no longer be derived `VERIFIED` with a
+  null scope — and native dependency extraction from
+  `implementation[]`/`tests[]`, not just `evidence[].ref`),
+  `planning/phase-02-measurement-design.md` (logging/telemetry), and
+  `planning/phase-02-planning-review.md` (four rounds of independent
+  review, all recorded as dated addenda, nothing rewritten to look
+  flawless in hindsight). The Stage 2.1 oracle evidence is now
+  durable, version-controlled at `evidence/phase-2-stage-2.1-oracle/`
+  (fixtures, transcripts, exact binary/commit identification), not
+  left in an agent session's scratch directory. **This is still a
   plan, not an implementation** — no skill, API, wiki entry, CI check
   or logger has been built.
 - Phase 2's wiki, knowledge API, identity/drift gate and template

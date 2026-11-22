@@ -207,7 +207,7 @@ review work; unaffected records are not gratuitously invalidated.
 
 **Owns the actual EC-022 implementation.** Stage 2.1 ends with the
 reviewed contract and oracle only (`planning/phase-02-stage-2.1-plan.md`
-§7, "Handoff to Stage 2.4") — it does not fix Ledgerkit's code. Stage
+§6, "Handoff to Stage 2.4") — it does not fix Ledgerkit's code. Stage
 2.4 is where `_parse_posting` actually changes, the fixture matrix is
 executed for real, the fix is independently verified, and the
 compat-register entry is written.
@@ -228,12 +228,15 @@ dependencies threaten a prior claim. Demonstrate:
 5. changed claims and evidence are reconciled without erasing
    original provenance; a fresh agent can subsequently reuse them.
 
-The "second meaningful change" is deliberately **two controlled
-conditions, not one** — a relevant change expected to flag the EC-022
-claim, and an unrelated change expected not to — per the concrete
-design in `planning/phase-02-stage-2.1-plan.md` §7's handoff section,
-so drift detection is tested for false positives as well as true
-positives, not demonstrated by a single success case.
+The "second meaningful change" is deliberately **three controlled
+conditions, not one** — a relevant change (with its actual dependency
+checked, not assumed from file co-location), an unrelated change in a
+different module, and a same-file-but-semantically-unrelated change
+that specifically measures file-level impact detection's own known
+false-positive cost — per the concrete design in
+`planning/phase-02-stage-2.1-plan.md` §6.2, so drift detection is
+tested for false positives as well as true positives, not demonstrated
+by a single success case.
 
 Measure real defects caught/missed, false positives, retrieval usefulness,
 review and maintenance effort, friction, and any unnecessary procedure.

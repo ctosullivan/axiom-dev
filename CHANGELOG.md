@@ -435,3 +435,47 @@ or logger was implemented or modified by this change, and
   that section existed — the same defect class as the package's
   original BLOCKING finding, caught by the second independent review
   and fixed in the same batch by writing that section.
+
+## Phase 2 final amendment — scoped verification, native dependency extraction, durable oracle evidence
+
+Corrective planning amendment, continuing into Stage 2.1 oracle-evidence
+completion only; no skill, API, CI check or logger was implemented,
+and `~/projects/ledgerkit`/`~/projects/hledger` remain untouched.
+
+### Fixed
+
+- **Scoped-verification contradiction**: the knowledge-adapter design
+  could previously produce `derived.status: VERIFIED` together with
+  `derived.scope: null` — contradicting `docs/knowledge-placement.md`'s
+  own definition of VERIFIED ("within a stated scope"). Fixed with a
+  new scope gate (`planning/phase-02-knowledge-api-design.md` §3b.1):
+  an optional, small, Axiom-owned "scope manifest" file, kept outside
+  Ledgerkit's own schema, with five deterministic checks. Absent a
+  passing manifest, derived status is `UNCERTAIN`, never `VERIFIED`
+  with a null scope.
+- **Missing evidence vs. contradictory evidence**: missing reviewer
+  metadata previously mapped to `CONTESTED`; now maps to `UNCERTAIN`.
+  `CONTESTED` is reserved for an actual conflict.
+- **Native dependency extraction**: `impacted()` now extracts from a
+  native register's `implementation[]` and `tests[]` fields, not only
+  `evidence[].ref`; qualified references are resolved to file-level
+  paths for Git-diff matching; unparseable/dangling references produce
+  an explicit `unresolved_reference` diagnostic.
+- **Native-vs-generic validation conflation**: explicitly distinguished
+  — Axiom's own default-schema checks (e.g. `evidence[].reviewed_by`)
+  no longer apply to a native register with its own, different,
+  equally valid convention.
+- **Oracle evidence durability**: all nine EC-022 fixture journals,
+  full hledger transcripts, exact binary/commit identification and a
+  reproduction recipe are now version-controlled at
+  `evidence/phase-2-stage-2.1-oracle/`, re-run fresh and reconfirmed
+  rather than left in a scratch directory that does not survive the
+  session.
+- **Drift-demonstration rationale strengthened**: EC-021's relevance
+  as the "relevant change" condition is now grounded in an actual
+  checked code dependency rather than file co-location; a third,
+  same-file-but-semantically-unrelated condition is added to measure
+  file-level impact detection's own known false-positive cost directly.
+- **Stale section cross-references** (`§7` where the actual section is
+  `§6`) fixed across three documents, found during this round's own
+  consistency check.

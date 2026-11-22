@@ -1,0 +1,7 @@
+=== row-01-prefix-period-plain ===
+  ParseError invalid amount: '= $100.00' (line 2)
+
+=== row-03-suffix-comma-plain ===
+  Posting(account='assets:bank', amount=Amount(quantity=Decimal('100.00'), commodity='='), balance_assertion=None, cost_raw=None, tags=[], date_override=None, date2_override=None)
+  Posting(account='equity:opening', amount=Amount(quantity=Decimal('-100.00'), commodity='EUR'), balance_assertion=None, cost_raw=None, tags=[], date_override=None, date2_override=None)
+

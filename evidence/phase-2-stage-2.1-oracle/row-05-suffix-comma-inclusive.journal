@@ -1,0 +1,4 @@
+decimal-mark ,
+2024-01-01 Opening balance
+    assets:bank  =* 100,00 EUR
+    equity:opening  -100,00 EUR

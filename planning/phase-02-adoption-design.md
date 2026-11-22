@@ -4,8 +4,8 @@
 §3/§4/§16.C: how an independent repository (Ledgerkit, or any other)
 adopts Axiom with minimal configuration, and the one project-local
 skill's content. Nothing here is built until Stage 2.2 is reviewed and
-approved (`planning/phase-02-stage-2.1-plan.md` §7 pattern applies
-again at the next stage boundary).
+approved (`planning/phase-02-stage-2.1-plan.md` §6.3's approval-checkpoint
+pattern applies again at the next stage boundary).
 
 ## 1. Capability-sourced design constraints
 
@@ -53,6 +53,7 @@ file and directory is necessary" instruction):
 │           └── SKILL.md                   [new, Axiom's own]
 ├── knowledge/
 │   ├── claims/                            [new, DEFAULT ONLY — see below]
+│   ├── scope-manifests/                   [new, OPTIONAL — see below]
 │   └── wiki/                              [new]
 └── .axiom-local/
     └── events.jsonl                       [new, gitignored]
@@ -60,7 +61,7 @@ file and directory is necessary" instruction):
 
 - **`knowledge/claims/` is a default for a consumer with no existing
   claim register — not a mandatory directory.** Stage 2.1's own
-  concrete case (`planning/phase-02-stage-2.1-plan.md` §5) shows why:
+  concrete case (`planning/phase-02-stage-2.1-plan.md` §7) shows why:
   Ledgerkit already has `dev-docs/compat-register/`, which is a mature,
   governed claim register in its own right. Forcing a *second*,
   Axiom-shaped `knowledge/claims/` directory into Ledgerkit would
@@ -79,6 +80,14 @@ file and directory is necessary" instruction):
   prompt: "separate human-readable wiki explanations from authoritative
   structured assertions"). This has no pre-existing Ledgerkit
   equivalent and is genuinely new.
+- **`knowledge/scope-manifests/`** is new in this revision, and
+  **optional per claim, not a mandatory directory either** — one small
+  file per claim that needs a derived `VERIFIED` status when the
+  claim's own native/default record carries no scope field of its own
+  (`planning/phase-02-knowledge-api-design.md` §3b.1). It is
+  deliberately kept outside Ledgerkit's own `dev-docs/compat-register/`
+  — Axiom's own, separately-reviewed artifact, never a modification to
+  a schema another project also uses.
 - **`.claude/skills/axiom-work/SKILL.md`** — one skill (§3 below), kept.
 - **`.axiom-local/events.jsonl`** — kept, Git-ignored by default (see
   `planning/phase-02-measurement-design.md` for format/retention). The

@@ -597,3 +597,222 @@ beyond Stage 2.1's own scope. No files anywhere were modified.
 
 Both the BLOCKING finding and the ADVISORY notes are fixed in the same
 batch this section was written in.
+
+## 7. Final-amendment addendum (AMEND phase of the Phase 2 final amendment/implementation assignment)
+
+Preserving everything above exactly as written. A follow-up authorising
+prompt ("Phase 2 Final Amendment, Verification and Implementation")
+identified further defects not caught by §1–6, specifically in the
+knowledge-adapter's scoped-verification invariant, native dependency
+extraction for `impacted()`, native-vs-generic validation conflation,
+durability of the oracle evidence, and the drift demonstration's
+dependency rationale. This section records what was corrected.
+
+### 7.1 Corrections made
+
+1. **Scoped-verification invariant fixed.** The prior revision could
+   produce `derived.status: VERIFIED` together with `derived.scope:
+   null` — a direct contradiction of `docs/knowledge-placement.md`'s
+   own, already-accepted definition of VERIFIED ("within a stated
+   scope"). Fixed with a new scope gate (`planning/phase-02-knowledge-api-design.md`
+   §3b.1): an optional, small, Axiom-owned "scope manifest" file,
+   kept outside Ledgerkit's own schema, with five deterministic
+   checks before it can support a `VERIFIED` derivation. Absent a
+   passing manifest, `derived.status` is `UNCERTAIN`, never `VERIFIED`
+   with a null scope.
+2. **"Missing evidence" vs "contradictory evidence" corrected.** The
+   prior revision mapped missing reviewer metadata to `CONTESTED`.
+   This conflated absence with conflict. Fixed: missing scope and
+   missing reviewer metadata now both map to `UNCERTAIN`; `CONTESTED`
+   is reserved for an actual conflict (disagreeing evidence items, or
+   a scope manifest that names the wrong claim or a stale source
+   pin).
+3. **Native dependency extraction specified.** `impacted()` previously
+   matched only `source.ref`/`evidence[].ref`. Native register fields
+   `implementation[]` and `tests[]` are now extracted too (§3f),
+   function/class-qualified references resolved to file-level paths
+   for Git-diff matching (deliberately conservative, not
+   AST-aware — this project's own complexity budget), `upstream`
+   revision changes represented as a pseudo-path change record, and
+   unparseable/dangling references reported as an explicit
+   `unresolved_reference` diagnostic rather than silently dropped.
+4. **Native-vs-generic validation distinguished explicitly** (§6.0):
+   Axiom's own default schema's `evidence[].reviewed_by` check applies
+   only to Axiom's own default `knowledge/claims/` records; it is not
+   a requirement imposed on Ledgerkit's native register, which has its
+   own, different, equally valid reviewer-identity convention
+   (top-level `verified_by`/`verified_date`, §3b).
+5. **Oracle evidence made durable.** All nine fixture journals, full
+   hledger transcripts, exact binary/commit identification, and a
+   reproduction recipe are now version-controlled at
+   `evidence/phase-2-stage-2.1-oracle/` — re-run fresh in this session
+   against the live pinned oracle (confirmed matching the prior
+   round's results), not left in a scratch directory that does not
+   survive the session.
+6. **Drift demonstration strengthened to three conditions.** EC-021's
+   relevance as the "relevant change" condition is now grounded in an
+   actual checked dependency (both EC-021 and EC-022 depend on
+   `txn.postings` being complete before `resolve_elision()` runs — not
+   mere file co-location), and a third, new "same-file,
+   semantically-unrelated" condition is added specifically to measure
+   file-level impact detection's own known false-positive cost
+   directly, rather than leaving it a theoretical limitation.
+7. **Stale section cross-references fixed.** Several `§7` references
+   to what is actually `§6` ("Handoff to Stage 2.4") in
+   `planning/phase-02-stage-2.1-plan.md`, `planning/phase-02-adoption-design.md`
+   and `planning/phase-02-template.md` — pre-existing dangling
+   references, not introduced by this amendment, found during this
+   round's own cross-document consistency check and fixed.
+
+### 7.2 What remains open
+
+- `knowledge/scope-manifests/`'s exact file format is illustrative;
+  precise field validation (beyond the five checks named) is BUILD-phase
+  work.
+- The `Skill`-tool `PreToolUse` matcher's payload shape remains
+  unconfirmed (unchanged from all prior rounds).
+- Rows 2, 4, 5, 6, 7, 8's Ledgerkit-side (not hledger-side) behaviour
+  was not independently re-run again in this round — see
+  `evidence/phase-2-stage-2.1-oracle/README.md`'s explicit
+  disclosure of exactly what was and wasn't re-confirmed.
+
+### 7.3 Independent review of this amendment
+
+Recorded in §8 below. **Note on this sentence:** when first written,
+§8 did not yet exist — a fresh-context reviewer caught this as its own
+BLOCKING finding (§8, Blocking 1), the same recurring defect class as
+§3's original BLOCKING 1 and §6's BLOCKING 1. This is now the
+**third** time this exact pattern has appeared in this file. Recorded
+honestly, including the recurrence itself, rather than quietly fixed
+without a trace — see §8's own closing note for what changes next
+round to actually stop this from recurring a fourth time.
+
+## 8. Third independent review (of the final-amendment round)
+
+Dispatched to a `general-purpose` agent (fresh context), after all of
+§7's edits existed on disk.
+
+**Isolation achieved, in the reviewer's own words:** "fresh context
+(no prior turns, no memory of any earlier round), no investment in
+this package's outcome, re-derived every checkable claim from the
+real files/binaries/git history." **Not achieved:** "same operator,
+same machine, and... almost certainly the same underlying model
+family as whoever produced this package and its three prior
+'independent' reviews... best-effort, single-operator isolation."
+
+### BLOCKING 1 — the dangling-forward-reference defect recurred a third time
+
+Confirmed real: §7.3 said "Recorded in §8 below" while §8 did not yet
+exist. The reviewer noted this is the exact pattern §3's original
+BLOCKING 1 and §6's BLOCKING 1 already named, now appearing a third
+time in the one file whose job is catching it. **Disposition: fixed**
+— this section is that review. **Process change, not just a content
+fix, to actually stop a fourth recurrence**: from this point on, this
+file's own addenda are written in two passes within the same editing
+session — the corrective-round addendum (§7-shaped) first, with any
+promissory forward-reference to a not-yet-run review explicitly
+phrased as pending ("a review has been dispatched; not yet returned"),
+and the actual review section added as a **separate edit** only after
+the dispatch returns, never written as a single pre-committed
+"follows below" sentence before the review exists. The recurring
+mistake was writing the promise and the promised content as if they
+would land together; they haven't, three times running.
+
+### BLOCKING 2 — EC-021's cited fix location was wrong
+
+Confirmed real by the reviewer reading the actual code: `_flush_txn`
+(`ledgerkit/parser.py:872–897`) only attaches tags/date-overrides to
+an already-complete postings list and never drops one. The actual
+EC-021 mechanism is in the directive-handling branches around
+`parser.py:1264–1343` (e.g. the `account` directive handler at line
+1278), which set `in_subdirective = True` without first checking
+whether a transaction is still open, so the adjacent
+subdirective-swallowing block (lines 1249–1258) silently consumes the
+transaction's next posting line. **Disposition: fixed** —
+`planning/phase-02-stage-2.1-plan.md` §6.2 now cites the correct
+location, with the correction itself recorded rather than silently
+swapped in. The reviewer confirmed the broader dependency argument
+(both EC-021 and EC-022 depend on `txn.postings` being complete before
+`resolve_elision()` runs) survives the correction — only the specific
+function/line citation was wrong, not the underlying relevance
+argument.
+
+### MATERIAL-NONBLOCKING 3 — a garbled cross-reference
+
+`planning/phase-02-knowledge-api-design.md`'s `get()` error section
+read "the CI schema check (§5 of `planning/phase-02-template.md`
+§2.3)" — `§2.3` is an unordered bullet list with no numbered item 5,
+so the reference didn't resolve to anything coherent. **Disposition:
+fixed.**
+
+### Independently re-verified and found accurate
+
+- The scope gate (§3b/§3b.1) genuinely closes the original
+  VERIFIED/null-scope contradiction — the reviewer walked every
+  branch and confirmed the combination that caused it is now
+  structurally unreachable.
+- Missing reviewer metadata maps to `UNCERTAIN`, not `CONTESTED`;
+  `CONTESTED` is reserved for genuine conflicts only — confirmed, no
+  other path produces it.
+- `impacted()`'s native dependency extraction genuinely covers
+  `implementation[]`/`tests[]`, with a real file-level resolution rule
+  and a defined `unresolved_reference` diagnostic — confirmed present,
+  not merely asserted.
+- Native-vs-generic validation is actually distinguished; no
+  remaining place assumes Ledgerkit's native `evidence[]` carries
+  `reviewed_by`.
+- `native.status` is never altered anywhere in the document.
+- `impacted()` remains read-only, with no graph database or inferred-
+  relationship engine.
+- **The oracle evidence directory is real, not fabricated** — the
+  reviewer independently re-ran rows 3, 7 and 9 against the live
+  hledger binary and Ledgerkit's own `parser.parse_string()` against
+  rows 1 and 3, in both cases getting results matching the recorded
+  transcripts exactly, including the precise `899,00 EUR` and
+  `$-150.00` figures.
+- hledger/Ledgerkit identification confirmed accurate a third time.
+- §7 item 7's claimed `§7`→`§6` fixes are real — every `§N` reference
+  checked against each document's actual headings resolved correctly,
+  except finding 3 above.
+- `knowledge/scope-manifests/` is documented consistently.
+- The third drift condition's function citation
+  (`_apply_posting_date_override_tags`) is accurate — zero interaction
+  with amount/assertion parsing, confirmed by direct reading.
+- ADR 0008 unmodified; §1–§6 of this file confirmed byte-for-byte
+  preserved (82 insertions, 0 deletions for this round's §7).
+- No unnecessary complexity found in this round's fixes.
+
+### What the reviewer did not check
+
+Fixture rows 2, 4, 5, 6, 8's Ledgerkit-side behaviour (disclosed as
+not re-run this round); the `Skill`-tool matcher payload shape
+(unconfirmed across all rounds); `dev-docs/compat-register/examples/`;
+whether a new relevant hledger commit has landed since the plan's
+`git log --grep` check (time-sensitive); solo-developer realism
+beyond Stage 2.1. No files modified anywhere.
+
+### Quotable verdict
+
+> "This round's substantive engineering content holds up under
+> independent re-verification: the scope-gate fix genuinely closes the
+> VERIFIED/null-scope contradiction with no path left open to
+> fabricate scope from area/reason; missing-evidence and
+> contested-evidence are now cleanly separated; impacted()'s native
+> dependency extraction, its unresolved_reference diagnostic, and the
+> native-vs-generic validation split are all real, specific, and
+> correctly described; and the oracle evidence directory is genuine,
+> durable, and reproducible — I re-ran three fixtures against the live
+> hledger binary and Ledgerkit's own parser myself and got exactly the
+> claimed results. But the round has two real defects of its own.
+> First, and most serious: the file whose entire job is catching 'a
+> document asserting another document's content exists before it was
+> written' has now committed that exact error a third time... Second,
+> the one specific technical claim this review was asked to check
+> hardest — that EC-021's fix and EC-022's fix share a dependency,
+> located by reading both functions — turns out to cite the wrong
+> function... Fix the dangling §8 reference and correct the EC-021
+> fix-location citation, and this round's actual engineering work is
+> sound."
+
+Both BLOCKING findings and the MATERIAL-NONBLOCKING finding are fixed
+in the same batch this section was written in.

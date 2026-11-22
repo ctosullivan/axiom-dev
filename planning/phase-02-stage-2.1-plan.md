@@ -6,14 +6,16 @@ EC-022 — it does not fix it. Per `AGENTS.md` §2/§11 and
 `docs/development-lifecycle.md`'s SPECIFY exit criterion, this plan
 requires independent review before BUILD starts; see
 `planning/phase-02-planning-review.md` for the review record. BUILD
-(Stage 2.4, §7 below) awaits separate human approval.
+(Stage 2.4, §6 below) awaits separate human approval.
 
-**Corrected sequencing (this revision).** An earlier draft of this
-plan included fix-implementation and regression-testing requirements
-that belonged to Stage 2.4, creating an overlap between the two
-stages. This revision ends Stage 2.1 at the reviewed contract and
-oracle; §7 below is the explicit handoff carrying everything
-implementation-shaped into Stage 2.4.
+**Corrected sequencing.** An earlier draft of this plan included
+fix-implementation and regression-testing requirements that belonged
+to Stage 2.4, creating an overlap between the two stages. This plan
+ends Stage 2.1 at the reviewed contract and oracle; §6 below is the
+explicit handoff carrying everything implementation-shaped into Stage
+2.4. (Found and fixed as a dangling-section-reference defect in this
+revision: this note previously cited "§7," which is actually the
+knowledge-recording decision, not the handoff.)
 
 ## 1. Baseline inspected (UNDERSTAND)
 
@@ -136,10 +138,13 @@ without anyone having decided that was acceptable.
 ## 4. Independent oracle — frozen and now fully captured
 
 Oracle: **hledger 1.52.4, commit `33fa849e7`**, run against
-hand-written fixture journals in an isolated scratch location (no
-Ledgerkit or hledger files modified), output captured *before* any
-Ledgerkit code change. Matching hledger is independently assessed as
-the right requirement here: Ledgerkit's own stated goal and its own
+hand-written fixture journals (no Ledgerkit or hledger files
+modified), output captured *before* any Ledgerkit code change, now
+preserved durably at `evidence/phase-2-stage-2.1-oracle/` (fixture
+files, full transcripts, exact version/commit identification,
+commands, and a reproduction recipe — see that directory's
+`README.md`). Matching hledger is independently assessed as the right
+requirement here: Ledgerkit's own stated goal and its own
 `DECISIONS.md`/`EDGE_CASES.md` already treat hledger's assertion-as-
 amount behaviour as the target.
 
@@ -157,10 +162,15 @@ amount behaviour as the target.
 | 8 (negative) | Malformed marker `===` | **exit 1**: parse error, `"unexpected '='... expecting '*' or amount"` | Yes — the fix must not over-match a triple marker |
 | 9 (boundary, **out of EC-022's scope**) | Suffix/prefix, **two transactions**, account has a nonzero prior balance before the balance-assignment posting | exit 0; assigned amount is `(asserted − prior running balance)`, **not** the asserted figure itself — see §3 | **No** — requires running-balance tracking `resolve_elision()` does not have; tracked as a named, accepted limitation, not silently diverged from |
 
-All nine rows were run against the live oracle in this planning pass
-(fixture files and full transcripts: this session's scratch directory,
-reproducible from the exact journal contents quoted in §3 and this
-table — not re-derived from Ledgerkit's own, not-yet-written fix).
+All nine rows were run against the live oracle, twice now in two
+separate sessions, with matching results. **Fixture files and full
+transcripts are version-controlled** at
+`evidence/phase-2-stage-2.1-oracle/` (not left in an agent session's
+scratch directory, which does not survive the session — corrected in
+this revision per the authorising prompt's explicit "reproducible
+oracle evidence must survive the agent session"), reproducible from
+the exact journal contents there and in this table — not re-derived
+from Ledgerkit's own, not-yet-written fix.
 Rows 1–8 are the **required pass set** for EC-022's fix; row 9 is a
 **required disposition**, not a required pass — Stage 2.4 must either
 extend the fix to cover it (expanding scope, requiring its own review)
@@ -219,42 +229,90 @@ Stage 2.4 owns everything below; none of it is done by this plan.
    separately-dispatched reviewer in item 5 — never set by the
    implementer, per that schema's own rule.
 
-### 6.2 Full-lifecycle demonstration — two controlled conditions, not one
+### 6.2 Full-lifecycle demonstration — three controlled conditions, not one
 
-Stage 2.4 must demonstrate drift detection with **both** a relevant
-change and an unrelated change — a single success case does not show
-the mechanism avoids false positives, and the original plan's reliance
-on an unpredictable future hledger commit is replaced with a condition
-this project controls directly:
+Stage 2.4 must demonstrate drift detection with **three** conditions,
+not two — a relevant change, an unrelated change in a different
+module, and a same-file-but-semantically-unrelated change — because
+two conditions alone cannot separate "the mechanism correctly found a
+real dependency" from "the mechanism's own file-level granularity
+(`planning/phase-02-knowledge-api-design.md` §3f) just happened to
+match." The original plan's reliance on an unpredictable future
+hledger commit is replaced with conditions this project controls
+directly.
 
-- **Relevant-change condition:** after the EC-022 fix and its
-  compat-register entry exist, make a second, genuinely meaningful
-  change to a source that entry depends on — the clearest controlled
-  choice is **fixing EC-021** next (rejected as the *primary* Stage
-  2.1 task in §2, but explicitly viable here: it touches the same
-  `_flush_txn`/transaction-block-closing neighbourhood in
-  `parser.py`, close enough that a careful implementer should ask
-  whether it affects EC-022's own fix's assumptions, even if the
-  answer turns out to be no). If a new, genuinely relevant hledger
-  commit has landed in the meantime (checked, not assumed — same
-  `git log --grep` search as §2's candidate research), that is an
-  equally valid, and richer, relevant-change condition; it is a bonus
-  if available, not a dependency.
-  **Required demonstration:** `impacted()` flags the EC-022 claim;
-  a reviewer who did not implement either change independently
-  reassesses it against the frozen oracle; the claim is reconciled
-  (not silently re-marked) with the new evidence.
-- **Unrelated-change condition:** a second, deliberately unrelated
-  source change (e.g. a documentation-only edit, or a change to an
-  unrelated Ledgerkit module such as `commodity_style.py`'s display
-  formatting, which the EC-022 claim's `source`/`evidence` references
-  do not touch) is made in the same stage.
+- **Relevant-change condition — EC-021, with its actual dependency
+  checked, not assumed from file co-location.** EC-021 (a bare
+  directive mid-transaction-block silently drops the rest of the
+  transaction). **Corrected fix-location citation** (an earlier draft
+  of this section misattributed the bug to `_flush_txn`, which an
+  independent reviewer found, by reading it directly, only ever
+  attaches tags/date-overrides to an *already-complete* postings list
+  and never drops one — `planning/phase-02-planning-review.md` §8,
+  BLOCKING 2): the actual mechanism is in the directive-handling
+  branches around `ledgerkit/parser.py:1264–1343` (e.g. the `account`
+  directive handler at line 1278), each of which sets
+  `in_subdirective = True` and `continue`s **without first checking
+  whether a transaction block is still open** — the subdirective-
+  swallowing block immediately above them (lines 1249–1258) then
+  silently consumes the still-open transaction's next posting line as
+  if it were an indented subdirective, which is exactly how the rest
+  of the transaction gets dropped. **The genuine dependency, now
+  correctly located, is still not "same file"** — it is that both
+  EC-021 and EC-022 depend on the same underlying assumption: that
+  `txn.postings` is complete and correct by the time balance-assignment
+  resolution (`resolve_elision()`) runs on it. EC-021's bug (silently
+  dropping postings before the transaction is ever flushed) and
+  EC-022's fix (resolving an elided posting's amount from its
+  siblings) would interact badly in a transaction that triggers both
+  — a dropped sibling posting would corrupt EC-022's own sibling-net
+  resolution,
+  not merely coexist in the same file. This is recorded as the actual
+  reason EC-021 is relevant, replacing an earlier draft's weaker "close
+  enough that a careful implementer should ask" framing. If a new,
+  genuinely relevant hledger commit has landed in the meantime
+  (checked via the same `git log --grep` search as §2's candidate
+  research, not assumed), that is an equally valid, richer
+  relevant-change condition — a bonus if available, not a dependency.
+  **Required demonstration:** `impacted()` flags the EC-022 claim via
+  its `implementation[]` reference; a reviewer who did not implement
+  either change independently reassesses it against the frozen oracle;
+  the claim is reconciled (not silently re-marked) with the new
+  evidence.
+- **Unrelated-change condition (different module):** a change to a
+  genuinely unrelated Ledgerkit module such as `commodity_style.py`'s
+  display formatting — not referenced by the EC-022 claim's
+  `implementation[]`/`tests[]`/`evidence[].ref` at all.
   **Required demonstration:** `impacted()` does **not** flag the
-  EC-022 claim. If it does, that is a recorded false positive, not a
-  discarded result.
-- **Both conditions' actual outcomes are recorded**, including any
-  false positive or false negative, in the Stage 2.4 evidence record —
-  per `planning/phase-02-measurement-design.md` §7.D's predeclared
+  EC-022 claim.
+- **Same-file, semantically unrelated condition (new in this
+  revision) — tests the known limitation of file-level matching
+  directly, rather than leaving it theoretical:** a change to
+  `_apply_posting_date_override_tags` (`ledgerkit/parser.py:900+`,
+  read directly: handles `date`/`date2` tag overrides, with zero
+  interaction with `Posting.amount`/`balance_assertion` or
+  `resolve_elision()`). This is in the **same file** as EC-022's own
+  `implementation[]` reference, so `impacted()`'s deliberately
+  conservative file-level matching (§3f) **will** flag the EC-022
+  claim — a **known, predicted false positive**, not a surprise, and
+  not a reason to abandon file-level matching, but direct, measured
+  evidence of its actual cost in this one real case rather than an
+  assertion that it "probably" produces false positives sometimes.
+  **Required demonstration:** `impacted()` flags the claim; the
+  reviewer confirms (by reading the actual diff) that the change has
+  no real bearing on EC-022's behaviour, and records this as a
+  **confirmed false positive**, not a missed impact and not silently
+  dropped from the report.
+- **All three conditions' actual outcomes are recorded** using these
+  exact categories, not a single pass/fail per condition: true
+  positives (correctly flagged, genuinely relevant), false positives
+  (flagged, confirmed not relevant on review — e.g. the third
+  condition above), missed impacts (relevant but not flagged, if any
+  occur), actual semantic changes found (does the change really alter
+  behaviour, independently assessed against the frozen oracle), source
+  changes with no semantic effect (changed code, unchanged behaviour),
+  and review effort (time/steps needed for the reviewer to reach each
+  determination) — per `planning/phase-02-measurement-design.md` §7.D's predeclared
   drift-effectiveness measure.
 
 ### 6.3 Approval checkpoints
