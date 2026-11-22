@@ -197,10 +197,27 @@ both would conflate two different kinds of statement.
   default rotation. A future `axiom-knowledge log-rotate` helper is
   deferred until a real file-size problem is observed (§14 complexity
   budget).
-- **Opt-out:** removing or not installing the hooks is sufficient — no
-  separate "logging enabled" flag is needed when the mechanism is
-  "a hook command either exists in `.claude/settings.json` or it
-  doesn't."
+- **Opt-out, corrected per native Codex review (commit `e83df4b`'s
+  finding on this exact paragraph):** removing the hooks is **not**
+  sufficient by itself. §1 is explicit that the `axiom-knowledge` CLI
+  appends `knowledge_get`/`knowledge_find`/`knowledge_impact` events
+  on its own exit, independently of any hook — and test-runner
+  wrappers/manual helpers (`claim_reconciled`, `review_finding`,
+  `task_accepted`) write directly too. A consumer who removes
+  `.claude/settings.json`'s hooks but keeps using the CLI would still
+  be logged, contradicting the opt-out this paragraph previously
+  promised. **Fixed with a single, shared check every event producer
+  honours**: one environment variable,
+  `AXIOM_DISABLE_LOGGING=1`. The hook commands check it before
+  appending (one guard clause each); `axiom-knowledge` itself checks
+  it before any event-writing call, in one shared code path all its
+  subcommands go through — not re-implemented per subcommand; the
+  test-runner wrapper and manual helpers check the same variable. This
+  is a second, simple, deterministic mechanism alongside "don't
+  install the hooks," not a replacement for it — removing the hooks
+  still stops hook-sourced events even without the variable set, but
+  the variable is the one opt-out that reliably covers every producer,
+  including the CLI's own direct writes.
 - **Logging-failure behaviour:** every logging hook command is
   non-blocking (no `exit 2`, no `onFailure: block`) — a failure to
   write the JSONL file (disk full, permissions) must never stop

@@ -816,3 +816,43 @@ beyond Stage 2.1. No files modified anywhere.
 
 Both BLOCKING findings and the MATERIAL-NONBLOCKING finding are fixed
 in the same batch this section was written in.
+
+## 9. Native Codex review (PR #4)
+
+The first **native** review of this planning package — distinct from
+every round above, which was a fresh-context Claude subagent dispatch
+(best-effort, single-operator isolation, per `docs/agent-isolation.md`).
+PR #4 (`planning/phase-2-stage-2.1-ledgerkit-oracle` → `main`) was
+opened and `@codex review` requested per `decisions/0005`. Reviewed
+commit: `e83df4b88fd34e0bba1dfcabe16831326f5dd65f`. Result: **2 P2
+findings**, both real, both fixed in the same batch as this entry.
+
+1. **Local dependencies resolved against the wrong revision space**
+   (`planning/phase-02-knowledge-api-design.md` §3f): the design
+   checked whether `implementation[]`/`tests[]` paths (Ledgerkit
+   files) existed "at the claim's own `pinned_at`/`compatibility_target`
+   revision" — but `compatibility_target` identifies an **hledger**
+   version, not a Ledgerkit repository revision; checking a Ledgerkit
+   path's existence against an hledger version string is not a
+   well-formed check. **Fixed**: local references now resolve against
+   an explicit consumer-repository (Ledgerkit) revision — that
+   evidence item's own `pinned_at` if given, else the revision the
+   caller is currently evaluating against — never against
+   `compatibility_target`, which is reserved exclusively for the
+   `upstream:<project>` pseudo-path mechanism.
+2. **Logging opt-out didn't cover CLI-owned event writes**
+   (`planning/phase-02-measurement-design.md` §5): "removing or not
+   installing the hooks is sufficient" to opt out contradicted §1's
+   own statement that `axiom-knowledge` appends
+   `knowledge_get`/`knowledge_find`/`knowledge_impact` events on its
+   own exit, independently of hooks, and that test-runner wrappers/
+   manual helpers write directly too. **Fixed**: a single shared
+   environment-variable check (`AXIOM_DISABLE_LOGGING=1`) every event
+   producer honours — hooks, the CLI's own writes, and manual helpers
+   alike — alongside, not instead of, removing the hooks.
+
+Both findings are genuine design defects this project's own fresh-context
+review rounds (§1–§8) did not catch — native Codex found something new,
+not a repeat of an already-known issue. Full test/governance
+verification re-run after the fix: 82/82 + 33/33 tests, all governed
+documents `PASS`, no trailing whitespace.

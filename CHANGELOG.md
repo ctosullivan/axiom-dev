@@ -479,3 +479,20 @@ and `~/projects/ledgerkit`/`~/projects/hledger` remain untouched.
 - **Stale section cross-references** (`§7` where the actual section is
   `§6`) fixed across three documents, found during this round's own
   consistency check.
+
+## PR #4 — native Codex review findings fixed
+
+First native Codex review of the planning package (`decisions/0005`),
+commit `e83df4b`. 2 P2 findings, both real, both fixed:
+
+- **Local dependencies resolved against the wrong revision space**:
+  `implementation[]`/`tests[]` (Ledgerkit file paths) were checked for
+  existence against `compatibility_target` (an hledger version
+  string) — not a Ledgerkit revision at all. Fixed: local references
+  now resolve against an explicit consumer-repository revision,
+  `compatibility_target` reserved exclusively for the
+  `upstream:<project>` pseudo-path mechanism.
+- **Logging opt-out didn't cover CLI-owned event writes**: removing
+  hooks did not stop `axiom-knowledge`'s own direct event-writing on
+  exit. Fixed with a single shared `AXIOM_DISABLE_LOGGING=1` check
+  every event producer honours.

@@ -359,12 +359,29 @@ already enumerate exactly what a claim depends on; `impacted()`
 extracts from them directly, with the simplest deterministic rule
 that works — **path matching, not an AST or a dependency graph**:
 
+**Two separate revision spaces, never conflated.** A native claim's
+`upstream.compatibility_target` identifies an **hledger** version
+(e.g. `"1.52.4"`) — it has no meaning as a revision of the **Ledgerkit**
+repository, where `implementation[]`/`tests[]` paths actually live.
+Checking whether `ledgerkit/parser.py` "exists at revision 1.52.4"
+is not a well-formed question — an earlier draft of this section did
+exactly that, found and confirmed wrong by native Codex review (see
+disposition below). The corrected rule: local references
+(`implementation[]`, `tests[]`, and any `evidence[].ref` whose `kind`
+describes Ledgerkit's own code) are resolved against an explicit
+**consumer-repository revision** — the Ledgerkit commit the caller is
+currently evaluating against (ordinarily Ledgerkit's own current
+HEAD, or the specific commit a historical `impacted()` run is
+checking) — never against `upstream.compatibility_target`, which is
+reserved exclusively for the `upstream:<project>` pseudo-path case
+below.
+
 | Native field | What it identifies | Extraction rule |
 |---|---|---|
-| `implementation: [<path>:<qualifier>, ...]` | Ledgerkit source location(s) the claim's behaviour depends on | Split each entry on the **last** `:` — everything before it is the file path a Git change is matched against; the qualifier (function/class name) is kept for the impact report's human-readable reason, but matching itself is file-level, per this project's complexity budget ("deterministic path matching should be sufficient initially") |
-| `tests: [<path>::<Class>::<method>, ...]` | regression/verification dependency | Split on the **first** `::` for the file path, same file-level matching; a test file counts as a dependency exactly like an implementation file — this closes a real gap the prior revision's `evidence[].ref`-only matching left open: a changed *test*, with no corresponding `implementation[]`/`evidence[]` entry touched, previously would not have flagged anything |
-| `upstream: {project, compatibility_target}` | the external reference version the claim was evaluated against | Not a local file path — represented as a pseudo-path `upstream:<project>` (e.g. `upstream:hledger`) in a change record, with `base`/`head` being the pinned version *before* and *after* a bump. A caller comparing the native record's own `compatibility_target` across two reviewed revisions of the compat-register file builds this change record; `impacted()` does not reach into `~/projects/hledger` itself |
-| `evidence: [{kind, ref, pinned_at}, ...]` | supporting observations, each pinned | Unchanged from the prior revision: `ref` matched the same way as `implementation[]`, by file path |
+| `implementation: [<path>:<qualifier>, ...]` | Ledgerkit source location(s) the claim's behaviour depends on | Split each entry on the **last** `:` — everything before it is the file path, resolved against the **consumer-repository revision** (above, never `compatibility_target`) and matched against a Git change the same way. The qualifier (function/class name) is kept for the impact report's human-readable reason; matching itself is file-level, per this project's complexity budget ("deterministic path matching should be sufficient initially") |
+| `tests: [<path>::<Class>::<method>, ...]` | regression/verification dependency | Split on the **first** `::` for the file path, same consumer-repository-revision, file-level matching; a test file counts as a dependency exactly like an implementation file — this closes a real gap the prior revision's `evidence[].ref`-only matching left open: a changed *test*, with no corresponding `implementation[]`/`evidence[]` entry touched, previously would not have flagged anything |
+| `upstream: {project, compatibility_target}` | the external reference version the claim was evaluated against | Not a local file path, and **not resolved against the consumer-repository revision at all** — represented as a pseudo-path `upstream:<project>` (e.g. `upstream:hledger`) in a change record, with `base`/`head` being the pinned version *before* and *after* a bump. A caller comparing the native record's own `compatibility_target` across two reviewed revisions of the compat-register file builds this change record; `impacted()` does not reach into `~/projects/hledger` itself |
+| `evidence: [{kind, ref, pinned_at}, ...]` | supporting observations, each pinned | `ref` matched the same way as `implementation[]` **only when it names a Ledgerkit-local path**, resolved against that evidence item's own `pinned_at` (a Ledgerkit commit) if `pinned_at` is given, falling back to the consumer-repository revision otherwise — never against `compatibility_target`. An evidence item describing hledger's own source/behaviour (not a Ledgerkit path) is not path-checked against the Ledgerkit tree at all; see the gap noted below |
 
 **Resolving a qualified reference to a file** is the one new piece of
 logic this revision adds, and it is intentionally the simplest rule
@@ -381,15 +398,23 @@ measures how often this conservative choice produces a false positive
 in practice, rather than asserting it won't.
 
 **Missing or ambiguous references are reported, not silently
-ignored.** An `implementation[]`/`tests[]`/`evidence[].ref` entry that
-does not parse into the `path:qualifier` or `path::Class::method`
-shape above, or whose extracted path does not exist anywhere in the
-repository at the claim's own `pinned_at`/`compatibility_target`
-revision, produces an `unresolved_reference` diagnostic on that claim
-— distinct from an impact finding (it is a data-quality problem with
+ignored.** A local (`implementation[]`/`tests[]`/Ledgerkit-path
+`evidence[].ref`) entry that does not parse into the `path:qualifier`
+or `path::Class::method` shape above, or whose extracted path does
+not exist in the Ledgerkit repository at the **consumer-repository
+revision** being checked (that evidence item's own `pinned_at` if
+given, else the revision the caller is currently evaluating against
+— **never** `compatibility_target`, which names an hledger version
+and is not a Ledgerkit revision at all — corrected per native Codex
+review, commit `e83df4b`'s finding on this exact paragraph),
+produces an `unresolved_reference` diagnostic on that claim —
+distinct from an impact finding (it is a data-quality problem with
 the claim's own record, surfaced the same way a dangling reference is
 surfaced elsewhere in this design, §6) — rather than being dropped
-from consideration with no trace.
+from consideration with no trace. An `evidence[].ref` describing
+hledger's own source (not a Ledgerkit path) is not checked for local
+existence at all — it is out of scope for this diagnostic, not
+silently treated as resolved.
 
 ## 4. Operations
 
