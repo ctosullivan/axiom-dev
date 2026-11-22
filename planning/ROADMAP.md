@@ -1,100 +1,159 @@
 # Roadmap
 
-Axiom Dev seeks the simplest useful, evidence-based development lifecycle
-that preserves trustworthy knowledge across coding sessions and exposes
-drift before unsupported claims become accepted facts. `AGENTS.md`
-governs planning, verification and phase acceptance; detailed plans and
-historical records live outside this summary.
+Axiom Dev tests whether a **small, conventional, knowledge-based development
+method** makes AI-assisted maintenance of complex software more trustworthy
+and practically useful. The method must preserve verified understanding
+across disconnected sessions, support independent verification, expose
+potential knowledge drift, and justify its own overhead. A wiki, API,
+template, MCP adapter or experiment is a *means*, not the product outcome.
+
+`AGENTS.md` governs plans, verification, evidence, human approval and phase
+closure. Detailed plans and historical records remain at their canonical
+paths; do not duplicate them here.
 
 ## Phase overview
 
-| Phase | Goal | Status | Plan / record |
+| Phase | Outcome | Status | Detail |
 |---|---|---|---|
-| 1 | Foundation: lifecycle, validator, governance and verified dogfooding | **Completed** (owner decision, 2026-11-22; qualifications recorded) | [Archive](archive/phase-01/README.md) |
-| 2 | Reusable knowledge-based template, comparative wiki, knowledge API and deterministic CI in Ledgerkit | **Planned** (direction approved; implementation plan pending review) | [Phase 2 plan](phase-02-template.md) |
-| 3 | Optional MCP adapter and controlled agent-strategy A/B evaluation with a mature Assure harness | **Proposed** | Below |
-| 4 | Wider adoption, hardening, evidence-backed release | **Proposed** | Below |
+| 1 — Foundation | Evidence-based development lifecycle, validator and governance | **Completed** (owner decision 2026-11-22, with recorded qualifications) | [Archive](archive/phase-01/README.md) |
+| 2 — Practical value and reusable template | Demonstrate a complete, evidence-backed Ledgerkit vertical slice; extract a minimal portable package | **Planned** (direction approved; focused contracts require review) | [Phase 2 plan](phase-02-template.md) |
+| 3 — Measured effectiveness and MCP | Deliver a thin, consumer-optional MCP adapter over Phase 2's API and test agent/retrieval strategies with an independent Assure harness | **Proposed** | Below |
+| 4 — Product maturity | Independent adoption, simplification, hardening and evidence-backed release | **Proposed** | Below |
 
-A roadmap entry alone is not authorisation to start implementing it:
-follow `AGENTS.md` §2 and the acceptance process in
-[phase archiving](../docs/phase-archiving.md).
+**Planning status is not implementation authorisation.** Each substantive
+stage requires an independently reviewed focused plan and contracts before
+building (`AGENTS.md` §2). Phase 2 deliberately does **not** A/B test the
+template.
 
 ## Phase 1 — Foundation (Completed)
 
-The repository owner declared Phase 1 complete on 2026-11-22, following
-the merge of [PR #1](https://github.com/ctosullivan/axiom-dev/pull/1).
-The [archive](archive/phase-01/README.md) links the unchanged
-implementation plan, closeout assessments, retrospective, decisions
-and verification evidence. Completion is an **explicit owner acceptance
-with disclosed residual conditions**, not a claim that the previously
-requested fifth Codex review, outstanding review-thread resolutions or
-required-merge enforcement were independently demonstrated. See the
-[acceptance qualification](../evidence/phase-1-owner-acceptance.md).
+The owner declared Phase 1 complete on 2026-11-22, following
+[PR #1](https://github.com/ctosullivan/axiom-dev/pull/1).
+The [archive](archive/phase-01/README.md) links the original plan,
+closeout, evidence, decisions and retrospective; the
+[acceptance qualification](../evidence/phase-1-owner-acceptance.md)
+explicitly discloses the historical outstanding conditions. Phase 1
+completion is not evidence that those conditions were subsequently
+retested or resolved.
 
-## Phase 2 — Reusable template and Ledgerkit dogfooding (Planned)
+## Phase 2 — Practical value, then template extraction (Planned)
 
-**Objective:** produce a reusable, lightweight package that applies
-UNDERSTAND → SPECIFY → ASSESS IMPACT → BUILD → VERIFY → RECONCILE in
-an **independent** codebase, with Ledgerkit as the first consumer.
-The [focused proposal](phase-02-template.md) requires review before
-implementation.
+**Objective:** show the full UNDERSTAND → SPECIFY → ASSESS IMPACT → BUILD
+→ VERIFY → RECONCILE lifecycle works on real Ledgerkit development,
+including a subsequent change that threatens previously recorded
+knowledge. Develop only the knowledge substrate needed for that
+example; then extract a reusable template and test clean adoption
+independently.
 
-**Required deliverables:** a comparative **Ledgerkit ↔ hledger
-semantic wiki** with reproducible examples and versioned evidence;
-stable identifiers for **all governed knowledge artifacts and claims**;
-a local **knowledge API** for lookup, relations and impact/drift
-queries; deterministic CI integrity gates; and end-to-end dogfooding
-through initial change, subsequent drift, review and reconciliation.
-A second clean adoption must establish that the template is not
-Ledgerkit-specific.
+**Order of work:** the intended product is a reusable package, but
+**dogfooding drives design**. Do not finish a generic platform before
+learning from the real consumer.
 
-**Drift control:** mechanically detect duplicate/reused IDs, invalid
-schemas, dangling references, invalid provenance, uncovered relations,
-stale source revisions and unreviewed impacted claims. Distinguish
-*CI executed* from *CI required for merge*. Semantic equivalence,
-truthfulness and the meaning of an upstream change are reviewable
-claims—not automatically proven by a green check.
+| Stage | Evidence-producing milestone | Exit demonstration |
+|---|---|---|
+| **2.1** Select a Ledgerkit case | Inspect Ledgerkit/hledger versions, choose a bounded semantic compatibility problem, freeze a behavioural contract and independent oracle | Reproducible fixture, scope, failure cases, reviewer and explicit value/overhead questions |
+| **2.2** Minimal comparative knowledge | Create a readable Ledgerkit ↔ hledger wiki slice, stable IDs for governed artifacts/material claims, referenced sources/evidence and a small **local knowledge API** | A fresh session can deterministically retrieve a scoped claim with provenance and limitations |
+| **2.3** Deterministic integrity and drift | Add contract-tested CI for IDs, references, source revisions, evidence integrity and change-to-claim impact | Seeded mechanical faults fail; source changes flag relevant claims; no automatic semantic verdict |
+| **2.4** Full lifecycle dogfooding | Make a meaningful Ledgerkit change, independently verify it, then change a source on which recorded knowledge depends | Axiom flags potentially stale knowledge and supports evidenced reconciliation that another agent can reuse |
+| **2.5** Extract a minimal template | Remove Ledgerkit-specific assumptions, unneeded features and maintenance overhead | The resulting package is conventional, documented, opt-in and independent of a hosted service |
+| **2.6** Independent adoption/value review | Reproduce clean adoption in a second repository and independently review outcomes and costs | Review supported value, failure cases, useful reuse, false positives and what to remove or defer |
 
-**Evidence:** reproducible adoption, validator and negative-case CI
-runs, wiki examples, actual defects caught/missed, and measured
-operational friction. **No Phase 2 A/B testing of the template**;
-dogfooding demonstrates applicability and observations, not causal
-superiority.
+**Knowledge API boundary:** Phase 2 requires a usable API, preferably a
+small read-only Python library/CLI with `get(id)`, `find(query)`,
+`related(id)` and `impacted(changes)`. Use Markdown/YAML and Git as
+the canonical store, optionally building an ephemeral index. CI
+validation is a separate tool/command. Avoid a graph database,
+persistent knowledge service, embeddings, agent-written knowledge
+reconciliation, a write API or MCP until a *demonstrated* use case
+justifies an increment.
 
-## Phase 3 — MCP and Assure-backed experiments (Proposed)
+**Evidence model:** use first-class stable IDs for governed documents
+and *material, independently testable* claims, not every explanatory
+sentence. A claim records exact scope/assumptions, source version,
+supporting test or review evidence and a meaningful status (INTENDED,
+OBSERVED, VERIFIED, UNCERTAIN or CONTESTED). Verification means an
+independent check against an accepted contract/oracle for that scope;
+a source link, record ID or green schema check alone never proves
+semantic truth. Change detection establishes **possible impact**,
+not actual invalidity.
 
-Add a thin **optional MCP interface over Phase 2's stable knowledge
-API**, preserving the local API and identifiers. Define security,
-read/write permissions, provenance, deterministic responses and
-conformance tests. Once Axiom Assure has a demonstrably adequate
-independent experiment harness, pre-register controlled **A/B tests
-of knowledge retrieval and agent strategies** (e.g. with/without
-structured knowledge access or different context-selection methods):
-held-out tasks, common acceptance oracle, equivalent resources,
-cost/latency and defect metrics, leakage controls and independent
-adjudication. The experiments test stated strategies—not the Phase 2
-template retroactively. The core template must work without MCP or
-Assure.
+**CI:** fail closed for defined mechanical integrity violations;
+produce actionable reports for affected claims and require explicit,
+reviewed disposition under documented policy. Explain the difference
+between a CI job that executes and a check configured as a **required
+merge condition**. Never silently reclassify potentially stale claims
+as VERIFIED.
 
-**Exit evidence:** interoperable MCP adapter and replicated,
-well-controlled findings with limitations and no unearned claims
-of improvement. A focused Phase 3 plan is required before work starts.
+**Value evidence:** track supported knowledge reuse, real defects
+caught/missed, false positives, reviewer effort, maintenance/setup
+time, friction, and independent onboarding. Choose assessment
+questions and acceptable overhead *before* observing outcomes.
+No Phase 2 A/B test: dogfooding can demonstrate feasibility and
+specific instances of usefulness, but **not causal superiority**.
+Remove or defer features with no demonstrated net value.
 
-## Phase 4 — Broader adoption and release (Proposed)
+**End-to-end acceptance scenario:** an independently specified
+Ledgerkit/hledger semantic claim is retrievable by stable ID with
+versioned evidence; a relevant Ledgerkit source changes; CI identifies
+affected records; a separate reviewer reproduces the appropriate
+behavioural test and dispositions any semantic difference; the wiki
+and claim evidence are reconciled without losing provenance; a fresh
+agent uses the revised knowledge for a subsequent task. This
+demonstrates the *whole lifecycle*, not just independent API features.
 
-Try the mature template with additional independent repositories,
-migration/refactoring scenarios and more developers; simplify
-procedures that show little value, harden versioning and compatibility,
-document failure cases and issue a supported release. Do not infer
-generalisability from Ledgerkit dogfooding alone.
+See [the Phase 2 plan](phase-02-template.md) for stage contracts,
+negative cases, non-goals and independent closeout criteria. This
+remains a **planned** phase, not an implemented package.
 
-**Exit evidence:** independently reproducible onboarding, cross-project
-test results, declared support boundary, versioned release, adoption
-costs and documented limitations.
+## Phase 3 — Experiment-led assurance and MCP adapter (Proposed)
+
+**Question first:** does persistent, scoped, independently verifiable
+knowledge improve actual agent development outcomes, and when is
+structured retrieval worth its cost? Using Axiom Assure once its
+independence and experimental correctness are established, pre-register
+controlled A/B evaluations of *agent and retrieval strategies* such as:
+
+- Plain repository search vs verified structured knowledge.
+- Complete context vs selective retrieval, with correctness and token costs.
+- Fresh-agent reconstruction vs reuse of previously accepted knowledge.
+- Conventional Markdown access vs the knowledge API, where comparable.
+- Self-review vs genuinely independent verification.
+
+Use held-out tasks, independently established behavioural oracles,
+controlled resources and leakage, defect/rework/cost measures,
+replications and honest negative findings. A/B here is **not a delayed
+A/B test of the Phase 2 template**.
+
+**Phase 3 also delivers a small MCP adapter over the stable Phase 2
+knowledge API**, with interoperable read-only operations, conformance
+tests, explicit permissions and provenance. The adapter is **required
+as a Phase 3 deliverable** under accepted ADR 0008, Decision 7, but
+**optional for consumers**: Phase 2's API and template must remain
+fully functional without MCP or Assure. Keep the adapter thin; do not
+turn it into a new knowledge platform or claim it improves results
+without experimental evidence.
+
+**Exit evidence:** a working, independently checked interoperable MCP
+adapter **and** an independently reviewed experimental harness with
+reproducible, appropriately qualified strategy findings. A focused
+Phase 3 plan is required.
+
+## Phase 4 — Product maturity (Proposed)
+
+Test adoption and maintenance in additional independent repositories,
+including substantial refactoring and changed legacy behaviour.
+Simplify or remove low-value rules, support compatibility/versioning,
+document boundaries and issue a versioned package release.
+
+**Exit evidence:** reproducible independent onboarding, across-project
+results, operational and maintenance costs, known limitations and a
+supported release. Do not generalise from Ledgerkit alone.
 
 ## Archived phases
 
-- [Phase 1 — Foundation](archive/phase-01/README.md) — completed by
-  owner decision on 2026-11-22 with documented qualifications.
+- [Phase 1 — Foundation](archive/phase-01/README.md) — completed by owner
+  decision on 2026-11-22 with disclosed qualifications.
 
-See [archive index](archive/README.md) for the canonical archive list.
+See [the archive index](archive/README.md). The sequencing rationale is
+recorded in [this refinement plan](phase-02-roadmap-refinement.md) and
+[ADR 0008](../decisions/0008-template-first-knowledge-identity-and-experiment-sequencing.md).
