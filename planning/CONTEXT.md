@@ -78,9 +78,15 @@ dependency or the project's purpose.
 sets the accepted Phase 2/3 direction. This roadmap refinement changes
 **sequencing and proposed scope, not the accepted architectural decision**.
 
-**Next action:** human review and approval of this planning-only PR
-(Stage 2.1 plan, four cross-cutting designs, independent review). Only
-after approval does Stage 2.1 BUILD work start — reproducing Ledgerkit's
-EC-022 fixture matrix and implementing the fix in `_parse_posting`
-(`planning/phase-02-stage-2.1-plan.md` §3, §7). No implementation
-begins before that approval, per `AGENTS.md` §11.
+**Next action:** human review and approval of this planning-only PR.
+**Stage 2.1's own exit evidence is now complete** (durable, reviewed
+oracle evidence; frozen behavioural contract; Stage 2.4 handoff —
+`planning/phase-02-stage-2.1-plan.md` §5) and ready for human
+confirmation per `docs/development-lifecycle.md`'s phase-acceptance
+procedure — this session recommends it, but does not itself change
+`planning/ROADMAP.md`'s status to Completed, since that edit is a
+human-approval-boundary action (`AGENTS.md` §11). **Stage 2.2**
+(introducing the actual Claude Code skill, minimal configuration and
+read-only `get`/`find` into Ledgerkit) is the next stage, and has
+**not** been approved to begin — no implementation in Ledgerkit
+starts before explicit human approval of that stage boundary.
