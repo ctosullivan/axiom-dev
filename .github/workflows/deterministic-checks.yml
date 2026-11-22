@@ -1,18 +1,14 @@
 name: deterministic-checks
 
-# Runs every real, locally-testable, credential-free Phase 1 check on
-# every push and PR: the Stage 1.3 policy-evaluator test suite, the
-# documentation/knowledge validator's own test suite, a check of the
-# governed documentation manifest (companion .schema.yaml files,
-# decisions/0006), and basic doc hygiene checks. Needs no secrets and no
-# external services. This is CI at enforcement level 4 ("executed by
-# CI") per docs/knowledge-placement.md's "Enforcement classes" — none of
-# these jobs are configured as a GitHub required status check (that
-# needs repository-admin access this environment has never had), so a
-# red run here blocks nothing mechanically; it is visible, not
-# merge-blocking. See planning/phase-01-foundation.md Sec 17 (prompt 003
-# Amendment E) and decisions/0005 for why Codex review itself is not
-# part of this workflow — see .github/deferred/codex-review.yml instead.
+# Runs the credential-free policy, validator, governed-document and whitespace
+# checks on every push and PR. The ci-required summary job depends on all four:
+# it fails if any required dependency failed, was skipped or was cancelled.
+#
+# IMPORTANT: a green workflow alone does NOT enforce merge safety.
+# The repository owner must configure main's GitHub branch rules to require
+# ci-required. See docs/ci-enforcement-setup.md and verify the live rule;
+# never describe this as a required merge check before that verification.
+# Codex review remains advisory (decisions/0005), outside deterministic CI.
 #
 # "Validate every governed documentation file" below also performs a
 # repository-wide orphaned-schema scan as a side effect of calling
@@ -84,3 +80,38 @@ jobs:
             exit 1
           fi
           echo "No trailing whitespace in tracked Markdown."
+
+  # Stable, single GitHub required-check target; configure branch protection
+  # separately. Do not add CI jobs above without adding them to needs below.
+  ci-required:
+    name: ci-required
+    if: ${{ always() }}
+    needs:
+      - policy-evaluator-tests
+      - axiom-validator-tests
+      - validate-governed-documentation
+      - no-trailing-whitespace
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require success from every dependent job
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          results = json.loads(os.environ["NEEDS_JSON"])
+          nonpassing = {
+              job: info["result"]
+              for job, info in results.items()
+              if info["result"] != "success"
+          }
+          for job, info in results.items():
+              print(f"{job}: {info['result']}")
+          if nonpassing:
+              print("Required CI dependencies did not all succeed:", nonpassing)
+              sys.exit(1)
+          print("All required CI dependencies succeeded.")
+          PY
