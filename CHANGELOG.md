@@ -6,6 +6,24 @@ remain under `Unreleased` until a release is explicitly prepared.
 
 ## [Unreleased]
 
+### 2026-11-22 — Phase 2 evidence-first refinement
+
+- Reordered the Phase 2 implementation proposal around an independently
+  specified Ledgerkit/hledger vertical slice; knowledge/API and CI now grow
+  from demonstrated need rather than preceding dogfooding as a platform.
+- Clarified the minimal, read-only Git/file-backed knowledge API, governed
+  stable claim IDs, reproducible independent evidence, drift-impact limits
+  and explicit CI-versus-required-merge enforcement levels.
+- Added a reproducible whole-lifecycle acceptance scenario and value/overhead
+  evaluation, including false positives, missed defects and pruning low-value
+  features. Template extraction follows actual Ledgerkit use.
+- Recast Phase 3 as hypothesis-driven Axiom Assure evaluation of agent and
+  retrieval strategies, with MCP an optional interface. **Phase 2 still
+  has no A/B test of the template.**
+- Reconciled roadmap, Phase 2 proposal, current context and README;
+  no runtime/API functionality has been added by this documentation PR.
+
+
 ### 2026-11-22 — Phase transition
 
 - Phase 1 marked Completed by explicit owner decision after PR #1 merged;
