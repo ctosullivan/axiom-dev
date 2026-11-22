@@ -504,3 +504,11 @@ requirement for per-task correlation. Fixed: the skill now records
 `task-start` before retrieval and threads `--task-id` through every
 subsequent example command, closing with `task-accepted`. A duplicate
 step-numbering bug found in the same pass was fixed alongside it.
+
+Re-review on that fix (commit `441f4c8`) found 2 further P2s:
+`impacted()`'s upstream-pin detection excluded the exact claim §3b.2
+promised it would catch proactively (fixed: now checks both
+not-yet-bumped and just-bumped-with-stale-scope-manifest); CLI-owned
+events had no actual source for `session_id` (fixed: a `SessionStart`
+hook writes a small local handoff file CLI producers read, with an
+explicit `null` fallback for invocation outside any session).

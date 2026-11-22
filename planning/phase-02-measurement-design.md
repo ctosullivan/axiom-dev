@@ -54,7 +54,7 @@ to the consuming repository's `.gitignore` as part of adoption —
 |---|---|---|
 | `timestamp` | logger, at write time | always |
 | `event_type` | logger | always |
-| `session_id` | hook stdin JSON (`session_id`) | **confirmed available** on every hook event; behaviour across `/clear`/compaction not confirmed — do not assume stability across those without a build-time check |
+| `session_id` | hook stdin JSON (`session_id`) for hook-sourced events; for CLI-owned events (`task_start`, `knowledge_get`/`find`/`impact`), a **hook-to-CLI handoff file** — see below, corrected per native Codex review | **confirmed available** to hooks directly; CLI-owned events depend on the handoff file existing — absent when the CLI runs outside any Claude Code session (a human at a terminal, CI) or before the handoff file is written, in which case `session_id` is explicitly `null`, never fabricated. Behaviour across `/clear`/compaction not confirmed for either source — do not assume stability without a build-time check |
 | `task_id` | caller-supplied (e.g. a Stage-2.x identifier or claim ID being worked on) | **not natively provided by Claude Code** — this project must mint and pass it; see §2 |
 | `git_revision` | `git rev-parse HEAD` at write time | always (shell, not a Claude Code feature) |
 | `knowledge_id` | event-specific | present only on knowledge-operation events |
@@ -69,6 +69,28 @@ deliberately **not** in this common event model — the capability
 research confirms hooks do not receive cost/token fields; those come
 from a separate source (§4), joined by `session_id`/`git_revision`
 after the fact, not fabricated into the hook-based log.
+
+**Session-ID propagation to CLI-owned event producers — specified
+here, found missing by native Codex review (commit `441f4c8`'s
+finding on this exact gap).** `axiom-knowledge` (and the test-runner
+wrapper, and manual helpers) are plain processes — they do not
+receive hook stdin, and the capability research
+(`planning/phase-02-planning-review.md` §2.1) already confirmed no
+session-ID environment variable is documented. Writing these events
+"independently of hooks" (as this design requires, §1) does not by
+itself give them a `session_id` to write. **Fixed with the simplest
+adequate mechanism — a one-line hook-to-CLI handoff, not a new
+IPC layer**: a `SessionStart` hook writes the current `session_id` to
+`.axiom-local/current_session_id` (gitignored, like the event log
+itself); every CLI-owned event producer reads that file at write time
+and stamps its own `session_id` from it. **Explicit, named fallback
+for invocation outside any session** (a human at a terminal, a CI
+job, or any call before `SessionStart` has run): the file is absent,
+and the event's `session_id` is written as `null` — this is a
+legitimate, expected case, not an error, and it means such an event
+genuinely cannot be joined to session-level usage data (§4, §7.E) —
+accepted as a real, disclosed limitation of this mechanism rather
+than papered over with a fabricated ID.
 
 ### Event categories (evaluated against the authorising prompt's §8 table)
 

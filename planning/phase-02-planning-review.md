@@ -870,3 +870,31 @@ example command (`get`/`find`/`impacted`/the test-runner wrapper), and
 closes with `task-accepted` once acceptance criteria are confirmed
 met. A pre-existing duplicate step-numbering bug (two steps both
 numbered "8") found in the same pass was fixed alongside it.
+
+**Re-review requested on this fix** (commit `441f4c8`): **2 further P2
+findings**, both real.
+
+1. **`impacted()`'s upstream-pin detection excluded the exact claim
+   §3b.2 promises it catches proactively.** The predicate only flagged
+   a claim still pinned at `base` — but a caller following §3f's own
+   workflow constructs the upstream change record *after* the
+   compat-register entry is already edited to `head`, so the claim
+   whose pin just changed (the one with a now-possibly-stale scope
+   manifest) was never the one flagged. §3b.2's claim that the two
+   mechanisms "agree with each other by construction" was false as
+   written. **Fixed**: `impacted()`'s upstream case now checks two
+   conditions — not-yet-bumped (as before) and
+   just-bumped-with-a-stale-scope-manifest (new) — so the proactive
+   and reactive checks genuinely examine the same condition from each
+   side.
+2. **CLI-owned events (`task_start`, `knowledge_get`/`find`/`impact`)
+   had no actual source for `session_id`.** These are plain processes
+   with no hook stdin, and the capability research already recorded
+   no documented session-ID environment variable — the design wrote
+   "independently of hooks" without specifying how a `session_id`
+   would reach them at all. **Fixed**: a `SessionStart` hook writes
+   the session ID to a small local handoff file
+   (`.axiom-local/current_session_id`); CLI-owned producers read it;
+   invocation outside any session (human at a terminal, CI) is an
+   explicit, named case producing `session_id: null`, not a
+   fabricated value.

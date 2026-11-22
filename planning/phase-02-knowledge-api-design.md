@@ -303,11 +303,16 @@ compatibility target version is bumped) after a scope manifest was
 written against the old pin, check 5 above now fails against the
 *current* native record — `derived.status` becomes `CONTESTED` on the
 next `get()`, not silently still `VERIFIED` against a stale scope.
-This is also surfaced proactively by `impacted()` (§4) when the
-revision change is detected as a Git diff, not only reactively on the
-next `get()` — the two mechanisms agree with each other by
-construction, since both check the same `source_pin`/
-`compatibility_target` match.
+This is also surfaced proactively by `impacted()` (§4's "just bumped,
+scope manifest stale" case), not only reactively on the next `get()`
+— **corrected per native Codex review, commit `441f4c8`**: an earlier
+draft asserted the two mechanisms "agree with each other by
+construction" without `impacted()`'s predicate actually covering the
+case where the claim's own pin has *already* been bumped (which is
+exactly when a stale scope manifest first becomes detectable) — fixed
+by giving `impacted()` the matching second case, so the two checks now
+genuinely examine the same condition from each side rather than one of
+them silently never firing.
 
 ### 3c. Relationship → mapping_result — scoped, never silently collapsed
 
@@ -527,15 +532,32 @@ equivalent), not evidence alone:
   existing could have depended on a path that didn't exist before) —
   included in the input schema only so a caller's Git-diff-derived
   change list doesn't need pre-filtering before calling `impacted()`.
-- **`upstream:<project>` pseudo-path, `modified`** (§3f): every claim
-  whose `upstream.project` matches `<project>` and whose
-  `upstream.compatibility_target` corresponds to `base` (not already
-  at or past `head`) is flagged `possible_impact: true`, reason
-  `"upstream revision changed from <base> to <head>"` — this is the
-  mechanism for "relevant upstream revision changes where captured
-  dependencies permit detection"; a claim whose `compatibility_target`
-  is already at `head` or later is not flagged (nothing for it to
-  detect).
+- **`upstream:<project>` pseudo-path, `modified`** (§3f): **two cases,
+  not one — corrected per native Codex review, commit `441f4c8`'s
+  finding on this exact rule.** The original rule only flagged a
+  claim still pinned at `base` — but a caller following §3f's own
+  stated workflow constructs this change record *after* the
+  compat-register entry has already been edited to bump
+  `compatibility_target` to `head`, so that claim's own field already
+  equals `head` by the time `impacted()` runs, and the original rule
+  excluded exactly the claim whose pin just changed — the one case
+  §3b.2 ("changed-source-revision") promises `impacted()` would catch
+  proactively. Both cases are now checked:
+  - **Not yet bumped**: `upstream.compatibility_target` still equals
+    `base` → flagged, reason `"upstream revision changed from <base>
+    to <head>, claim not yet re-pinned"`.
+  - **Just bumped, scope manifest stale**: `upstream.compatibility_target`
+    now equals `head`, **and** the claim has an associated scope
+    manifest (§3b.1) whose `source_pin` does not also equal `head` →
+    flagged, reason `"claim re-pinned to <head>, scope manifest still
+    references <manifest's source_pin>"` — this is the proactive
+    counterpart of §3b.2's reactive `get()`-time `CONTESTED` check;
+    the two are required to agree (a claim `impacted()` doesn't catch
+    here must not then surface as `CONTESTED` on `get()` with no
+    corresponding impact history, and vice versa).
+  A claim with no scope manifest, or whose manifest's `source_pin`
+  already equals `head`, is not flagged in either case — nothing left
+  for either check to catch.
 
 **This never sets or implies a status change** — per ADR 0008
 Decision 4/§5 of the authorising prompt, change detection establishes

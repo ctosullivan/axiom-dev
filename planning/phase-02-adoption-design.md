@@ -34,7 +34,11 @@ not as settled fact):
   `SessionEnd`, and others) and can run an ordinary shell command,
   including appending to a local file — this is plain shell behaviour,
   not a special Axiom mechanism. Used by the measurement design
-  (`planning/phase-02-measurement-design.md`), not by the skill itself.
+  (`planning/phase-02-measurement-design.md`), not by the skill itself
+  — including a `SessionStart` hook that writes the current
+  `session_id` to a small local handoff file so the CLI subcommands
+  this skill invokes (which receive no hook stdin of their own) can
+  stamp their own events with it.
 - Nothing requires a persistent daemon, an MCP server, or a hosted
   account for any of the above.
 
