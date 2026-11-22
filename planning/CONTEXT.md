@@ -35,18 +35,23 @@ dependency or the project's purpose.
   `53d818b`. Inspect actual HEAD and PR state rather than trusting
   this text.
 - This branch makes Stage 2.1 and Phase 2's cross-cutting designs
-  implementation-ready: `planning/phase-02-stage-2.1-plan.md` (task,
-  oracle, fixtures), `planning/phase-02-adoption-design.md` (skill,
-  file layout), `planning/phase-02-knowledge-api-design.md` (claim
-  model, API, and — found missing by independent review and now fixed
-  — the adapter contract for reading Ledgerkit's own existing
-  compat-register rather than duplicating it),
-  `planning/phase-02-measurement-design.md` (logging/telemetry),
-  `planning/phase-02-architecture.md` (diagram), and
-  `planning/phase-02-planning-review.md` (full independent review: 2
-  BLOCKING findings, both fixed in this same batch). **This is still
-  a plan, not an implementation** — no skill, API, wiki entry, CI
-  check or logger has been built.
+  implementation-ready, corrected twice after independent review:
+  `planning/phase-02-stage-2.1-plan.md` (contract-only — ends at the
+  reviewed oracle/fixture matrix, does not fix EC-022; explicit
+  "Handoff to Stage 2.4" for the actual fix), `planning/phase-02-adoption-design.md`
+  (skill, file layout, and the merged architecture diagram),
+  `planning/phase-02-knowledge-api-design.md` (claim model, API, and a
+  conservative native-register adapter that keeps Ledgerkit's own
+  status/relationship fields separate from Axiom's derived view rather
+  than overstating them), `planning/phase-02-measurement-design.md`
+  (logging/telemetry, with explicit skill-activation-vs-knowledge-use-
+  vs-assessed-usefulness distinctions), and
+  `planning/phase-02-planning-review.md` (two rounds of independent
+  review, both recorded as dated addenda, nothing rewritten to look
+  flawless in hindsight). `planning/phase-02-architecture.md` no
+  longer exists — merged into the adoption design. **This is still a
+  plan, not an implementation** — no skill, API, wiki entry, CI check
+  or logger has been built.
 - Phase 2's wiki, knowledge API, identity/drift gate and template
   **do not yet exist**; do not imply they have been implemented.
 - The core should be Git/files plus a small read-only local API

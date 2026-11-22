@@ -132,68 +132,128 @@ stale itself), no embedding vector.
 
 ## 3a. Reading an existing non-Axiom register (adapter contract)
 
-**Found missing by this package's own independent review
-(`planning/phase-02-planning-review.md` §3, BLOCKING 2) and specified
-here rather than left implicit.** When `get`/`find`/`related`/
-`impacted` read a claim from an existing, non-Axiom register (the
-Stage 2.1 case: Ledgerkit's `dev-docs/compat-register/`, per §2
-above), the native record is **not** silently assumed to already match
-§3's generic schema field-for-field — it does not. The API returns a
-normalised common view **additively**, alongside the untouched native
-fields, never discarding or overwriting the source record:
+**Found missing by independent review (`planning/phase-02-planning-review.md`
+§3, BLOCKING 2) and specified here rather than left implicit; corrected
+again in this revision (§3 and §3b below) after a second independent
+review found the first version's translation itself was too generous
+in two places** (`self-verified`/`proposed` status handling — now
+fixed; see `planning/phase-02-planning-review.md`'s corrective-review
+addendum). When `get`/`find`/`related`/`impacted` read a claim from an
+existing, non-Axiom register (the Stage 2.1 case: Ledgerkit's
+`dev-docs/compat-register/`), the native record is **never** silently
+assumed to already match §3's generic schema field-for-field — it does
+not. `get()` returns **native fields and derived fields kept visibly
+separate**, never merged into one ambiguous view:
 
 ```yaml
 id: <native ID, unchanged — e.g. LK-COMPAT-PARSER-BALANCEASSIGN-001>
-status: <mapped — see table below>
-mapping_result: <mapped — see table below>
-scope: null          # see "known gap" below — never fabricated
+
+native:
+  status: <verbatim — e.g. "self-verified">
+  relationship: <verbatim — e.g. "superset">
+  verified_by: <verbatim, or absent>
+  verified_date: <verbatim, or absent>
+  <every other field exactly as read, unmodified>
+
+derived:
+  status: <Axiom's INTENDED|OBSERVED|VERIFIED|UNCERTAIN|CONTESTED — see §3b>
+  status_basis: <one line citing which native fields justified it>
+  mapping_result: <equivalent|partial|divergent|unknown — see §3c>
+  mapping_scope: <required whenever mapping_result is derived from a
+                  superset/subset relationship — see §3c; null only
+                  when relationship was already `equivalent`/`incomparable`>
+  scope: null          # see §3d — never fabricated
+  reviewer: <native verified_by, surfaced at the top level deliberately
+             — see §3b; null if absent>
+
 evidence: <native evidence list, field names unchanged>
 related: <native resolved_into/resolves, unchanged>
-native:
-  <the complete, unmodified original record, exactly as read>
 ```
 
-**`relationship` → `mapping_result` mapping** (Ledgerkit's
-`ledgerkit.relationship` has no field named `mapping_result`, and the
-two vocabularies are not synonyms):
+The **native** block is never altered by Axiom's reading of it — it is
+exactly what Ledgerkit's own schema and review process produced. The
+**derived** block is Axiom's own, conservative, explicitly-justified
+reading of what that native record supports under Axiom's own
+definitions — and, per the sections below, it is frequently *weaker*
+than a naive reading of the native status would suggest, never
+stronger.
 
-| Ledgerkit `relationship` | Axiom `mapping_result` | Why |
+### 3b. Status and reviewer-identity mapping — conservative by construction
+
+**Corrected in this revision** (an earlier draft mapped `proposed` to
+`OBSERVED`, which overstated it — see below):
+
+| Ledgerkit `status` | Axiom `derived.status` | Why |
 |---|---|---|
-| `equivalent` | `equivalent` | same behaviour, direct match |
-| `superset` | `equivalent` | for the hledger-defined behaviour itself, Ledgerkit matches it; the *additional* extension behaviour is out of scope for a mapping-result comparison and is described by `kind: extension` instead, not by this field |
-| `subset` | `partial` | intentionally covers less than hledger — a partial mapping, not a full equivalence or a genuine divergence |
-| `incomparable` | `divergent` | genuinely different, not reducible to subset/superset |
-| *(no `unexplained_mismatch` relationship value — that's a `kind`, not a `relationship`)* | `unknown` | a `kind: unexplained_mismatch` entry has not yet been classified; `mapping_result: unknown` until it resolves into a new entry |
+| `proposed` | `UNCERTAIN` | Ledgerkit's own schema note: "hledger-researcher's reading; **not yet run against the real binary**." No execution has happened at all — this is closer to an unconfirmed reading than an OBSERVED fact, so Axiom's honest default (`docs/knowledge-placement.md`: "insufficient evidence either way") applies, not `OBSERVED`. |
+| `self-verified` | `OBSERVED`, **never** `VERIFIED` | a real comparison WAS run with real output, but by the same identity that implemented the fix. Mapping this to `VERIFIED` would launder a self-check into independent status — the exact circularity `AGENTS.md` §6/`decisions/0004` Amendment B exists to prevent. |
+| `verified` | `VERIFIED`, **conditionally** | only if `verified_by` AND `verified_date` are both present and non-empty on the **native record itself** (see reviewer-identity rule below) — if either is missing despite `status: verified`, `derived.status` is `CONTESTED`, not `VERIFIED` and not silently `UNCERTAIN` either: a native record claiming `verified` with missing required metadata is an unresolved conflict between what it asserts and what it can actually support, which is exactly what `CONTESTED` means. |
+| `final` | `VERIFIED`, same condition as `verified` | additionally reconciled/published; the evidence status is unchanged from `verified`'s own conditional rule — `final` does not bypass the metadata check. |
 
-**`status` → Axiom status mapping** (word-similarity is actively
-misleading here — checked explicitly, not assumed):
+**Reviewer-identity field mapping, corrected.** Ledgerkit's own schema
+(`dev-docs/compat-register/schema.md`, read in full) stores reviewer
+metadata as **top-level fields on the register entry itself**,
+`verified_by`/`verified_date` — **not** nested inside individual
+`evidence[]` items, as an earlier draft of this design assumed by
+specifying a generic `evidence[].reviewed_by`/`reviewed_date` for
+every source without checking the one real source against it. The
+adapter maps `native.verified_by` → `derived.reviewer` at the top
+level, exactly where Ledgerkit's own schema puts it; it does **not**
+invent a per-evidence-item reviewer where the native schema has none.
 
-| Ledgerkit `status` | Axiom `status` | Why |
+**What a present `verified_by` name does and does not prove.** A
+non-empty `verified_by` field satisfies the *mechanical* precondition
+for `derived.status: VERIFIED` above — it does **not**, by itself,
+constitute deterministic proof that the named reviewer was actually
+independent of the implementer. That is a **process** guarantee
+(Ledgerkit's own rule that `status: verified` "must NEVER be written
+into a register YAML directly [by the implementer] — only a
+dispatched `compat-differential-tester` agent's own output sets it"),
+not something the API can verify by inspecting a string. The API's
+mechanical check is therefore necessary, not sufficient: it blocks the
+*clear* failure case (claimed `verified`/`final` with no reviewer
+recorded at all), while independence of the named reviewer itself
+remains a human/process judgement, exactly as `docs/agent-isolation.md`
+already treats isolation-level claims generally.
+
+### 3c. Relationship → mapping_result — scoped, never silently collapsed
+
+**Corrected in this revision**: an earlier draft mapped `superset` to
+a bare, unqualified `equivalent`, which the authorising prompt's §4.C
+specifically warns against ("a superset must not silently become an
+unqualified equivalent"). Fixed by requiring an explicit
+`mapping_scope` string whenever the native relationship is not already
+a 1:1 `equivalent`/`incomparable`:
+
+| Ledgerkit `relationship` | Axiom `mapping_result` | Required `mapping_scope` (always present for these two rows) |
 |---|---|---|
-| `proposed` | `OBSERVED` | a reading exists; not yet run against the real binary, so no independent (or even self-run) evidence yet — closer to "observed via inspection" than confirmed |
-| `self-verified` | `OBSERVED`, **not** `VERIFIED` | a real comparison WAS run with real output, but by the same identity that implemented the fix — Ledgerkit's own schema explicitly reserves `verified` for a separately-dispatched reviewer, the same circularity rule as `AGENTS.md` §6/`decisions/0004` Amendment B. Mapping this to `VERIFIED` would launder a self-check into independent status; it must not. |
-| `verified` | `VERIFIED` | set only by a separately-dispatched `compat-differential-tester`, matching Axiom's own definition of VERIFIED exactly |
-| `final` | `VERIFIED` | additionally reconciled/published; evidence status unchanged from `verified` |
+| `equivalent` | `equivalent` | not required (already unqualified) |
+| `superset` | `equivalent` | **required**: `"equivalent for hledger-defined behaviour only; Ledgerkit's extension behaviour (kind: extension) is additional and out of scope for this comparison"` |
+| `subset` | `partial` | **required**: `"partial — Ledgerkit intentionally covers less than hledger for this area; see native.reason for which cases are excluded"` |
+| `incomparable` | `divergent` | not required (already unqualified) |
+| *(no `relationship` value — entry's `kind` is `unexplained_mismatch`)* | `unknown` | not required — `unknown` is itself the honest statement; there is nothing yet to scope |
 
-**Known gap, disclosed rather than papered over:** the compat-register
-schema has **no field carrying scope/input-boundary information** —
-confirmed directly against `dev-docs/compat-register/schema.md`, which
-has no `scope` key. `get()` on a Ledgerkit-backed claim therefore
-returns `scope: null`, not a fabricated value. A human wanting the
-scope must read that entry's `area` and `reason` fields directly — the
-API does not claim to supply something the source record doesn't have.
-This is recorded as a real, acknowledged limitation of deferring to an
-existing register that wasn't designed with Axiom's exact field set in
-mind, not resolved by inventing data.
+A caller reading `derived.mapping_result: equivalent` with no
+`mapping_scope` present can rely on it meaning full, unqualified
+equivalence. A caller reading it **with** a `mapping_scope` present
+must read that string before treating the claim as applying beyond
+the stated boundary — the field's mere presence is itself the signal
+that a qualification exists, not just its content.
 
-**Terminology correction** (the same independent review flagged an
-internal inconsistency): a compat-register entry **is a Claim**, in
-this API's own three-concept vocabulary — not a `Source`. Its
-`upstream:` block (project + pinned version) is that Claim's `Source`;
-its `evidence:` list is that Claim's `Evidence` list. The phrase "one
-of its `Source` kinds," used in an earlier draft of
-`planning/phase-02-stage-2.1-plan.md` §5, was a misuse of this design's
-own terms and has been corrected there.
+### 3d. Known gap — scope field absent from the native schema
+
+The compat-register schema has **no field carrying scope/input-boundary
+information** — confirmed directly against `dev-docs/compat-register/schema.md`,
+which has no `scope` key. `derived.scope` on a Ledgerkit-backed claim
+is therefore always `null`, never fabricated. A human wanting the
+scope reads that entry's `area` and `reason` fields directly.
+
+### 3e. Terminology note
+
+A compat-register entry **is a Claim**, in this API's own three-concept
+vocabulary — not a `Source`. Its `upstream:` block (project + pinned
+version) is that Claim's `Source`; its `evidence:` list is that
+Claim's `Evidence` list.
 
 ## 4. Operations
 
@@ -207,12 +267,15 @@ server, per architectural principle C.
 ### `get(id) -> Claim | NotFound`
 
 Returns the claim/artifact record and its evidence list, scope, status
-and relationships. **Minimum data returned:** `id`, `status`, `scope`,
-`source`, `evidence` (full list), `related` (IDs only, not expanded —
-expansion is `related()`'s job). If `resolved_into` is set, `get`
-returns the record **and** a pointer to the superseding ID — it never
-silently redirects, since the authorising prompt's §6 requires
-identity/revision/status to stay distinct and visible.
+and relationships. **Minimum data returned:** `id`, `source`,
+`evidence` (full list), `related` (IDs only, not expanded — expansion
+is `related()`'s job), and — for a default-schema claim — `status`/
+`scope` directly, or — for a claim read from an existing native
+register (§3a–§3e) — the `native`/`derived` pair, never collapsed into
+one ambiguous view. If `resolved_into` is set, `get` returns the
+record **and** a pointer to the superseding ID — it never silently
+redirects, since the authorising prompt's §6 requires identity/
+revision/status to stay distinct and visible.
 
 **Errors:** `NotFound` (no record at that ID — distinct from
 `Superseded`, which still returns the historical record plus the
@@ -254,23 +317,66 @@ condition at read time rather than disagreeing with CI about it.
 
 ### `impacted(changes) -> list[ImpactReport]`
 
-Input: a list of changed source paths/revisions (e.g. from `git diff
---name-only` against a claim's pinned `source.ref`/`pinned_at`).
-Output: every claim whose `source` or `evidence[].ref` falls under a
-changed path, or whose `pinned_at` no longer matches the current
-revision of that path — each flagged `possible_impact: true` with the
-specific changed reference that triggered it. **This never sets or
-implies a status change** — per ADR 0008 Decision 4/§5 of the
-authorising prompt, change detection establishes *possible* impact,
-never proven invalidity; `impacted()`'s output is a worklist for a
-human/independent reviewer, not a verdict. An unaffected claim is not
-returned at all (not returned-with-`possible_impact: false`) — keeping
-the "affected" set small and actionable is more useful than echoing
-every claim back with a boolean.
+**Input redesigned in this revision.** The original design treated a
+nonexistent path as a malformed request — found wrong by the
+authorising prompt's §5: a deleted source file is a legitimate,
+common kind of change, not an error. `impacted()` now takes
+**Git-derived change records**, not bare paths:
 
-**Errors:** `InvalidChangeSpec` if a given path doesn't exist in the
-repository at all (distinct from "exists but affects nothing," which is
-simply absent from the result).
+```yaml
+changes:
+  - base: <revision>              # required
+    head: <revision>              # required
+    path: <repository-relative path>
+    change_type: added | modified | deleted | renamed
+    old_path: <required when change_type == renamed, else absent>
+```
+
+This is the simplest input shape that distinguishes every case the
+authorising prompt's §5 requires, and is exactly what `git diff
+--name-status <base> <head>` already reports — `impacted()`'s caller
+is expected to build this list from that output (or equivalent),
+not invent change detection itself.
+
+**Output and semantics**, per change type:
+
+- **`modified`**: every claim whose `source.ref`/`evidence[].ref`
+  falls under `path`, or whose `pinned_at` no longer matches `head`'s
+  revision of that path, is flagged `possible_impact: true` with the
+  specific reference that triggered it.
+- **`deleted`**: every claim referencing `path` is flagged
+  `possible_impact: true`, reason `"source deleted"` — a deletion is
+  **not** treated as proof the claim is now false (the behaviour it
+  described may have moved, or the claim may need retiring — a human/
+  reviewer decides which), only as a certain reason to look.
+- **`renamed`**: every claim referencing `old_path` is flagged
+  `possible_impact: true`, reason `"source renamed to <path>"` —
+  **preserving the ability to find claims that reference the old
+  path** is the specific requirement this case exists for; the API
+  does not silently update the claim's `source.ref` itself (that is a
+  human/reviewer edit through a normal commit, per §5).
+- **`added`**: never produces an impact entry on its own (nothing
+  existing could have depended on a path that didn't exist before) —
+  included in the input schema only so a caller's Git-diff-derived
+  change list doesn't need pre-filtering before calling `impacted()`.
+
+**This never sets or implies a status change** — per ADR 0008
+Decision 4/§5 of the authorising prompt, change detection establishes
+*possible* impact, never proven invalidity, and never proven
+*un*-impact either: `impacted()`'s output is a worklist for a human/
+independent reviewer, not a verdict in either direction. An unaffected
+claim is not returned at all (not returned-with-`possible_impact:
+false`) — keeping the "affected" set small and actionable is more
+useful than echoing every claim back with a boolean.
+
+**Errors:** `InvalidChangeSpec` for a change record missing `base`/
+`head`, or a `renamed` record missing `old_path` — these are
+structural defects in the request itself, distinct from every case
+above, all of which describe a *legitimate* source change. A `path`/
+`old_path` that doesn't exist at the stated revision is **not** an
+error by itself — Git's own diff output is the source of truth for
+whether a change is legitimate; `impacted()` trusts the caller's
+change records rather than re-deriving them from a live checkout.
 
 ### Introduced incrementally, full four-operation target retained
 
@@ -322,11 +428,60 @@ reviewer edits the file after assessing the flagged claim.
   that crashes a caller; **`get(id)` for a superseded ID** → returns
   the historical record plus the `resolved_into` pointer, never a bare
   redirect.
-- **`impacted([])`** (empty change list) → `[]`, not an error — the
-  degenerate case must be well-defined, not merely untested.
-- **`impacted(["path/that/does/not/exist"])`** → `InvalidChangeSpec`,
-  distinguishing "nothing is affected" from "the input itself was
-  wrong."
+
+**Native-register translation tests (§3a–§3e), added in this revision:**
+
+- **Missing `scope`** (any native register lacking the field, e.g.
+  Ledgerkit's) → `derived.scope: null`, never fabricated; `get()`
+  succeeds, it does not error.
+- **Missing reviewer metadata**: `native.status: verified` but
+  `verified_by`/`verified_date` absent or empty → `derived.status:
+  CONTESTED`, not `VERIFIED` and not `UNCERTAIN` — the native record's
+  own claim conflicts with what it can support.
+- **Conflicting evidence**: an entry's own `evidence[]` contains both
+  a passing and a failing `executable` result at the same `pinned_at`
+  → `derived.status: CONTESTED`, regardless of the native `status`
+  field's value — an unresolved conflict in the evidence itself always
+  takes precedence over whatever status was claimed.
+- **Unsupported/unrecognised native value**: a `relationship` or
+  `status` value outside the known enums (a future Ledgerkit schema
+  revision adds one this adapter doesn't know about) → `derived.status:
+  UNCERTAIN` with an explicit `translation_gap: true` marker and the
+  raw native value preserved — never silently dropped, never crashes.
+- **`superset`/`subset` relationship always carries a `mapping_scope`**
+  — tested as a positive assertion (the field is present and non-empty)
+  whenever `relationship` is one of those two values, and *absent*
+  whenever it's `equivalent`/`incomparable`.
+
+**Git-change (`impacted()`) regression fixtures, added in this revision:**
+
+- **Source modification**: a claim's `source.ref` under the changed
+  `path`, `change_type: modified` → flagged, reason cites the specific
+  reference.
+- **Source deletion**: a claim referencing a `path` with
+  `change_type: deleted` → flagged, reason `"source deleted"`, no
+  status implied.
+- **Source rename**: a claim referencing `old_path`, change record has
+  `change_type: renamed`, `old_path` set, `path` the new location →
+  flagged against the old reference, confirming the rename case is
+  findable, not silently missed because the literal path changed.
+- **Evidence file deletion**: a claim's `evidence[].ref` (not its
+  `source.ref`) under a deleted path → flagged, same treatment as
+  source deletion — evidence references are checked exactly like
+  source references, not a weaker case.
+- **Changed source with a relevant claim** → flagged with
+  `possible_impact: true` and the specific reference.
+- **Changed source with no relevant claim** → claim absent from the
+  result entirely (not returned with `possible_impact: false`).
+- **Unrelated source change** (a path no claim references at all) →
+  no entries in the result; this is the false-positive check Stage
+  2.4's drift demonstration (`planning/phase-02-stage-2.1-plan.md` §6.2)
+  exercises for real.
+- **Invalid revision or change specification**: a change record
+  missing `base`/`head`, or `change_type: renamed` missing `old_path`
+  → `InvalidChangeSpec`, distinguishing a malformed request from every
+  legitimate-change case above, all of which succeed.
+- **`impacted([])`** (empty change list) → `[]`, not an error.
 
 ## 7. What this explicitly is not
 

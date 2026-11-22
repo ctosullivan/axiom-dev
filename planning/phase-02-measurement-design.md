@@ -7,6 +7,41 @@ section); every field below is either confirmed-available or explicitly
 marked uncertain/to-verify-at-build-time, per that research's own
 caveats.
 
+## 0. Seven distinct things that must not be conflated
+
+**Added in this revision**, per the authorising prompt's explicit
+correction: a `knowledge_get` event firing proves none of the other
+six things in this list, and the design below must not be read as if
+it did:
+
+1. **Axiom skill activation** — the skill's guidance was surfaced to
+   the agent. Not reliably observable at all (§1 below); tracked only
+   indirectly, and that indirection is stated as weak, not as proof.
+2. **Knowledge API invocation** — `axiom-knowledge <op>` ran. Directly
+   observed (`knowledge_get`/`knowledge_find`/`knowledge_impact`
+   events).
+3. **Knowledge retrieval** — an invocation returned a non-empty,
+   non-error result. A subset of (2); still just "data came back."
+4. **Actual knowledge use** — the retrieved content was read and acted
+   on, not merely requested. Requires a human/reviewer judgement
+   against the task's own BUILD/VERIFY output (§7.A) — never inferred
+   from the invocation alone.
+5. **Correct application** — the knowledge was used *and* applied
+   correctly (vs. retrieved, then misapplied). A further, separate
+   reviewer judgement (fed into the usefulness classification, §6).
+6. **Independently assessed usefulness** — the `review_finding`-category
+   classification in §6, requiring an evidence reference, from a
+   reviewer who did not do the work being assessed.
+7. **Verified development outcome** — the task's own acceptance
+   criteria, checked against the independent oracle (§7.C) — a
+   different question from whether any *knowledge* was useful at all;
+   a task can be verified-correct with no knowledge reuse, or
+   incorrect despite heavy reuse.
+
+Every table and metric below is written to produce only (2)/(3)
+directly, and to mark (1), (4), (5), (6) and (7) as requiring a
+human/reviewer step — never computed from event counts alone.
+
 ## 1. JSONL event log
 
 `.axiom-local/events.jsonl`, append-only, Git-ignored by default (added
@@ -40,9 +75,10 @@ after the fact, not fabricated into the hook-based log.
 | Event | Built how | Confirmed source |
 |---|---|---|
 | `session_start` / `session_end` | `SessionStart`/`SessionEnd` hooks | confirmed hook events exist |
+| `task_start` | **added in this revision**: the skill instructs recording this explicitly, via `axiom-knowledge task-start --task-id <id>`, at the start of a bounded Axiom-guided unit of work — before any `knowledge_get`/`find` call for that task. This is the one lightweight, explicit marker the authorising prompt's §7 asks for, distinct from (and not a substitute for) skill-activation detection (§0 item 1): it records that *a human or agent chose to start Axiom-guided work*, not that the skill itself fired. | Axiom's own CLI, deliberate append — same reliability class as `knowledge_get` below |
 | `knowledge_get` / `knowledge_find` / `knowledge_impact` | the `axiom-knowledge` CLI itself appends its own event on exit — **not** inferred from a generic tool-use hook, since the CLI knows its own operation/result precisely and a hook would only see "a shell command ran" | CLI is Axiom's own code; most reliable source for these three |
 | `test_result` | CI/local test-runner wrapper appends on exit (exit code + duration), or parsed from the test runner's own machine-readable output if one exists | shell/CI, not a Claude Code feature |
-| `tool_failure` | `PostToolUseFailure` hook | confirmed hook event, confirmed fields (`error`, `is_interrupt`, `duration_ms`) |
+| `tool_failure` | `PostToolUseFailure` hook; the hook command classifies the raw `error` field into `error_class` (§5) before writing — the raw string is not logged by default | confirmed hook event, confirmed fields (`error`, `is_interrupt`, `duration_ms`) |
 | `claim_reconciled` | appended by whoever edits a claim file, via a small `axiom-knowledge reconcile-note` helper invoked as part of the commit, **not** inferred automatically from a Git diff (a file changing is not proof a claim was *reconciled* with evidence — that distinction matters per ADR 0008 Decision 5) | manual, deliberate append — matches "no autonomous semantic reconciliation" |
 | `review_finding` | appended by the independent-review dispatch itself, or transcribed by the orchestrating session from the review's own report, naming the isolation level achieved | manual append, mirrors this project's existing practice (`docs/agent-isolation.md`) |
 | `task_accepted` | appended once acceptance criteria are confirmed met, by whoever confirms it | manual append, matches `docs/development-lifecycle.md`'s phase-acceptance "who" column |
@@ -52,21 +88,25 @@ capability research found no dedicated "skill invoked" hook event, only
 a `PreToolUse` hook matchable on the `Skill` tool, with the exact input
 shape for that matcher unconfirmed. **Decision: do not build against
 this until confirmed at implementation time** (authorising prompt's
-explicit "do not invent unavailable telemetry fields"); Stage 2.2's
-BUILD step confirms the matcher's actual payload shape before relying
-on it, and if it turns out not to give a reliable signal, skill
-activation is tracked only indirectly (a `knowledge_get`/`knowledge_find`
-event firing is itself evidence the skill's guidance was followed,
-whether or not the skill-invocation event itself is captured).
+explicit "do not invent unavailable telemetry fields" and "do not...
+depend on unsupported skill-detection mechanisms"); Stage 2.2's BUILD
+step confirms the matcher's actual payload shape before relying on it.
+If unconfirmed or unreliable, skill activation (§0 item 1) is **not**
+tracked at all, rather than approximated by a weaker signal — `task_start`
+and `knowledge_get`/`find` firing are evidence Axiom-guided work
+*happened*, which is a deliberately weaker and distinct claim from
+"the skill itself activated," and the two are never reported as if
+they were the same measurement.
 
 ## 2. Task/session correlation
 
 `task_id` has no native Claude Code source, so it must be **deliberately
 assigned**: at the start of a bounded Axiom-guided unit of work, the
 skill instructs recording a short, human-chosen task identifier (e.g.
-`stage-2.1-ec022` or a claim ID being worked on) and every subsequent
-`axiom-knowledge` CLI invocation and test-runner wrapper call takes it
-as an explicit argument (`--task-id`), not inferred from context. This
+`stage-2.1-ec022` or a claim ID being worked on) via the `task_start`
+event (§1), and every subsequent `axiom-knowledge` CLI invocation and
+test-runner wrapper call takes it as an explicit argument
+(`--task-id`), not inferred from context. This
 is a deliberate, small piece of friction, accepted because inferring a
 task boundary automatically (e.g. from a time gap or a branch name) would
 be guessing, not measurement — and this assignment explicitly asks for
@@ -137,15 +177,21 @@ both would conflate two different kinds of statement.
 
 - **Redaction:** no full prompts, conversation text, tool arguments,
   file contents, or credentials are logged by default — only the
-  structured fields in §1. A `tool_failure` event's `error` field is
-  the tool's own error string, which could in principle contain a
-  file path or similar; this is accepted as a known, bounded exposure
-  (consistent with what `PostToolUseFailure` already surfaces to the
-  session itself) rather than attempting content-scanning redaction,
-  which would be exactly the kind of "large observability platform"
-  this assignment's §8 explicitly rejects. A consumer with stricter
-  needs can wrap the hook command with their own filter — not Axiom's
-  concern to solve generically before any real need is shown.
+  structured fields in §1. **Corrected in this revision**, per the
+  authorising prompt's explicit "prefer safe error classifications
+  rather than raw error strings by default": a `tool_failure` event's
+  `error_class` field (§1's common fields) is, by default, a **small,
+  closed classification** (`parse_error` | `timeout` | `not_found` |
+  `permission_denied` | `assertion_failed` | `unknown`) derived by the
+  logger from the tool's exit behaviour, not the raw `error` string
+  itself — an earlier draft of this design logged the raw string by
+  default, which could in principle carry a file path or other
+  incidental content. The raw string is **not** logged at all by
+  default; a consumer who explicitly wants it for local debugging can
+  opt in with one logger flag (e.g. `AXIOM_LOG_RAW_ERRORS=1`), which is
+  the simplest adequate mechanism, not content-scanning redaction —
+  that would be exactly the kind of "large observability platform"
+  this assignment's §8 explicitly rejects.
 - **Retention:** `.axiom-local/` is Git-ignored, so it never enters
   history; retention is whatever the local filesystem does, with no
   default rotation. A future `axiom-knowledge log-rotate` helper is

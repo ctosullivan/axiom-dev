@@ -371,3 +371,67 @@ was implemented by this change.
 - `planning/ROADMAP.md`, `planning/CONTEXT.md`: reconciled to reflect
   the now-concrete Stage 2.1 plan and cross-cutting designs. Phase 2
   remains **Planned**; no stage is marked In progress or Completed.
+
+## Phase 2 planning amendment — sequencing, adapter conservatism and simplification
+
+Corrective planning only; no code, skill, API, wiki record, CI check
+or logger was implemented or modified by this change, and
+`~/projects/ledgerkit`/`~/projects/hledger` remain untouched.
+
+### Fixed (planning defects found by a follow-up corrective review)
+
+- **Stage 2.1/2.4 sequencing overlap**: `planning/phase-02-stage-2.1-plan.md`
+  previously included fix-implementation, regression-testing and
+  independent-verification requirements that belong to Stage 2.4.
+  Rewritten so Stage 2.1 ends at the reviewed contract and a fully
+  captured (not merely specified) 9-row fixture matrix; a new explicit
+  "Handoff to Stage 2.4" section carries everything implementation-shaped.
+- **A genuinely new scope boundary, found while actually capturing the
+  full fixture matrix against the live hledger oracle**: hledger's
+  balance-assignment semantics resolve an elided amount against the
+  account's full running balance across the journal, not merely the
+  current transaction's sibling-posting net — confirmed with a
+  two-transaction fixture and independently re-confirmed by a second
+  reviewer with a different fixture. Ledgerkit's existing
+  `resolve_elision()` (`ledgerkit/parser.py:816-869`) only ever sees
+  one transaction and cannot provide this. Added as fixture row 9 and
+  an explicit scope boundary for EC-022's eventual fix, not silently
+  left for a fix to diverge from hledger without disposition.
+- **Knowledge-adapter over-generosity**: `planning/phase-02-knowledge-api-design.md`
+  previously merged native and derived fields into one view and mapped
+  Ledgerkit's `proposed` status to `OBSERVED` (overstating it — no
+  execution has actually happened for a `proposed` entry) and assumed
+  reviewer metadata lived inside `evidence[]` items rather than at the
+  register entry's own top level. Fixed: native/derived fields kept
+  visibly separate; `proposed -> UNCERTAIN`; `verified`/`final ->
+  VERIFIED` only when `verified_by`/`verified_date` are actually
+  present on the native record, `CONTESTED` otherwise;
+  `superset`/`subset` relationships now require an explicit
+  `mapping_scope` string rather than collapsing into an unqualified
+  `equivalent`/`partial`.
+- **`impacted()`'s input contract treated a legitimate source deletion
+  as malformed.** Redesigned to take Git-derived change records
+  (`base`/`head`/`path`/`change_type`/`old_path`); `deleted` and
+  `renamed` are now explicitly legitimate inputs, with a rename
+  preserving the ability to find claims referencing the old path. 9
+  new contract tests.
+- **Drift demonstration depended on an unpredictable future hledger
+  commit.** `planning/phase-02-stage-2.1-plan.md` §6.2 now specifies
+  two controlled conditions for Stage 2.4 (a relevant change — EC-021
+  as the primary choice — and a deliberately unrelated change), both
+  outcomes recorded including any false positive/negative.
+- **Measurement design conflated distinct things** (skill activation,
+  API invocation, retrieval, actual use, correct application,
+  assessed usefulness, verified outcome) and defaulted to logging raw
+  error strings. Fixed with an explicit distinguishing section, a new
+  `task_start` event, and a default `error_class` classification
+  (raw string opt-in only).
+- **Planning volume**: `planning/phase-02-architecture.md` merged into
+  `planning/phase-02-adoption-design.md` §9; `planning/phase-02-template.md`
+  gained an explicit "Document map and navigation path" section.
+- **A dangling forward-reference recurred inside the review record
+  itself**: `planning/phase-02-planning-review.md`'s own corrective-review
+  addendum asserted a second independent review "follows below" before
+  that section existed — the same defect class as the package's
+  original BLOCKING finding, caught by the second independent review
+  and fixed in the same batch by writing that section.

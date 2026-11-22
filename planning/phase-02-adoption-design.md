@@ -273,3 +273,95 @@ by lifecycle phase (e.g. a separate "axiom-verify" skill) is deferred
 until Stage 2.4's dogfooding shows a real reason one phase needs
 different tool access or framing than the rest — no such reason is
 evident yet.
+
+## 9. Architecture diagram
+
+**Merged into this document in this revision** (previously a separate
+file, `planning/phase-02-architecture.md` — removed as pure
+duplication of what §1–8 above already specify; a diagram of this
+design belongs beside the design, not in a document a reader has to
+separately locate and cross-reference).
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │  Independent consuming repository         │
+                    │  (e.g. Ledgerkit)                          │
+                    │                                            │
+                    │  AGENTS.md / CLAUDE.md  (unchanged,        │
+                    │  remains the project's own governance)     │
+                    │                                            │
+                    │  ┌──────────────────────────────────┐     │
+                    │  │ .claude/skills/axiom-work/         │     │
+                    │  │   SKILL.md  (§6 above)             │     │
+                    │  └──────────────┬─────────────────────┘     │
+                    │                 │ invokes                   │
+                    │                 ▼                            │
+                    │  ┌──────────────────────────────────┐     │
+                    │  │ axiom-knowledge CLI / library       │     │
+                    │  │ get / find / related / impacted     │     │
+                    │  │ (plain Python, no daemon)           │     │
+                    │  └───┬─────────────────┬──────────────┘     │
+                    │      │ reads            │ appends            │
+                    │      ▼                  ▼                    │
+                    │ ┌──────────────┐  ┌─────────────────────┐  │
+                    │ │ knowledge/    │  │ .axiom-local/        │  │
+                    │ │  wiki/claims/ │  │  events.jsonl         │  │
+                    │ │  (default —   │  │ (gitignored,          │  │
+                    │ │  OR an        │  │  per-checkout only)   │  │
+                    │ │  existing     │  └─────────────────────┘  │
+                    │ │  register,    │                            │
+                    │ │  e.g.         │                            │
+                    │ │  Ledgerkit's  │                            │
+                    │ │  compat-      │                            │
+                    │ │  register/)   │                            │
+                    │ └──────┬───────┘                            │
+                    │        │ versioned by                        │
+                    └────────┼────────────────────────────────────┘
+                             ▼
+                    ┌─────────────────────────────────────────┐
+                    │  Git  (authoritative store, only write     │
+                    │  path — commits/PRs, not an API call)       │
+                    └────────────────┬────────────────────────┘
+                                      │ triggers
+                                      ▼
+                    ┌─────────────────────────────────────────┐
+                    │  CI — schema/identity/reference integrity, │
+                    │  changed-source -> impacted() report,       │
+                    │  deterministic test suite (existing CI,     │
+                    │  no new orchestration)                      │
+                    └────────────────┬────────────────────────┘
+                                      │ surfaces findings for
+                                      ▼
+                    ┌─────────────────────────────────────────┐
+                    │  Independent verification (fresh-context    │
+                    │  agent or human; isolation level named      │
+                    │  honestly) — establishes actual correctness;│
+                    │  CI alone never does                        │
+                    └─────────────────────────────────────────┘
+
+              ┌───────────────────────────────────────────────┐
+              │  Future, optional, Phase 3 (NOT built in         │
+              │  Phase 2, not a Phase 2 dependency): a thin MCP   │
+              │  adapter wrapping axiom-knowledge read-only, and  │
+              │  Axiom Assure's controlled A/B of agent/retrieval │
+              │  strategies, using the same stable IDs as data.   │
+              └───────────────────────────────────────────────┘
+```
+
+**Relationships stated explicitly:** the consuming repository owns
+its governance and knowledge files outright, not Axiom. The skill is
+the only Claude-Code-specific component and calls the CLI exactly as
+a human or non-Claude agent would — no hidden channel bypasses it. The
+CLI is the only thing that reads/writes structured knowledge data, and
+never writes without a human/agent committing through Git (the event
+log's "appends" is the one exception, and that log is explicitly not
+the knowledge store). CI and independent verification are kept as two
+separate boxes on purpose — conflating "CI passed" with "verified" is
+the exact mistake ADR 0008 Decision 5 warns against. The Phase 3 box
+is drawn separately to make it visually obvious that removing it
+entirely still leaves a complete, functioning Phase 2 system above.
+
+**Complexity-budget check:** no component above is a database, a
+persistent background service, a write-capable API, an autonomous
+knowledge generator, an embedding index, or a dashboard. Every box
+maps to a justification already given in §1–8 above.
