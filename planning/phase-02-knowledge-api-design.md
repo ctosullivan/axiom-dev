@@ -555,9 +555,22 @@ equivalent), not evidence alone:
     the two are required to agree (a claim `impacted()` doesn't catch
     here must not then surface as `CONTESTED` on `get()` with no
     corresponding impact history, and vice versa).
-  A claim with no scope manifest, or whose manifest's `source_pin`
-  already equals `head`, is not flagged in either case — nothing left
-  for either check to catch.
+  **Scope-manifest exemption corrected per native Codex review, commit
+  `a2419d8`'s finding on this exact paragraph**: "no scope manifest"
+  only exempts a claim from the **second** ("just bumped") case —
+  there is nothing for that case to check without a manifest to
+  compare. It does **not** exempt a claim from the **first** ("not
+  yet bumped") case, which fires on `compatibility_target` alone and
+  has nothing to do with manifests at all; an earlier draft's blanket
+  "not flagged in either case" wrongly suppressed the base-pinned
+  warning for the ordinary case of a claim with no manifest yet (which
+  is most claims, since manifests are explicitly optional, §3b.1). The
+  correct statement: a **base-pinned** claim is flagged by the first
+  case regardless of whether it has a scope manifest; a **head-pinned**
+  claim is flagged by the second case only if it has a manifest whose
+  `source_pin` doesn't also equal `head` — a head-pinned claim with no
+  manifest, or with a current one, is the only case genuinely not
+  flagged.
 
 **This never sets or implies a status change** — per ADR 0008
 Decision 4/§5 of the authorising prompt, change detection establishes

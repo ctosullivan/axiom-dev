@@ -997,3 +997,25 @@ earlier rounds (§6–9), not the `ci-required` gate itself:
 Verification after both fixes: 44/44 `.github/scripts/tests` (was 33),
 82/82 `tests/`, all governed documents `PASS`, no trailing whitespace,
 CI green on `c4c41a9` including `ci-required` itself (all 5 jobs).
+
+**Re-review on that fix** (commit `a2419d8`): **2 findings** — the
+already-deferred native-integrity gap recurring (expected: it was
+deliberately not fixed, so Codex correctly flags it again, unchanged
+disposition) and **1 new, genuine P2**: the previous round's own fix
+introduced its own bug. §4's upstream rule's "no scope manifest"
+exemption was written as a blanket statement ("not flagged in either
+case"), but it only actually applies to the second ("just bumped")
+case — the first ("not yet bumped") case fires on
+`compatibility_target` alone and has nothing to do with manifests.
+The blanket wording would have wrongly suppressed the ordinary,
+common warning for a base-pinned claim with no manifest yet (most
+claims, since manifests are optional). **Fixed**: the exemption is
+now scoped to the head-pinned case only; a base-pinned claim is
+flagged regardless of manifest state.
+
+This round's own correction was itself the third round to touch
+§4's upstream rule (§9's original fix, this file's own prior round's
+correction, and now this one) — each round fixed a real, narrower
+defect in the previous round's fix, converging on a more precise
+statement each time. Re-verified: 44/44 + 82/82, all governed
+documents `PASS`.
