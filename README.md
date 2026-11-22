@@ -17,8 +17,9 @@ across successive, disconnected development sessions.
 > read-only knowledge API and deterministic CI impact checks; then
 > extract a reusable template and test clean adoption.
 > **Phase 2 does not A/B test the template.**
-> Phase 3 is hypothesis-driven Assure evaluation of agent/retrieval
-> strategies, with an optional MCP adapter where useful. See
+> Phase 3 delivers a thin MCP adapter (required to build, optional for
+> consumers) and hypothesis-driven Assure evaluation of agent/retrieval
+> strategies. See
 > [roadmap](planning/ROADMAP.md) and [current context](planning/CONTEXT.md).
 
 ## Mission
