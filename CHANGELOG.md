@@ -496,3 +496,11 @@ commit `e83df4b`. 2 P2 findings, both real, both fixed:
   hooks did not stop `axiom-knowledge`'s own direct event-writing on
   exit. Fixed with a single shared `AXIOM_DISABLE_LOGGING=1` check
   every event producer honours.
+
+Re-review on the fix (commit `cdc3fb8`) found 1 further P2: the
+proposed skill never actually instructed recording `task_start` or
+passing `--task-id`, contradicting the measurement design's own
+requirement for per-task correlation. Fixed: the skill now records
+`task-start` before retrieval and threads `--task-id` through every
+subsequent example command, closing with `task-accepted`. A duplicate
+step-numbering bug found in the same pass was fixed alongside it.

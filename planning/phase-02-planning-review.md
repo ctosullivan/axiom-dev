@@ -856,3 +856,17 @@ review rounds (§1–§8) did not catch — native Codex found something new,
 not a repeat of an already-known issue. Full test/governance
 verification re-run after the fix: 82/82 + 33/33 tests, all governed
 documents `PASS`, no trailing whitespace.
+
+**Re-review requested on the fix** (commit `cdc3fb8`): **1 further P2
+finding.** `planning/phase-02-adoption-design.md`'s skill body (§6)
+never actually instructed recording `task_start` or passing
+`--task-id`, even though `planning/phase-02-measurement-design.md`
+§1–§2 requires that marker before retrieval for per-task measurement
+to work at all — a real contradiction between what the skill tells an
+agent to do and what the measurement design assumes the skill does.
+**Fixed**: the skill body now records `task-start` as its first
+retrieval-adjacent step, threads `--task-id` through every subsequent
+example command (`get`/`find`/`impacted`/the test-runner wrapper), and
+closes with `task-accepted` once acceptance criteria are confirmed
+met. A pre-existing duplicate step-numbering bug (two steps both
+numbered "8") found in the same pass was fixed alongside it.

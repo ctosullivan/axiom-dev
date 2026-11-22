@@ -215,12 +215,20 @@ knowledge retrieval and evidence discipline on top of them.
 
 1. Read the project's own governance file and current plan/context —
    do not assume a prior session's summary is still accurate.
-2. If relevant existing knowledge may exist, retrieve it:
-   `axiom-knowledge get <id>` or `axiom-knowledge find "<query>"`
-   (see `knowledge/README.md` for where this project's claims live —
-   its own existing register, if one exists, takes priority over a
-   generic `knowledge/claims/` default).
-3. Distinguish the claim's evidence status
+2. **Choose a short task ID for this unit of work and record it before
+   any retrieval**: `axiom-knowledge task-start --task-id <id>`.
+   Required, not optional — task identity cannot be inferred
+   automatically (`planning/phase-02-measurement-design.md` §1–§2),
+   and every subsequent command in this skill carries `--task-id <id>`
+   so retrieval, overhead and usefulness can actually be measured per
+   task, not just logged with no way to group the events back
+   together.
+3. If relevant existing knowledge may exist, retrieve it:
+   `axiom-knowledge get <id> --task-id <id>` or `axiom-knowledge find
+   "<query>" --task-id <id>` (see `knowledge/README.md` for where this
+   project's claims live — its own existing register, if one exists,
+   takes priority over a generic `knowledge/claims/` default).
+4. Distinguish the claim's evidence status
    (INTENDED/OBSERVED/VERIFIED/UNCERTAIN/CONTESTED, or this project's
    own equivalent taxonomy if it has one already) from your own
    confidence. A retrieved claim being VERIFIED for one scope does not
@@ -229,28 +237,32 @@ knowledge retrieval and evidence discipline on top of them.
 
 ## Before changing code (ASSESS IMPACT)
 
-4. If the change touches a source a recorded claim depends on, run
-   `axiom-knowledge impacted <changed-paths>` and read what comes back
-   as *potentially* affected, not proven stale.
+5. If the change touches a source a recorded claim depends on, run
+   `axiom-knowledge impacted <changed-paths> --task-id <id>` and read
+   what comes back as *potentially* affected, not proven stale.
 
 ## While developing (BUILD / VERIFY)
 
-5. Develop against an independently specified contract/oracle, not one
+6. Develop against an independently specified contract/oracle, not one
    derived from your own new code.
-6. Run this project's deterministic checks directly; report what
-   actually ran and its actual result. Request independent review
-   named at the isolation level actually used
-   (see this project's own isolation-level documentation if present).
+7. Run this project's deterministic checks directly (through the
+   test-runner wrapper with `--task-id <id>`, per
+   `planning/phase-02-measurement-design.md` §1); report what actually
+   ran and its actual result. Request independent review named at the
+   isolation level actually used (see this project's own
+   isolation-level documentation if present).
 
 ## After the change (RECONCILE)
 
-7. Update affected claims/evidence in the same change, through an
+8. Update affected claims/evidence in the same change, through an
    ordinary commit/PR — never by having this skill or any agent write
    directly to a claim's authoritative file without that normal review
    path.
-8. Report unresolved uncertainty and verification limitations
+9. Report unresolved uncertainty and verification limitations
    explicitly; do not let a passing test or a clean schema check stand
-   in for semantic correctness.
+   in for semantic correctness. If this task's acceptance criteria are
+   confirmed met, record it: `axiom-knowledge task-accepted --task-id
+   <id>`.
 ```
 
 This is short by design (well under the ~500-line guidance) and
