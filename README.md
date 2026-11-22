@@ -10,12 +10,15 @@ across successive, disconnected development sessions.
 > Its [archive](planning/archive/phase-01/README.md) preserves the
 > [independent closeout](evidence/phase-1-final-closeout.md) and
 > [outstanding qualifications](evidence/phase-1-owner-acceptance.md).
-> **Phase 2 is planned, not implemented**: an independent, reusable
-> development template, Ledgerkit/hledger semantic wiki, stable claim
-> identifiers, a local knowledge API and deterministic CI drift controls,
-> dogfooded through the full lifecycle **without A/B testing the template**.
-> Phase 3 adds an optional MCP adapter and Assure-backed agent-strategy
-> experiments once the harness is ready. See
+> **Phase 2 is planned, not implemented**: select one meaningful
+> Ledgerkit/hledger compatibility task, specify an independent behavioural
+> oracle, and dogfood the full development lifecycle. Build only the
+> necessary comparative wiki, stable claim IDs, small Git/file-backed
+> read-only knowledge API and deterministic CI impact checks; then
+> extract a reusable template and test clean adoption.
+> **Phase 2 does not A/B test the template.**
+> Phase 3 is hypothesis-driven Assure evaluation of agent/retrieval
+> strategies, with an optional MCP adapter where useful. See
 > [roadmap](planning/ROADMAP.md) and [current context](planning/CONTEXT.md).
 
 ## Mission
@@ -48,8 +51,9 @@ is not to maximise automation, knowledge records, or architectural
 sophistication — it is to demonstrate improvement net of the methodology's
 own overhead. Phase 1 included a self-development exercise (Stages 1.1–1.5)
 in which Axiom Dev was built, refactored and independently re-documented
-using its own methodology. Phase 2 will extend dogfooding to an
-independent repository; this is not a controlled A/B test.
+using its own methodology. Phase 2 will extend dogfooding to Ledgerkit with an independent oracle,
+a small evidence-backed knowledge API and drift checks, then extract a
+reusable template. This is not a controlled A/B test.
 
 ## Relationship to Axiom Assure
 
@@ -95,7 +99,7 @@ for how to propose and land a change.
 | `planning/ROADMAP.md` | Concise phase status: Phase 1 completed; Phase 2 template work planned; Phases 3–4 proposed. |
 | `planning/CONTEXT.md` | Current phase, latest work, and the next concrete action. |
 | `planning/phase-01-foundation.md` | Canonical historical Phase 1 plan, stages and amendments (unchanged by archiving). |
-| `planning/phase-02-template.md` | Proposed focused Phase 2 plan: knowledge API, stable IDs, comparative wiki, deterministic gates and Ledgerkit dogfooding. |
+| `planning/phase-02-template.md` | Proposed evidence-first Phase 2 vertical-slice plan, knowledge API, deterministic CI, dogfooding and extraction. |
 | `planning/prompts/` | Original planning prompts, preserved verbatim with provenance. |
 | `planning/retros/` | Phase retrospectives, created as phases complete. |
 | `planning/archive/` | Completed Phase 1 archive index; see `docs/phase-archiving.md`. |
