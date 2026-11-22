@@ -17,7 +17,7 @@ paths; do not duplicate them here.
 |---|---|---|---|
 | 1 — Foundation | Evidence-based development lifecycle, validator and governance | **Completed** (owner decision 2026-11-22, with recorded qualifications) | [Archive](archive/phase-01/README.md) |
 | 2 — Practical value and reusable template | Demonstrate a complete, evidence-backed Ledgerkit vertical slice; extract a minimal portable package | **Planned** (direction approved; focused contracts require review) | [Phase 2 plan](phase-02-template.md) |
-| 3 — Measured effectiveness | Test knowledge/agent strategies with an independent Assure harness; provide optional MCP access where useful | **Proposed** | Below |
+| 3 — Measured effectiveness and MCP | Deliver a thin, consumer-optional MCP adapter over Phase 2's API and test agent/retrieval strategies with an independent Assure harness | **Proposed** | Below |
 | 4 — Product maturity | Independent adoption, simplification, hardening and evidence-backed release | **Proposed** | Below |
 
 **Planning status is not implementation authorisation.** Each substantive
@@ -105,7 +105,7 @@ See [the Phase 2 plan](phase-02-template.md) for stage contracts,
 negative cases, non-goals and independent closeout criteria. This
 remains a **planned** phase, not an implemented package.
 
-## Phase 3 — Experiment-led assurance and optional MCP (Proposed)
+## Phase 3 — Experiment-led assurance and MCP adapter (Proposed)
 
 **Question first:** does persistent, scoped, independently verifiable
 knowledge improve actual agent development outcomes, and when is
@@ -124,14 +124,19 @@ controlled resources and leakage, defect/rework/cost measures,
 replications and honest negative findings. A/B here is **not a delayed
 A/B test of the Phase 2 template**.
 
-If it benefits those use cases, provide a small **optional MCP adapter
-over the stable Phase 2 knowledge API**, with conformance tests,
-explicit permissions and provenance. MCP is not the phase's success
-metric and must not become a dependency of the Phase 2 core.
+**Phase 3 also delivers a small MCP adapter over the stable Phase 2
+knowledge API**, with interoperable read-only operations, conformance
+tests, explicit permissions and provenance. The adapter is **required
+as a Phase 3 deliverable** under accepted ADR 0008, Decision 7, but
+**optional for consumers**: Phase 2's API and template must remain
+fully functional without MCP or Assure. Keep the adapter thin; do not
+turn it into a new knowledge platform or claim it improves results
+without experimental evidence.
 
-**Exit evidence:** a independently reviewed experiment harness and
-reproducible, appropriately qualified strategy findings; MCP
-interoperability only if justified. A focused Phase 3 plan is required.
+**Exit evidence:** a working, independently checked interoperable MCP
+adapter **and** an independently reviewed experimental harness with
+reproducible, appropriately qualified strategy findings. A focused
+Phase 3 plan is required.
 
 ## Phase 4 — Product maturity (Proposed)
 
