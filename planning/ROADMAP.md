@@ -1,153 +1,100 @@
 # Roadmap
 
-What Axiom Dev is trying to achieve, long-term: find the simplest
-practical methodology for AI-assisted software development that
-preserves project knowledge, supports independent verification, keeps
-documentation accurate as the system changes, and lets complex software
-evolve reliably across disconnected agent sessions — see `README.md`
-"Fundamental hypothesis." Phases below are the plan for testing that
-hypothesis progressively, each building on verified evidence from the
-one before, not on assumption.
+Axiom Dev seeks the simplest useful, evidence-based development lifecycle
+that preserves trustworthy knowledge across coding sessions and exposes
+drift before unsupported claims become accepted facts. `AGENTS.md`
+governs planning, verification and phase acceptance; detailed plans and
+historical records live outside this summary.
 
-Status values and what they mean here:
+## Phase overview
 
-- **Proposed** — described in a plan or prompt, not yet reviewed/accepted.
-- **Planned** — accepted in principle; dependencies and acceptance criteria
-  recorded; no focused implementation plan written yet.
-- **In progress** — a focused plan exists and work is underway.
-- **Completed** — acceptance criteria met *with evidence*, confirmed by an
-  independent closeout (`AGENTS.md` §6) and approved by a human
-  (`AGENTS.md` §11). Writing the code/docs is not sufficient on its own.
-- **Deferred** — intentionally not pursued now; reason recorded.
-- **Blocked** — cannot proceed; blocker recorded.
-
-This file is deliberately concise — it answers "what's the plan and
-what's the current state," not "how did Phase 1 actually go." Detailed
-implementation plans, stage-by-stage specs, independent review records
-and evidence stay in their own files (linked below and from
-`planning/CONTEXT.md`), not duplicated here. Once a phase is archived
-(`docs/phase-archiving.md`), its roadmap entry shrinks to a short
-summary and an archive link — this entry has not happened for any phase
-yet (see "Archived phases" below).
-
-## Overview
-
-| Phase | Title | Status | Plan |
+| Phase | Goal | Status | Plan / record |
 |---|---|---|---|
-| 1 | Foundation | In progress | [`planning/phase-01-foundation.md`](phase-01-foundation.md) |
-| 2 | Real-world validation | Proposed | *(not yet written — becomes actionable once authorised and planned, `AGENTS.md` §2)* |
-| 3 | Methodology consolidation and reusable template | Proposed | *(not yet written)* |
-| 4 | Broader validation and release | Proposed | *(not yet written)* |
+| 1 | Foundation: lifecycle, validator, governance and verified dogfooding | **Completed** (owner decision, 2026-11-22; qualifications recorded) | [Archive](archive/phase-01/README.md) |
+| 2 | Reusable knowledge-based template, comparative wiki, knowledge API and deterministic CI in Ledgerkit | **Planned** (direction approved; implementation plan pending review) | [Phase 2 plan](phase-02-template.md) |
+| 3 | Optional MCP adapter and controlled agent-strategy A/B evaluation with a mature Assure harness | **Proposed** | Below |
+| 4 | Wider adoption, hardening, evidence-backed release | **Proposed** | Below |
 
-Phases 2–4 are the long-term direction this project intends to pursue,
-proposed by
-`planning/prompts/004-documentation-schema-and-roadmap-amendment.md` §8
-— **not authorised implementation commitments.** Each becomes actionable
-only once its own focused plan is written, independently reviewed, and
-approved (`AGENTS.md` §2), exactly like every phase before it. No dates,
-measured benefits, or acceptance results are invented for any of them
-below — only what each phase is *for* and what evidence would close it.
+A roadmap entry alone is not authorisation to start implementing it:
+follow `AGENTS.md` §2 and the acceptance process in
+[phase archiving](../docs/phase-archiving.md).
 
-## Phase 1 — Foundation
+## Phase 1 — Foundation (Completed)
 
-**Status: In progress — not Completed.** Establishes and tests the
-basic evidence-based development methodology: governance, knowledge
-placement, documentation schemas, behavioural contracts, independent
-review, deterministic CI, self-development, refactoring, and
-documentation reconstruction. Full stage-by-stage detail, dependencies,
-and acceptance criteria: [`planning/phase-01-foundation.md`](phase-01-foundation.md).
+The repository owner declared Phase 1 complete on 2026-11-22, following
+the merge of [PR #1](https://github.com/ctosullivan/axiom-dev/pull/1).
+The [archive](archive/phase-01/README.md) links the unchanged
+implementation plan, closeout assessments, retrospective, decisions
+and verification evidence. Completion is an **explicit owner acceptance
+with disclosed residual conditions**, not a claim that the previously
+requested fifth Codex review, outstanding review-thread resolutions or
+required-merge enforcement were independently demonstrated. See the
+[acceptance qualification](../evidence/phase-1-owner-acceptance.md).
 
-**Exit evidence required:** a working methodology, demonstrated through
-real internal use (not synthetic fixtures alone), independent
-verification of that use, and an accepted closeout. An independent
-closeout assessment has run
-(`evidence/phase-1-closeout.md`, `planning/phase-01-foundation.md` §16)
-and found 15 of 17 original Definition-of-Done items met with evidence,
-1 partially met, 1 genuinely blocked. A corrective amendment then fixed
-documentation drift, strengthened the validator, completed deterministic
-CI, and changed the independent-Codex-review requirement to native Codex
-GitHub PR review (`decisions/0005`; `planning/phase-01-foundation.md`
-§17–§20) — that batch's own revised 16-item Definition of Done
-(§18) stands at 10 MET, 1 locally-verified-only, 5 open. A further
-amendment moved documentation schemas to companion files and expanded
-this roadmap itself (`decisions/0006`; §21–§22) — its own 21-item
-Definition of Done (`planning/prompts/004-...md` §13) stands at 19 MET,
-1 locally-verified-only, 2 open. **PR #1 exists and is open**
-(<https://github.com/ctosullivan/axiom-dev/pull/1>) and has now had
-**four native Codex reviews**, finding five real defects in total, all
-corrected and independently verified:
+## Phase 2 — Reusable template and Ledgerkit dogfooding (Planned)
 
-| Review | Commit | Finding(s) | Correction | Independent review |
-|---|---|---|---|---|
-| 1st | `3a8c395` | A: fenced-code-block heading false positive; B: unhandled `TypeError` on malformed severity | `162e5c6` | §24 |
-| 2nd | `2ebac4c` | C: heading-whitespace false positive (`\s+` matching a newline) | `0645af3` | §26 |
-| 3rd | `6e75d2b` | D: governed-document manifest not checked when a document's own schema exists | `e0094f7` | §28 (also found and fixed: a directory-as-manifest unhandled exception; a brief documentation overclaim this project corrected in the same batch) |
-| 4th | `10dd266` | E: `check_authoritative_sources` wrongly accepting an absolute path to a file inside the repository | `1bd7f3a` (§29) | PASS, no blocking (§29) |
+**Objective:** produce a reusable, lightweight package that applies
+UNDERSTAND → SPECIFY → ASSESS IMPACT → BUILD → VERIFY → RECONCILE in
+an **independent** codebase, with Ledgerkit as the first consumer.
+The [focused proposal](phase-02-template.md) requires review before
+implementation.
 
-**All five findings (A–E) are now corrected, regression-tested, and
-independently verified with no blocking findings**, at commit
-`1bd7f3a`. **GitHub Actions confirmed passing** on `1bd7f3a` (run
-`#27`) and across all 27 runs on this branch to date (fetched directly
-from the Actions run listing, not a single spot-checked run) — the
-first time this project has seen the whole recent run history rather
-than one result. **The remaining open items**: a *fifth* native Codex
-review of the latest corrected commit (`1bd7f3a`) has not been
-requested (no `gh`/token to post the request — confirmed repeatedly
-across five amendments, not assumed), two narrow, deliberately
-deferred, pre-existing gaps in the same bug family as Finding E remain
-open by design (see §29), and human acceptance has not been sought.
-See `evidence/phase-1-final-closeout.md` and its addenda for the
-current full acceptance matrix. Phase 1 cannot be marked Completed,
-merged, or archived until a human requests that review, dispositions
-whatever it finds, and reviews the result (`AGENTS.md` §11).
+**Required deliverables:** a comparative **Ledgerkit ↔ hledger
+semantic wiki** with reproducible examples and versioned evidence;
+stable identifiers for **all governed knowledge artifacts and claims**;
+a local **knowledge API** for lookup, relations and impact/drift
+queries; deterministic CI integrity gates; and end-to-end dogfooding
+through initial change, subsequent drift, review and reconciliation.
+A second clean adoption must establish that the template is not
+Ledgerkit-specific.
 
-## Phase 2 — Real-world validation (proposed)
+**Drift control:** mechanically detect duplicate/reused IDs, invalid
+schemas, dangling references, invalid provenance, uncovered relations,
+stale source revisions and unreviewed impacted claims. Distinguish
+*CI executed* from *CI required for merge*. Semantic equivalence,
+truthfulness and the meaning of an upstream change are reviewable
+claims—not automatically proven by a green check.
 
-Apply the methodology to a substantive development task in an existing
-project — Ledgerkit is the preferred candidate
-(`planning/prompts/004-...md` §8). Potential activities: select a
-bounded, meaningful Ledgerkit objective; establish an independently
-reviewed behavioural contract; measure baseline development performance;
-execute the work using Axiom Dev; compare against a simpler conventional
-approach where a fair comparison is feasible; record defects, rework,
-effort, verification coverage and knowledge reuse; evaluate whether
-Axiom's procedures deliver value exceeding their overhead.
+**Evidence:** reproducible adoption, validator and negative-case CI
+runs, wiki examples, actual defects caught/missed, and measured
+operational friction. **No Phase 2 A/B testing of the template**;
+dogfooding demonstrates applicability and observations, not causal
+superiority.
 
-**Exit evidence required:** a credible, reproducible real-world
-evaluation that distinguishes demonstrated improvements from unresolved
-hypotheses — not a claim of superiority over alternative methods made
-before that evidence exists.
+## Phase 3 — MCP and Assure-backed experiments (Proposed)
 
-## Phase 3 — Methodology consolidation and reusable template (proposed)
+Add a thin **optional MCP interface over Phase 2's stable knowledge
+API**, preserving the local API and identifiers. Define security,
+read/write permissions, provenance, deterministic responses and
+conformance tests. Once Axiom Assure has a demonstrably adequate
+independent experiment harness, pre-register controlled **A/B tests
+of knowledge retrieval and agent strategies** (e.g. with/without
+structured knowledge access or different context-selection methods):
+held-out tasks, common acceptance oracle, equivalent resources,
+cost/latency and defect metrics, leakage controls and independent
+adjudication. The experiments test stated strategies—not the Phase 2
+template retroactively. The core template must work without MCP or
+Assure.
 
-Refine the methodology based on Phase 2's actual findings. Potential
-activities: remove procedures Phase 2 showed to be unnecessary; simplify
-governance and documentation; consolidate reusable contracts, checks and
-workflows; produce an Axiom Dev starter/template repository; demonstrate
-that a fresh agent can use the template to develop and verify a bounded
-change.
+**Exit evidence:** interoperable MCP adapter and replicated,
+well-controlled findings with limitations and no unearned claims
+of improvement. A focused Phase 3 plan is required before work starts.
 
-**Exit evidence required:** a reusable, documented development template
-with a successful independent adoption exercise.
+## Phase 4 — Broader adoption and release (Proposed)
 
-## Phase 4 — Broader validation and release (proposed)
+Try the mature template with additional independent repositories,
+migration/refactoring scenarios and more developers; simplify
+procedures that show little value, harden versioning and compatibility,
+document failure cases and issue a supported release. Do not infer
+generalisability from Ledgerkit dogfooding alone.
 
-Evaluate the methodology across additional projects and development
-scenarios. Potential activities: cross-project trials; maintenance and
-refactoring exercises; documentation reconstruction after substantial
-change; comparison of verification approaches; usability/overhead
-assessment; a versioned release of the methodology and template.
-
-**Exit evidence required:** a stable release with documented
-capabilities, limitations, and reproducible supporting evidence.
+**Exit evidence:** independently reproducible onboarding, cross-project
+test results, declared support boundary, versioned release, adoption
+costs and documented limitations.
 
 ## Archived phases
 
-None yet. **Phase 1 is not archived** — per
-`planning/prompts/004-...md` §9's explicit restriction, it stays open
-and un-archived until its outstanding requirements (native Codex GitHub
-PR review, human acceptance) are met. See
-[`docs/phase-archiving.md`](../docs/phase-archiving.md) for the
-procedure that will apply once a phase is actually Completed, and
-[`planning/archive/README.md`](archive/README.md) for the (currently
-empty) archive index.
+- [Phase 1 — Foundation](archive/phase-01/README.md) — completed by
+  owner decision on 2026-11-22 with documented qualifications.
+
+See [archive index](archive/README.md) for the canonical archive list.
