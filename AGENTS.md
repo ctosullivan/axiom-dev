@@ -279,3 +279,71 @@ P0/P1 findings require resolution or explicit human disposition before acceptanc
 Human approval remains required for governance changes, phase completion and merging.
 
 The Phase 1 review mechanism is native Codex GitHub PR review, as established by `decisions/0005`. API-backed automated Codex CI gating remains deferred.
+
+## 14. Bounded autonomous implementation-PR readiness cycle
+
+After the owner has approved a focused implementation plan and its contracts,
+Claude may proceed autonomously through ordinary build, local testing,
+documentation reconciliation, PR creation, CI debugging and independent
+Codex review corrections **within that authorised scope**. Routine
+corrective edits do not each require a new human prompt; §11 approval
+boundaries still apply, including governance changes, stage completion,
+changed acceptance criteria and **every merge**.
+
+1. **Baseline and branch.** Inspect the actual worktree, current branch,
+   remote PR, accepted plan/contracts, dependencies and existing findings.
+   Do not discard uncommitted changes or work on a different person's
+   branch. Start from current `main` for a new task unless an existing PR
+   branch is expressly authorised. Preserve accepted oracle outputs and
+   contractual expectations independently of code under test.
+2. **Implement and verify.** Work to the approved plan; write/run relevant
+   deterministic tests including counterexamples, update affected docs and
+   knowledge in the same PR, and capture real commands/results. Never
+   manufacture green evidence, rewrite oracle results to fit the new code,
+   weaken checks, or silently change scope to obtain a pass.
+3. **Publish a PR.** Commit and push the feature branch, create/update its
+   implementation PR, and provide a reviewable summary of intended change,
+   plan/contract, tests, semantic uncertainties and remaining risks.
+4. **Check GitHub CI.** Read the exact PR head SHA and wait for its required
+   status checks to finish (including `ci-required` once configured).
+   Inspect failure logs, correct ordinary defects and rerun locally before
+   pushing. Do not treat merely-running CI, skipped checks, an earlier
+   successful SHA, or a green workflow with unconfigured branch protection
+   as a satisfied merge gate.
+5. **Request and inspect native Codex review.** Ask for `@codex review`
+   on the PR when appropriate; fetch its review status, inline findings and
+   latest reviewed SHA. A review of an earlier head is stale after further
+   commits. Wait for review to complete or report unavailability; absence
+   of comments alone is not proof of review. Codex remains advisory, not a
+   required GitHub status check (`decisions/0005`).
+6. **Disposition findings and iterate.** Inspect all current material
+   findings and unresolved review threads; reproduce suspected defects and
+   fix justified findings, including P2/P3 where worthwhile. Record a
+   specific, evidence-backed reason for any false positive, out-of-scope
+   issue or accepted limitation. Do not silently dismiss, hide or mark a
+   finding resolved. Repeat local checks, push, GitHub CI and **fresh-head**
+   Codex review after substantive corrections. Avoid repeated identical
+   review requests for the same unchanged commit.
+7. **Bound the loop.** Default to **three corrective rounds** after the
+   initial review. If failures persist, evidence conflicts, a reviewer is
+   unavailable, review has not finished, or correcting a finding requires
+   changing an approved plan, contracts, architecture or other §11
+   boundary, **stop and escalate** with the precise blocking evidence.
+   No indefinite retry, no bypass or force-push, and no speculative claims
+   that all reviews are green.
+8. **Ready for human review, not auto-merge.** Report the final head SHA,
+   exact CI checks and results, latest Codex review SHA/status, disposition
+   of material findings, docs/knowledge reconciliation, remaining unknowns,
+   and a concise risk-focused diff summary. Only describe a PR as ready when
+   the latest head has passing required checks and a completed up-to-date
+   independent review with no unresolved material defects (or explicit
+   human disposition). Ask the owner to review code, documentation and
+   evidence and authorise merge. After approval, confirm checks still
+   correspond to the current head, merge by the approved method and
+   reconcile local `main` and project continuity records.
+
+**Enforcement distinction:** GitHub's required status checks mechanically
+block merges only when correctly configured in repository settings. The
+native Codex review, human review, semantic validity and this retry policy
+are procedural safeguards; never describe them as a mechanical GitHub gate.
+See `docs/ci-enforcement-setup.md` for configuration and verification.

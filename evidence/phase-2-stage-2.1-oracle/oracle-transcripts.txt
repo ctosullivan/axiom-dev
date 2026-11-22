@@ -1,0 +1,143 @@
+### row-01-prefix-period-plain ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank                    = $100.00
+    equity:opening        $-100.00
+
+exit: 0
+-- balance --
+             $100.00  assets:bank
+            $-100.00  equity:opening
+--------------------
+                   0  
+exit: 0
+
+### row-02-suffix-period-plain ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank                    = 100.00 USD
+    equity:opening     -100.00 USD
+
+exit: 0
+-- balance --
+          100.00 USD  assets:bank
+         -100.00 USD  equity:opening
+--------------------
+                   0  
+exit: 0
+
+### row-03-suffix-comma-plain ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank                    = 100,00 EUR
+    equity:opening     -100,00 EUR
+
+exit: 0
+-- balance --
+          100,00 EUR  assets:bank
+         -100,00 EUR  equity:opening
+--------------------
+                   0  
+exit: 0
+
+### row-04-prefix-period-sole-commodity ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank                    == $100.00
+    equity:opening        $-100.00
+
+exit: 0
+-- balance --
+             $100.00  assets:bank
+            $-100.00  equity:opening
+--------------------
+                   0  
+exit: 0
+
+### row-05-suffix-comma-inclusive ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank                    =* 100,00 EUR
+    equity:opening     -100,00 EUR
+
+exit: 0
+-- balance --
+          100,00 EUR  assets:bank
+         -100,00 EUR  equity:opening
+--------------------
+                   0  
+exit: 0
+
+### row-06-suffix-comma-multiposting ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank                    = 100,00 EUR
+    assets:cash          50,00 EUR
+    equity:opening     -150,00 EUR
+
+exit: 0
+-- balance --
+          100,00 EUR  assets:bank
+           50,00 EUR  assets:cash
+         -150,00 EUR  equity:opening
+--------------------
+                   0  
+exit: 0
+
+### row-07-negative-unbalanced-assertion ###
+-- print --
+hledger: Error: /home/cormac/projects/axiom-dev/evidence/phase-2-stage-2.1-oracle/row-07-negative-unbalanced-assertion.journal:2-4:
+2 | 2024-01-01 Opening balance
+  |     assets:bank         999,00 EUR = 999,00 EUR
+  |     equity:opening     -100,00 EUR
+
+This transaction is unbalanced.
+The real postings' sum should be 0 but is: 899,00 EUR
+exit: 1
+-- balance --
+hledger: Error: /home/cormac/projects/axiom-dev/evidence/phase-2-stage-2.1-oracle/row-07-negative-unbalanced-assertion.journal:2-4:
+2 | 2024-01-01 Opening balance
+  |     assets:bank         999,00 EUR = 999,00 EUR
+  |     equity:opening     -100,00 EUR
+
+This transaction is unbalanced.
+The real postings' sum should be 0 but is: 899,00 EUR
+exit: 1
+
+### row-08-negative-malformed-marker ###
+-- print --
+hledger: Error: /home/cormac/projects/axiom-dev/evidence/phase-2-stage-2.1-oracle/row-08-negative-malformed-marker.journal:3:20:
+  |
+3 |     assets:bank  === 100,00 EUR
+  |                    ^
+unexpected '='
+expecting '*' or amount (for a balance assertion or assignment)
+exit: 1
+-- balance --
+hledger: Error: /home/cormac/projects/axiom-dev/evidence/phase-2-stage-2.1-oracle/row-08-negative-malformed-marker.journal:3:20:
+  |
+3 |     assets:bank  === 100,00 EUR
+  |                    ^
+unexpected '='
+expecting '*' or amount (for a balance assertion or assignment)
+exit: 1
+
+### row-09-boundary-cross-transaction-running-balance ###
+-- print --
+2024-01-01 Opening balance
+    assets:bank            $100.00
+    equity:opening        $-100.00
+
+2024-02-01 Deposit, balance assigned
+    assets:bank                    = $250.00
+    equity:unknown
+
+exit: 0
+-- balance --
+             $250.00  assets:bank
+            $-100.00  equity:opening
+            $-150.00  equity:unknown
+--------------------
+                   0  
+exit: 0
+

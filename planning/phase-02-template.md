@@ -7,6 +7,49 @@ criteria; it is not permission to implement** until each focused increment,
 its independent acceptance oracle and contracts have been reviewed under
 `AGENTS.md` §2.
 
+## Document map and navigation path
+
+Phase 2's planning is split by concern, each with exactly one
+authoritative location — no schema, API contract or capability fact is
+repeated in full across documents; a later document links to the
+earlier one instead. **To execute an approved stage, read in this
+order and no further** (this is the actual minimum reading path, not
+an aspiration):
+
+1. `planning/CONTEXT.md` — current branch, current approved stage.
+2. **This document** — objective, six-stage sequence, non-goals,
+   architectural boundaries. Stop here if you only need orientation.
+3. The **one** stage plan you are executing (currently
+   [`planning/phase-02-stage-2.1-plan.md`](phase-02-stage-2.1-plan.md)) —
+   self-contained for that stage's own scope.
+4. **Only the cross-cutting contract(s) that stage plan actually
+   references** — it names them explicitly, you do not need to read
+   all three to execute one stage:
+   - [`planning/phase-02-adoption-design.md`](phase-02-adoption-design.md) —
+     the Claude Code skill, consumer file layout, install/upgrade/
+     removal, and the minimal architecture diagram (merged in — a
+     diagram of this design belongs beside it, not in a separate file
+     a reader has to cross-reference).
+   - [`planning/phase-02-knowledge-api-design.md`](phase-02-knowledge-api-design.md) —
+     the Claim/Source/Evidence model, stable identity, the
+     native-register adapter contract, the four operations with error
+     semantics, and contract tests.
+   - [`planning/phase-02-measurement-design.md`](phase-02-measurement-design.md) —
+     the JSONL event log, event-granularity distinctions,
+     existing-telemetry reuse, usefulness classification and
+     scorecard.
+5. `planning/phase-02-planning-review.md` — read only if you need the
+   underlying research provenance or want to see what an earlier
+   version of a document got wrong and why; not required to execute a
+   stage. It is never edited to read as if its own history were
+   different — corrections are recorded as dated, appended addenda.
+
+**This still is not implementation authorisation.** The stage
+sequence, scope and acceptance criteria below remain this document's
+own; the documents above make Stage 2.1 and its cross-cutting designs
+concrete enough to execute once reviewed and human-approved, per
+`AGENTS.md` §2/§11.
+
 ## Objective and expected value
 
 Demonstrate that a *small, conventional, evidence-based knowledge system*
@@ -53,6 +96,12 @@ preceding dogfooding.
 ## Scope and delivery sequence
 
 ### 2.1 — Choose a meaningful Ledgerkit problem and oracle
+
+**Done, as a plan — see `planning/phase-02-stage-2.1-plan.md`.** The
+task is selected (balance-assignment elision, Ledgerkit's own EC-022),
+against actually-inspected code and an actually-runnable, exact-commit
+hledger oracle. What follows in this section is retained as the
+general requirement the concrete plan satisfies, not superseded by it.
 
 Inspect a bounded area of Ledgerkit and hledger, e.g. posting/balancing,
 query or register semantics, and choose a **real development change**
@@ -156,6 +205,13 @@ review work; unaffected records are not gratuitously invalidated.
 
 ### 2.4 — Dogfood a complete lifecycle including real drift
 
+**Owns the actual EC-022 implementation.** Stage 2.1 ends with the
+reviewed contract and oracle only (`planning/phase-02-stage-2.1-plan.md`
+§6, "Handoff to Stage 2.4") — it does not fix Ledgerkit's code. Stage
+2.4 is where `_parse_posting` actually changes, the fixture matrix is
+executed for real, the fix is independently verified, and the
+compat-register entry is written.
+
 Use the wiki and read-only API *before* writing code to understand a
 Ledgerkit behaviour. Execute UNDERSTAND → SPECIFY → ASSESS IMPACT →
 BUILD → VERIFY → RECONCILE against an accepted contract and oracle.
@@ -171,6 +227,16 @@ dependencies threaten a prior claim. Demonstrate:
    revision;
 5. changed claims and evidence are reconciled without erasing
    original provenance; a fresh agent can subsequently reuse them.
+
+The "second meaningful change" is deliberately **three controlled
+conditions, not one** — a relevant change (with its actual dependency
+checked, not assumed from file co-location), an unrelated change in a
+different module, and a same-file-but-semantically-unrelated change
+that specifically measures file-level impact detection's own known
+false-positive cost — per the concrete design in
+`planning/phase-02-stage-2.1-plan.md` §6.2, so drift detection is
+tested for false positives as well as true positives, not demonstrated
+by a single success case.
 
 Measure real defects caught/missed, false positives, retrieval usefulness,
 review and maintenance effort, friction, and any unnecessary procedure.

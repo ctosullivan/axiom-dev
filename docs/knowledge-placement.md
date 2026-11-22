@@ -79,10 +79,10 @@ identified and this section was rewritten to stop:
 5. **Mechanism enforced as a required merge condition** — a failure
    mechanically blocks merge (GitHub branch protection / required status
    checks). **Blocks** — by definition, this is the one level that does.
-   **Nothing in this repository is currently at this level** — reaching
-   it needs repository-admin API access this environment has never had
-   (confirmed again, directly, as part of this correction — see
-   `decisions/0005`).
+   **A candidate aggregate check exists in the workflow**, but level 5
+   applies only after GitHub's main-branch rule is configured and tested.
+   See `docs/ci-enforcement-setup.md`; the connected integration cannot
+   independently confirm branch-protection configuration.
 6. **Semantic / editorial (manual)** — needs human or independent-agent
    judgement about quality, clarity, or whether a claim is well-supported
    (CONTESTED items in particular). **Advisory only, by design** — never
@@ -93,12 +93,12 @@ correction:
 
 | Control | Level |
 |---|---|
-| `src/axiom_validator/` — companion-schema presence, required sections, path/link resolution, ADR-reference existence, field type/non-emptiness, governed-document scope, orphaned-schema and reintroduced-front-matter detection (`decisions/0006`) | 4 — executed by CI (`.github/workflows/deterministic-checks.yml`), **not** a required merge check |
-| `.github/scripts/policy_evaluator.py` — Codex-finding policy decisions | 4 — executed by CI, not a required merge check; its live Codex input source is deferred (`decisions/0005`) |
+| `src/axiom_validator/` — companion-schema presence, required sections, path/link resolution, ADR-reference existence, field type/non-emptiness, governed-document scope, orphaned-schema and reintroduced-front-matter detection (`decisions/0006`) | 4 — executed by CI (`.github/workflows/deterministic-checks.yml`); aggregation into `ci-required` is not proven to block merges until GitHub protection is configured and tested |
+| `.github/scripts/policy_evaluator.py` — Codex-finding policy decisions | 4 — executed by CI; included in aggregate `ci-required` job, but not a live Codex review gate (`decisions/0005`) |
 | Sequential ADR numbering | 1 — policy only (`AGENTS.md` §3). **Nothing in this repository mechanically checks that ADR numbers are sequential or gap-free** — the validator's `ADR_PATH_RE` only checks that a *referenced* ADR number resolves to a real file, which is a different, narrower check than "the ADR sequence has no gaps." Do not read the validator's existing-ADR-reference check as sequential-numbering enforcement. |
 | Complete documentation correctness (semantic accuracy of claims) | 6 — semantic/editorial only, by design; see `docs/knowledge-reconciliation.md` and the Amendment D semantic-review procedure (`planning/phase-01-foundation.md` §17, §19) |
-| Native Codex GitHub PR review | Not yet run for real (no PR opened); once run, it is level 6 (an independent AI review a human acts on), **never** level 5 — `decisions/0005` is explicit that this must never be described as mechanically preventing an unauthorised merge |
-| GitHub required status checks / branch protection | Not configured; would be level 5 if it existed, and nothing here claims it does |
+| Native Codex GitHub PR review | 6 — independent advisory review is operational on PRs, but its comments are **not** a required merge check (`decisions/0005`). Require latest-head review and human disposition procedurally. |
+| GitHub required status checks / branch protection | `ci-required` aggregate job implemented; enforcement stays level 4 until an administrator enables and tests a `main` rule requiring that exact check (`docs/ci-enforcement-setup.md`). |
 
 ## Reconciliation hook
 

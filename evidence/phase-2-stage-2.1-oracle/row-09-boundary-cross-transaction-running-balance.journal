@@ -1,0 +1,7 @@
+2024-01-01 Opening balance
+    assets:bank  $100.00
+    equity:opening  $-100.00
+
+2024-02-01 Deposit, balance assigned
+    assets:bank  = $250.00
+    equity:unknown

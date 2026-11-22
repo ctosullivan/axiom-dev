@@ -326,3 +326,224 @@ complete, on two named, real, external blockers.
   finding's scope — recorded in
   `contracts/documentation-schema-validator.md` and
   `planning/phase-01-foundation.md` §29.
+
+## Phase 2 planning — Stage 2.1 and cross-cutting designs made implementation-ready
+
+Planning only; no code, skill, API, wiki record, CI check or logger
+was implemented by this change.
+
+### Added
+
+- `planning/phase-02-stage-2.1-plan.md`: selects Ledgerkit's own
+  documented EC-022 (balance-assignment elision parsing,
+  `ledgerkit/parser.py`) as the Stage 2.1 dogfooding task, with an
+  independently re-derived root cause, both failure modes reproduced
+  against the actual pinned hledger binary (commit-matched to
+  `~/projects/hledger` HEAD), a required fixture matrix, acceptance
+  criteria, and the decision to defer to Ledgerkit's own existing
+  `dev-docs/compat-register/` rather than duplicating it.
+- `planning/phase-02-adoption-design.md`: the Claude Code skill
+  (`.claude/skills/axiom-work/SKILL.md`), consumer file layout,
+  install/upgrade/removal mechanism, and non-Claude-agent equivalence.
+- `planning/phase-02-knowledge-api-design.md`: the Claim/Source/
+  Evidence model, stable identity (reusing Ledgerkit's own
+  `LK-<KIND>-<AREA>-<NNN>` scheme where one already exists), the
+  four-operation `get`/`find`/`related`/`impacted` API with error
+  semantics and contract tests, and an explicit adapter contract for
+  normalising an existing non-Axiom register's fields into Axiom's
+  common view without altering or duplicating the source record.
+- `planning/phase-02-measurement-design.md`: the `.axiom-local/events.jsonl`
+  format, existing Claude Code telemetry reuse (hooks, `/usage`,
+  OpenTelemetry), privacy/retention/opt-out rules, knowledge-usefulness
+  classification and the per-task scorecard.
+- `planning/phase-02-architecture.md`: the minimal component diagram.
+- `planning/phase-02-planning-review.md`: full independent review of
+  this planning package — 2 BLOCKING findings (a cited-but-nonexistent
+  provenance file; a generic claim schema that didn't line up
+  field-for-field with the real register it commits to reading), both
+  fixed in this same batch, plus 3 MATERIAL-NONBLOCKING and 2 ADVISORY
+  findings, dispositioned.
+
+### Changed
+
+- `planning/phase-02-template.md`: points to the five documents above;
+  §2.1 marked done-as-a-plan.
+- `planning/ROADMAP.md`, `planning/CONTEXT.md`: reconciled to reflect
+  the now-concrete Stage 2.1 plan and cross-cutting designs. Phase 2
+  remains **Planned**; no stage is marked In progress or Completed.
+
+## Phase 2 planning amendment — sequencing, adapter conservatism and simplification
+
+Corrective planning only; no code, skill, API, wiki record, CI check
+or logger was implemented or modified by this change, and
+`~/projects/ledgerkit`/`~/projects/hledger` remain untouched.
+
+### Fixed (planning defects found by a follow-up corrective review)
+
+- **Stage 2.1/2.4 sequencing overlap**: `planning/phase-02-stage-2.1-plan.md`
+  previously included fix-implementation, regression-testing and
+  independent-verification requirements that belong to Stage 2.4.
+  Rewritten so Stage 2.1 ends at the reviewed contract and a fully
+  captured (not merely specified) 9-row fixture matrix; a new explicit
+  "Handoff to Stage 2.4" section carries everything implementation-shaped.
+- **A genuinely new scope boundary, found while actually capturing the
+  full fixture matrix against the live hledger oracle**: hledger's
+  balance-assignment semantics resolve an elided amount against the
+  account's full running balance across the journal, not merely the
+  current transaction's sibling-posting net — confirmed with a
+  two-transaction fixture and independently re-confirmed by a second
+  reviewer with a different fixture. Ledgerkit's existing
+  `resolve_elision()` (`ledgerkit/parser.py:816-869`) only ever sees
+  one transaction and cannot provide this. Added as fixture row 9 and
+  an explicit scope boundary for EC-022's eventual fix, not silently
+  left for a fix to diverge from hledger without disposition.
+- **Knowledge-adapter over-generosity**: `planning/phase-02-knowledge-api-design.md`
+  previously merged native and derived fields into one view and mapped
+  Ledgerkit's `proposed` status to `OBSERVED` (overstating it — no
+  execution has actually happened for a `proposed` entry) and assumed
+  reviewer metadata lived inside `evidence[]` items rather than at the
+  register entry's own top level. Fixed: native/derived fields kept
+  visibly separate; `proposed -> UNCERTAIN`; `verified`/`final ->
+  VERIFIED` only when `verified_by`/`verified_date` are actually
+  present on the native record, `CONTESTED` otherwise;
+  `superset`/`subset` relationships now require an explicit
+  `mapping_scope` string rather than collapsing into an unqualified
+  `equivalent`/`partial`.
+- **`impacted()`'s input contract treated a legitimate source deletion
+  as malformed.** Redesigned to take Git-derived change records
+  (`base`/`head`/`path`/`change_type`/`old_path`); `deleted` and
+  `renamed` are now explicitly legitimate inputs, with a rename
+  preserving the ability to find claims referencing the old path. 9
+  new contract tests.
+- **Drift demonstration depended on an unpredictable future hledger
+  commit.** `planning/phase-02-stage-2.1-plan.md` §6.2 now specifies
+  two controlled conditions for Stage 2.4 (a relevant change — EC-021
+  as the primary choice — and a deliberately unrelated change), both
+  outcomes recorded including any false positive/negative.
+- **Measurement design conflated distinct things** (skill activation,
+  API invocation, retrieval, actual use, correct application,
+  assessed usefulness, verified outcome) and defaulted to logging raw
+  error strings. Fixed with an explicit distinguishing section, a new
+  `task_start` event, and a default `error_class` classification
+  (raw string opt-in only).
+- **Planning volume**: `planning/phase-02-architecture.md` merged into
+  `planning/phase-02-adoption-design.md` §9; `planning/phase-02-template.md`
+  gained an explicit "Document map and navigation path" section.
+- **A dangling forward-reference recurred inside the review record
+  itself**: `planning/phase-02-planning-review.md`'s own corrective-review
+  addendum asserted a second independent review "follows below" before
+  that section existed — the same defect class as the package's
+  original BLOCKING finding, caught by the second independent review
+  and fixed in the same batch by writing that section.
+
+## Phase 2 final amendment — scoped verification, native dependency extraction, durable oracle evidence
+
+Corrective planning amendment, continuing into Stage 2.1 oracle-evidence
+completion only; no skill, API, CI check or logger was implemented,
+and `~/projects/ledgerkit`/`~/projects/hledger` remain untouched.
+
+### Fixed
+
+- **Scoped-verification contradiction**: the knowledge-adapter design
+  could previously produce `derived.status: VERIFIED` together with
+  `derived.scope: null` — contradicting `docs/knowledge-placement.md`'s
+  own definition of VERIFIED ("within a stated scope"). Fixed with a
+  new scope gate (`planning/phase-02-knowledge-api-design.md` §3b.1):
+  an optional, small, Axiom-owned "scope manifest" file, kept outside
+  Ledgerkit's own schema, with five deterministic checks. Absent a
+  passing manifest, derived status is `UNCERTAIN`, never `VERIFIED`
+  with a null scope.
+- **Missing evidence vs. contradictory evidence**: missing reviewer
+  metadata previously mapped to `CONTESTED`; now maps to `UNCERTAIN`.
+  `CONTESTED` is reserved for an actual conflict.
+- **Native dependency extraction**: `impacted()` now extracts from a
+  native register's `implementation[]` and `tests[]` fields, not only
+  `evidence[].ref`; qualified references are resolved to file-level
+  paths for Git-diff matching; unparseable/dangling references produce
+  an explicit `unresolved_reference` diagnostic.
+- **Native-vs-generic validation conflation**: explicitly distinguished
+  — Axiom's own default-schema checks (e.g. `evidence[].reviewed_by`)
+  no longer apply to a native register with its own, different,
+  equally valid convention.
+- **Oracle evidence durability**: all nine EC-022 fixture journals,
+  full hledger transcripts, exact binary/commit identification and a
+  reproduction recipe are now version-controlled at
+  `evidence/phase-2-stage-2.1-oracle/`, re-run fresh and reconfirmed
+  rather than left in a scratch directory that does not survive the
+  session.
+- **Drift-demonstration rationale strengthened**: EC-021's relevance
+  as the "relevant change" condition is now grounded in an actual
+  checked code dependency rather than file co-location; a third,
+  same-file-but-semantically-unrelated condition is added to measure
+  file-level impact detection's own known false-positive cost directly.
+- **Stale section cross-references** (`§7` where the actual section is
+  `§6`) fixed across three documents, found during this round's own
+  consistency check.
+
+## PR #4 — native Codex review findings fixed
+
+First native Codex review of the planning package (`decisions/0005`),
+commit `e83df4b`. 2 P2 findings, both real, both fixed:
+
+- **Local dependencies resolved against the wrong revision space**:
+  `implementation[]`/`tests[]` (Ledgerkit file paths) were checked for
+  existence against `compatibility_target` (an hledger version
+  string) — not a Ledgerkit revision at all. Fixed: local references
+  now resolve against an explicit consumer-repository revision,
+  `compatibility_target` reserved exclusively for the
+  `upstream:<project>` pseudo-path mechanism.
+- **Logging opt-out didn't cover CLI-owned event writes**: removing
+  hooks did not stop `axiom-knowledge`'s own direct event-writing on
+  exit. Fixed with a single shared `AXIOM_DISABLE_LOGGING=1` check
+  every event producer honours.
+
+Re-review on the fix (commit `cdc3fb8`) found 1 further P2: the
+proposed skill never actually instructed recording `task_start` or
+passing `--task-id`, contradicting the measurement design's own
+requirement for per-task correlation. Fixed: the skill now records
+`task-start` before retrieval and threads `--task-id` through every
+subsequent example command, closing with `task-accepted`. A duplicate
+step-numbering bug found in the same pass was fixed alongside it.
+
+Re-review on that fix (commit `441f4c8`) found 2 further P2s:
+`impacted()`'s upstream-pin detection excluded the exact claim §3b.2
+promised it would catch proactively (fixed: now checks both
+not-yet-bumped and just-bumped-with-stale-scope-manifest); CLI-owned
+events had no actual source for `session_id` (fixed: a `SessionStart`
+hook writes a small local handoff file CLI producers read, with an
+explicit `null` fallback for invocation outside any session).
+
+Re-review on that fix (commit `1b9904b`) found 1 further P2: the
+session-ID handoff file was a single, shared, checkout-wide file —
+broken under concurrent sessions (second session's `SessionStart`
+overwrites it) and never expired after a session ended. Fixed: the
+handoff is now keyed per-session by the `claude` process's own PID,
+with `SessionEnd` removing its own file.
+
+Re-review on that fix (commit `449ddea`): **0 findings — clean.**
+Five rounds total; every finding fixed in the commit immediately
+following its round; three of five rounds were follow-on gaps in the
+previous round's own fix (session-ID correlation, in progressively
+deeper layers) before converging.
+
+## P1 finding on PR #4's `ci-required` gate (CI enforcement added separately)
+
+The repository owner's own `ci-required` aggregate-gate addition (not
+this session's work) was reviewed and found 1 P1: no deterministic
+test existed for the gate's merge-decision logic, violating
+`AGENTS.md` §8.
+
+- **Fixed**: extracted the gate's inline-YAML logic into
+  `.github/scripts/ci_required_gate.py` (byte-identical behaviour) and
+  added 11 regression tests covering success/failure/skipped/
+  cancelled dependencies and the real workflow's `needs:` list.
+- **CI caught a real defect in that fix**: the new test's `pyyaml`
+  import wasn't installed in the `policy-evaluator-tests` job. Fixed
+  with the same `pip install -r requirements.txt` step the other jobs
+  already use.
+- Re-review found 2 further P2s on earlier Phase 2 planning content:
+  a stale contract-test bullet contradicting an already-corrected
+  upstream-detection rule (fixed); and a real, confirmed gap in
+  native-register identity/reference integrity checking for Stage 2.3
+  (deferred — out of scope for this round, recorded in
+  `planning/phase-02-planning-review.md` §10, not silently dropped).

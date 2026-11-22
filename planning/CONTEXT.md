@@ -29,12 +29,32 @@ dependency or the project's purpose.
 
 ## Current focus and constraints
 
-- Current documentation amendment branch:
-  `docs/phase-2-evidence-first-vertical-slice`, based on `main`.
-  Inspect actual HEAD and PR state rather than trusting this text.
-- Review [this refinement plan](phase-02-roadmap-refinement.md),
-  [Phase 2 proposal](phase-02-template.md), and the current roadmap
-  for evidence/semantic consistency before owner-approved merge.
+- `docs/phase-2-evidence-first-vertical-slice` (PR #3) merged on
+  2026-11-22. **Current branch:**
+  `planning/phase-2-stage-2.1-ledgerkit-oracle`, based on `main` at
+  `53d818b`. Inspect actual HEAD and PR state rather than trusting
+  this text.
+- This branch makes Stage 2.1 and Phase 2's cross-cutting designs
+  implementation-ready, corrected three times after independent
+  review: `planning/phase-02-stage-2.1-plan.md` (contract-only — ends
+  at the reviewed oracle/fixture matrix, does not fix EC-022; explicit
+  "Handoff to Stage 2.4" with a three-condition drift demonstration),
+  `planning/phase-02-adoption-design.md` (skill, file layout including
+  the new optional `knowledge/scope-manifests/`, and the merged
+  architecture diagram), `planning/phase-02-knowledge-api-design.md`
+  (claim model, API, and a conservative native-register adapter with
+  a scope gate — a claim can no longer be derived `VERIFIED` with a
+  null scope — and native dependency extraction from
+  `implementation[]`/`tests[]`, not just `evidence[].ref`),
+  `planning/phase-02-measurement-design.md` (logging/telemetry), and
+  `planning/phase-02-planning-review.md` (four rounds of independent
+  review, all recorded as dated addenda, nothing rewritten to look
+  flawless in hindsight). The Stage 2.1 oracle evidence is now
+  durable, version-controlled at `evidence/phase-2-stage-2.1-oracle/`
+  (fixtures, transcripts, exact binary/commit identification), not
+  left in an agent session's scratch directory. **This is still a
+  plan, not an implementation** — no skill, API, wiki entry, CI check
+  or logger has been built.
 - Phase 2's wiki, knowledge API, identity/drift gate and template
   **do not yet exist**; do not imply they have been implemented.
 - The core should be Git/files plus a small read-only local API
@@ -58,7 +78,15 @@ dependency or the project's purpose.
 sets the accepted Phase 2/3 direction. This roadmap refinement changes
 **sequencing and proposed scope, not the accepted architectural decision**.
 
-**Next action:** independent review and CI inspection of this
-documentation PR, followed by explicit human approval to merge.
-Then **inspect the actual Ledgerkit/hledger baseline and prepare a
-Stage 2.1 contract and independent oracle before any API coding**.
+**Next action:** human review and approval of this planning-only PR.
+**Stage 2.1's own exit evidence is now complete** (durable, reviewed
+oracle evidence; frozen behavioural contract; Stage 2.4 handoff —
+`planning/phase-02-stage-2.1-plan.md` §5) and ready for human
+confirmation per `docs/development-lifecycle.md`'s phase-acceptance
+procedure — this session recommends it, but does not itself change
+`planning/ROADMAP.md`'s status to Completed, since that edit is a
+human-approval-boundary action (`AGENTS.md` §11). **Stage 2.2**
+(introducing the actual Claude Code skill, minimal configuration and
+read-only `get`/`find` into Ledgerkit) is the next stage, and has
+**not** been approved to begin — no implementation in Ledgerkit
+starts before explicit human approval of that stage boundary.
