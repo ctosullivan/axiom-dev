@@ -1,65 +1,62 @@
 # Session continuity
 
-Keep this concise and current. Historical detail belongs in
+Keep this concise and current; preserve completed-phase history under
 `planning/archive/`, `planning/retros/` and `evidence/`.
 
 ## Current phase and status
 
-**Phase 1: Completed**, by explicit repository-owner decision on
-2026-11-22. Its implementation was merged as
-[PR #1](https://github.com/ctosullivan/axiom-dev/pull/1) on
-2026-11-21. The phase archive and
-[owner-acceptance qualifications](../evidence/phase-1-owner-acceptance.md)
-preserve the actual evidence and residual limitations rather than
-relabeling earlier unmet criteria as passed.
+**Phase 1 — Completed** by owner decision on 2026-11-22 following
+[PR #1](https://github.com/ctosullivan/axiom-dev/pull/1).
+[PR #2](https://github.com/ctosullivan/axiom-dev/pull/2) merged its
+archive and original Phase 2 direction. Historical acceptance limitations
+remain in [the qualification record](../evidence/phase-1-owner-acceptance.md).
 
-**Phase 2: Planned**, not yet authorised for substantive implementation.
-The owner has approved the template-first direction and no Phase 2
-template A/B testing. The focused
-[Phase 2 proposal](phase-02-template.md) requires independent review
-and contracts before code changes.
+**Phase 2 — Planned, not in implementation.** The objective is a
+reusable, knowledge-based methodology packaged for independent adoption.
+The [roadmap](ROADMAP.md) and [Phase 2 proposal](phase-02-template.md)
+now put a **real Ledgerkit/hledger vertical slice first**: establish
+an independent behavioural oracle; create only the evidence-backed
+comparative knowledge, stable IDs, minimal local knowledge API and
+deterministic checks required for that slice; then demonstrate drift,
+reconciliation and fresh-session reuse before extracting the template.
+**No Phase 2 A/B test of the template.**
 
-## Current focus
+**Phase 3 — Proposed:** investigate specific agent/retrieval strategy
+hypotheses using Axiom Assure when ready. MCP is an optional adapter
+over Phase 2's API, not a Phase 2 dependency or the project's purpose.
 
-- Finalise this Phase 1 status / archive / roadmap reconciliation PR.
-- Independently review the Phase 2 plan for a genuinely minimal
-  reusable package; refine scope before implementation.
-- First Phase 2 increments: stable identifiers, local knowledge API,
-  comparative Ledgerkit/hledger wiki, CI integrity and drift gating.
-- Dogfood on actual Ledgerkit work across the entire lifecycle, then
-  independently validate clean template adoption.
-- Phase 3 MCP and agent-strategy A/B trials wait for a sufficiently
-  mature, independently assessed Assure harness.
+## Current focus and constraints
 
-## Constraints and outstanding issues
-
-- Preserve Phase 1's [historical closeout record](../evidence/phase-1-final-closeout.md)
-  without rewriting earlier reviewer findings.
-- Four native Codex reviews were recorded on PR #1; a fifth review
-  of the final corrected commit has not been established by the
-  available evidence. Five historical review threads were still
-  unresolved at transition review. These are disclosed, not called
-  closed.
-- Two pre-existing nonblocking validator edge cases remain to
-  triage: absolute document links and empty-string source/body links.
-- Deterministic CI has been run, but required status-check enforcement
-  has not been independently established.
-- Phase 2 knowledge API and drift gate do **not yet exist**. They are
-  required deliverables, not current capabilities.
-- Axiom Assure and MCP remain independent/optional to the Phase 2
-  template. Do not claim comparative superiority from dogfooding.
+- Current documentation amendment branch:
+  `docs/phase-2-evidence-first-vertical-slice`, based on `main`.
+  Inspect actual HEAD and PR state rather than trusting this text.
+- Review [this refinement plan](phase-02-roadmap-refinement.md),
+  [Phase 2 proposal](phase-02-template.md), and the current roadmap
+  for evidence/semantic consistency before owner-approved merge.
+- Phase 2's wiki, knowledge API, identity/drift gate and template
+  **do not yet exist**; do not imply they have been implemented.
+- The core should be Git/files plus a small read-only local API
+  (`get`, `find`, `related`, `impacted`) and deterministic CI,
+  with independently reviewed semantic verification. Do not build a
+  graph database, hosted service, automatic claim generator or
+  autonomous reconciliation without observed need.
+- A claim may be VERIFIED only for a scoped, independently checked
+  contract/oracle. Changed source means possible impact, not proven
+  semantic invalidity; green schema/CI alone does not prove truth.
+- Preserve Phase 1 open qualifications and triage its documented
+  validator path/link edge cases in Phase 2 plans.
+- Track meaningful knowledge reuse, real defects caught/missed,
+  drift false positives, overhead and adoption cost. A/B work is
+  reserved for Phase 3 and cannot be inferred from Phase 2 dogfooding.
 
 ## Relevant decisions and next action
 
-`decisions/0001`–`0007` describe the Phase 1 baseline;
+`decisions/0001`–`0007` describe the foundation;
 [ADR 0008](../decisions/0008-template-first-knowledge-identity-and-experiment-sequencing.md)
-sets the new phase sequencing and knowledge-identity direction.
+sets the accepted Phase 2/3 direction. This roadmap refinement changes
+**sequencing and proposed scope, not the accepted architectural decision**.
 
-Current PR branch: `docs/phase-1-closeout-phase-2-roadmap`, based
-on `main`. Check the actual branch/HEAD at session start.
-
-**Next action:** independently review the transition PR and the
-[Phase 2 plan](phase-02-template.md), inspect CI, get explicit human
-approval before merge, then begin a *separate* focused Phase 2
-contract/design PR. Do not implement the API or MCP in the
-documentation closeout PR.
+**Next action:** independent review and CI inspection of this
+documentation PR, followed by explicit human approval to merge.
+Then **inspect the actual Ledgerkit/hledger baseline and prepare a
+Stage 2.1 contract and independent oracle before any API coding**.
