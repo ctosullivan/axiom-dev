@@ -21,9 +21,11 @@ deterministic checks required for that slice; then demonstrate drift,
 reconciliation and fresh-session reuse before extracting the template.
 **No Phase 2 A/B test of the template.**
 
-**Phase 3 — Proposed:** investigate specific agent/retrieval strategy
-hypotheses using Axiom Assure when ready. MCP is an optional adapter
-over Phase 2's API, not a Phase 2 dependency or the project's purpose.
+**Phase 3 — Proposed:** deliver a thin MCP adapter over Phase 2's API
+(required Phase 3 deliverable under ADR 0008, but optional for
+consumers) and investigate specific agent/retrieval strategy
+hypotheses using Axiom Assure when ready. MCP is not a Phase 2
+dependency or the project's purpose.
 
 ## Current focus and constraints
 
