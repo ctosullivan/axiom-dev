@@ -37,6 +37,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      - name: Install dependencies
+        # Added for test_ci_required_gate.py's workflow-YAML parsing
+        # (pyyaml, already a project dependency per requirements.txt,
+        # was previously only installed in the other two jobs below).
+        run: pip install -r requirements.txt
       - name: Run policy evaluator test suite
         run: |
           PYTHONPATH=.github/scripts python3 -m unittest discover -s .github/scripts/tests -v
