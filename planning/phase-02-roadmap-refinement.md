@@ -46,8 +46,10 @@ integrity from semantic judgement. Document actual costs, false positives,
 misses and pruning decisions; avoid unproven comparative claims.
 
 Phase 3 should be hypothesis-led: measure whether knowledge access or
-different agent strategies improve results using Assure when ready; MCP
-remains an optional adapter, not the purpose of the project.
+different agent strategies improve results using Assure when ready. In
+line with accepted ADR 0008, Decision 7, **building a thin MCP adapter
+remains a required Phase 3 deliverable**, although use of that adapter
+is optional for consumers and it is not the purpose of the project.
 
 ## Non-goals
 
