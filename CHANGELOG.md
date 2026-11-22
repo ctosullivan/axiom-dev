@@ -18,8 +18,9 @@ remain under `Unreleased` until a release is explicitly prepared.
   evaluation, including false positives, missed defects and pruning low-value
   features. Template extraction follows actual Ledgerkit use.
 - Recast Phase 3 as hypothesis-driven Axiom Assure evaluation of agent and
-  retrieval strategies, with MCP an optional interface. **Phase 2 still
-  has no A/B test of the template.**
+  retrieval strategies, while preserving ADR 0008's required thin MCP
+  adapter deliverable (optional for consumers). **Phase 2 still has no
+  A/B test of the template.**
 - Reconciled roadmap, Phase 2 proposal, current context and README;
   no runtime/API functionality has been added by this documentation PR.
 
