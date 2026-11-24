@@ -595,3 +595,68 @@ test existed for the gate's merge-decision logic, violating
   skill to silently fail or an agent to guess at a substitute.
 
 Re-review on that fix (commit `762614d`): **0 findings — clean.**
+
+## Stage 2.2 final planning amendment
+
+Corrective amendment to `planning/phase-02-stage-2.2-plan.md`; no
+Stage 2.2 functionality implemented, no Ledgerkit changes, no
+accepted ADR altered.
+
+### Fixed
+
+- **Positive `VERIFIED` demonstration added**: the plan named no
+  concrete claim showing `derived.status: VERIFIED` is actually
+  reachable. Now names `LK-COMPAT-PARSER-TAG-COMMODITY-001` (real,
+  native `status: verified`, with one independently reviewed scope
+  manifest to be written at BUILD time) as the positive case, and
+  `LK-COMPAT-QUERY-TAG-001` (same native status, deliberately no
+  manifest) as the contrasting `UNCERTAIN` case — both real register
+  entries, not synthetic fixtures.
+- **CLI repository-discovery mechanism specified**: `--repo-root`
+  argument with a `knowledge/README.md`-based current-directory
+  walk-up default; no configuration framework. Required test cases:
+  repo root, subdirectory, outside a recognised repository,
+  explicit-argument override.
+- **Logging/hook scope clarified**: Stage 2.2 delivers CLI-owned
+  `task-start`/`task-accepted`/`knowledge_get`/`knowledge_find`
+  events only; the `SessionStart`/`SessionEnd` hook pair, a
+  test-runner wrapper, and `knowledge_impact` are explicitly deferred
+  — `session_id` is `null` throughout Stage 2.2, the design's own
+  already-specified fallback, not a new gap. Construction-overhead
+  measurement before the CLI exists is manual, not CLI-logged.
+- **Python/licensing boundaries defined**: confirmed (direct
+  inspection) Ledgerkit's `pyproject.toml` declares
+  `requires-python = ">=3.8"`, `dependencies = []`, and
+  `GPL-3.0-or-later`; Axiom's CLI runs under its own Python
+  environment and `pyyaml` dependency as optional dev tooling, never
+  imported by the `ledgerkit` package; Apache-2.0-authored files
+  copied into Ledgerkit retain their own notice without altering
+  Ledgerkit's licence.
+- **Minimal initial corpus**: replaced the illustrative 10–20-claim
+  target with 4 real, named, already-existing compat-register claims
+  (two EC-022-related, two forming the VERIFIED/UNCERTAIN
+  demonstration pair) — no new claims authored, no duplication of
+  authoritative knowledge. The native adapter is prioritised; the
+  generic default-schema adapter's implementation is deferred,
+  interface unchanged.
+- Fresh-context acceptance test strengthened: must retrieve the four
+  named claims, state native/derived status for each, explain one
+  verified scope and one unresolved limitation with cited evidence,
+  independently verified by a reviewer against the original records
+  and Stage 2.1 oracle evidence, not the agent's own restatement.
+
+Two-PR sequencing (Axiom Dev library; Ledgerkit adoption, gated on
+the first) is unchanged. `planning/ROADMAP.md`, `planning/CONTEXT.md`
+reconciled.
+
+Independent review (fresh context, same-operator/machine/model —
+named honestly) of this amendment found no blocking issues; every
+real-data claim (the four compat-register claims' exact fields, the
+49-entry register count, Ledgerkit's Python/licence metadata) checked
+out against direct file inspection. 2 material-nonblocking findings,
+both fixed: the `knowledge/README.md` discovery marker's prior-
+specification claim was overstated (the cited section left that
+choice open; corrected to state this plan makes the choice, not that
+one already existed); the `--repo-root`-given-but-missing-the-marker
+failure case was specified in prose but had no required test (added
+as a 5th discovery test case).

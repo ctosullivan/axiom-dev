@@ -47,11 +47,19 @@ dependency or the project's purpose.
   `planning/phase-02-knowledge-api-design.md`,
   `planning/phase-02-measurement-design.md`) remain active, unarchived,
   needed by Stage 2.2 onward; (2) adds the **Stage 2.2 plan**
-  (`planning/phase-02-stage-2.2-plan.md`): a two-PR split (Axiom Dev's
-  reusable `get`/`find` library, Ledgerkit's adoption of the
-  skill/wiki/config), reusing the already-reviewed cross-cutting
-  designs rather than duplicating them; (3) **relicenses to Apache
-  2.0** (`decisions/0009-apache-2.0-licensing.md`, `LICENSE`, `NOTICE`),
+  (`planning/phase-02-stage-2.2-plan.md`), since corrected once more:
+  a two-PR split (Axiom Dev's reusable `get`/`find` library,
+  Ledgerkit's adoption of the skill/wiki/config), reusing the
+  already-reviewed cross-cutting designs rather than duplicating
+  them, now with a named `--repo-root`-discovery mechanism, a
+  positive `derived.status: VERIFIED` demonstration and a contrasting
+  `UNCERTAIN` one using **four real, already-existing**
+  `dev-docs/compat-register/` claims (not an illustrative 10–20-claim
+  quota), clarified logging/hook scope for Stage 2.2 specifically, and
+  explicit Python-version/licence boundaries between Axiom Dev
+  (Apache 2.0) and Ledgerkit (`GPL-3.0-or-later`, confirmed
+  unaffected); (3) **relicenses to Apache 2.0**
+  (`decisions/0009-apache-2.0-licensing.md`, `LICENSE`, `NOTICE`),
   preserving the existing copyright holder and year. **None of this
   implements Stage 2.2 functionality or touches Ledgerkit** — Stage
   2.1's oracle evidence remains durable, version-controlled at
