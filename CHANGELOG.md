@@ -660,3 +660,6 @@ choice open; corrected to state this plan makes the choice, not that
 one already existed); the `--repo-root`-given-but-missing-the-marker
 failure case was specified in prose but had no required test (added
 as a 5th discovery test case).
+
+Native Codex review on the resulting commit (`a8274e4`): **0
+findings — clean.**
