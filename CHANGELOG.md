@@ -593,3 +593,5 @@ test existed for the gate's merge-decision logic, violating
   annotating both steps with their actual availability and an
   explicit "skip and say so" instruction, rather than leaving the
   skill to silently fail or an agent to guess at a substitute.
+
+Re-review on that fix (commit `762614d`): **0 findings — clean.**
