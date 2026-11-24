@@ -246,17 +246,30 @@ knowledge retrieval and evidence discipline on top of them.
 5. If the change touches a source a recorded claim depends on, run
    `axiom-knowledge impacted <changed-paths> --task-id <id>` and read
    what comes back as *potentially* affected, not proven stale.
+   **Availability note, added per native Codex review of PR #5's
+   finding on this exact step**: `impacted` is a Stage 2.3 deliverable
+   (`planning/phase-02-stage-2.2-plan.md` §2a explicitly builds only
+   `get`/`find` in Stage 2.2). If this command does not yet exist in
+   the installed `axiom-knowledge`, **skip this step and say so
+   explicitly** rather than silently treating "ASSESS IMPACT" as
+   satisfied — do not guess at impact by other means and call it
+   equivalent.
 
 ## While developing (BUILD / VERIFY)
 
 6. Develop against an independently specified contract/oracle, not one
    derived from your own new code.
-7. Run this project's deterministic checks directly (through the
-   test-runner wrapper with `--task-id <id>`, per
-   `planning/phase-02-measurement-design.md` §1); report what actually
-   ran and its actual result. Request independent review named at the
-   isolation level actually used (see this project's own
-   isolation-level documentation if present).
+7. Run this project's deterministic checks directly; report what
+   actually ran and its actual result. Request independent review
+   named at the isolation level actually used (see this project's own
+   isolation-level documentation if present). **Availability note,
+   added for the same reason as step 5**: a dedicated test-runner
+   wrapper emitting `test_result` events
+   (`planning/phase-02-measurement-design.md` §1) is not part of
+   Stage 2.2's own delivery scope either — until one exists, run the
+   project's actual test command directly and report its real output;
+   do not fabricate a `test_result` event for a check that was not
+   actually wrapped.
 
 ## After the change (RECONCILE)
 

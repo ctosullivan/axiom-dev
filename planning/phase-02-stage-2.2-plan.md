@@ -66,7 +66,13 @@ this plan or this round:
 
 - Copy `.claude/skills/axiom-work/SKILL.md` verbatim from
   `planning/phase-02-adoption-design.md` §6 into Ledgerkit's own
-  `.claude/skills/axiom-work/`.
+  `.claude/skills/axiom-work/`. **That skill's steps 5 and 7 now
+  explicitly disclose that `impacted` and a dedicated test-runner
+  wrapper are not part of Stage 2.2's delivery** — found as a real
+  gap by native Codex review (an agent following the skill verbatim
+  would have been instructed to run a command 2a does not deliver)
+  and fixed directly in the skill text rather than left for this plan
+  to separately patch around.
 - Add `knowledge/README.md` pointing the CLI's source configuration at
   Ledgerkit's own `dev-docs/compat-register/` (the deferral decision
   `planning/phase-02-stage-2.1-plan.md` §7 already made — **not** a

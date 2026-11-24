@@ -581,3 +581,15 @@ test existed for the gate's merge-decision logic, violating
   reconciled to the above. No Stage 2.2 functionality implemented; no
   changes to Ledgerkit; no accepted ADR altered in place; PR not
   merged by this change.
+
+### Fixed (native Codex review, PR #5)
+
+- The skill template (`planning/phase-02-adoption-design.md` §6)
+  instructed running `axiom-knowledge impacted` and a dedicated
+  test-runner wrapper — neither of which Stage 2.2 actually delivers
+  (`get`/`find` only; `impacted` is Stage 2.3's work). An agent
+  following the skill verbatim after Stage 2.2's own adoption PR
+  would have been told to run commands that don't exist yet. Fixed by
+  annotating both steps with their actual availability and an
+  explicit "skip and say so" instruction, rather than leaving the
+  skill to silently fail or an agent to guess at a substitute.
