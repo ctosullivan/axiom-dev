@@ -11,15 +11,20 @@ Keep this concise and current; preserve completed-phase history under
 archive and original Phase 2 direction. Historical acceptance limitations
 remain in [the qualification record](../evidence/phase-1-owner-acceptance.md).
 
-**Phase 2 — Planned, not in implementation.** The objective is a
+**Phase 2 — Planned, not in implementation. Stage 2.1 Completed**
+(owner decision 2026-11-25, following the merge of
+[PR #4](https://github.com/ctosullivan/axiom-dev/pull/4) —
+[archive](archive/phase-02-stage-2.1/README.md)). The objective is a
 reusable, knowledge-based methodology packaged for independent adoption.
 The [roadmap](ROADMAP.md) and [Phase 2 proposal](phase-02-template.md)
-now put a **real Ledgerkit/hledger vertical slice first**: establish
-an independent behavioural oracle; create only the evidence-backed
-comparative knowledge, stable IDs, minimal local knowledge API and
-deterministic checks required for that slice; then demonstrate drift,
-reconciliation and fresh-session reuse before extracting the template.
-**No Phase 2 A/B test of the template.**
+put a **real Ledgerkit/hledger vertical slice first**: establish
+an independent behavioural oracle (done, Stage 2.1); create only the
+evidence-backed comparative knowledge, stable IDs, minimal local
+knowledge API and deterministic checks required for that slice
+(**Stage 2.2 planned** — `planning/phase-02-stage-2.2-plan.md` — not
+yet built); then demonstrate drift, reconciliation and fresh-session
+reuse before extracting the template. **No Phase 2 A/B test of the
+template.**
 
 **Phase 3 — Proposed:** deliver a thin MCP adapter over Phase 2's API
 (required Phase 3 deliverable under ADR 0008, but optional for
@@ -29,32 +34,29 @@ dependency or the project's purpose.
 
 ## Current focus and constraints
 
-- `docs/phase-2-evidence-first-vertical-slice` (PR #3) merged on
-  2026-11-22. **Current branch:**
-  `planning/phase-2-stage-2.1-ledgerkit-oracle`, based on `main` at
-  `53d818b`. Inspect actual HEAD and PR state rather than trusting
-  this text.
-- This branch makes Stage 2.1 and Phase 2's cross-cutting designs
-  implementation-ready, corrected three times after independent
-  review: `planning/phase-02-stage-2.1-plan.md` (contract-only — ends
-  at the reviewed oracle/fixture matrix, does not fix EC-022; explicit
-  "Handoff to Stage 2.4" with a three-condition drift demonstration),
-  `planning/phase-02-adoption-design.md` (skill, file layout including
-  the new optional `knowledge/scope-manifests/`, and the merged
-  architecture diagram), `planning/phase-02-knowledge-api-design.md`
-  (claim model, API, and a conservative native-register adapter with
-  a scope gate — a claim can no longer be derived `VERIFIED` with a
-  null scope — and native dependency extraction from
-  `implementation[]`/`tests[]`, not just `evidence[].ref`),
-  `planning/phase-02-measurement-design.md` (logging/telemetry), and
-  `planning/phase-02-planning-review.md` (four rounds of independent
-  review, all recorded as dated addenda, nothing rewritten to look
-  flawless in hindsight). The Stage 2.1 oracle evidence is now
-  durable, version-controlled at `evidence/phase-2-stage-2.1-oracle/`
-  (fixtures, transcripts, exact binary/commit identification), not
-  left in an agent session's scratch directory. **This is still a
-  plan, not an implementation** — no skill, API, wiki entry, CI check
-  or logger has been built.
+- [PR #4](https://github.com/ctosullivan/axiom-dev/pull/4) (Stage 2.1
+  planning/evidence, the `ci-required` CI gate, and
+  `AGENTS.md` §14's bounded corrective cycle) merged into `main` on
+  2026-11-22 by the repository owner. **Current branch:**
+  `phase-2/stage-2.1-closeout-and-licensing`, based on `main`. Inspect
+  actual HEAD and PR state rather than trusting this text.
+- This branch: (1) marks **Stage 2.1 Completed** and archives it
+  (`planning/archive/phase-02-stage-2.1/README.md`) without moving or
+  duplicating its canonical plan/evidence — the cross-cutting designs
+  (`planning/phase-02-adoption-design.md`,
+  `planning/phase-02-knowledge-api-design.md`,
+  `planning/phase-02-measurement-design.md`) remain active, unarchived,
+  needed by Stage 2.2 onward; (2) adds the **Stage 2.2 plan**
+  (`planning/phase-02-stage-2.2-plan.md`): a two-PR split (Axiom Dev's
+  reusable `get`/`find` library, Ledgerkit's adoption of the
+  skill/wiki/config), reusing the already-reviewed cross-cutting
+  designs rather than duplicating them; (3) **relicenses to Apache
+  2.0** (`decisions/0009-apache-2.0-licensing.md`, `LICENSE`, `NOTICE`),
+  preserving the existing copyright holder and year. **None of this
+  implements Stage 2.2 functionality or touches Ledgerkit** — Stage
+  2.1's oracle evidence remains durable, version-controlled at
+  `evidence/phase-2-stage-2.1-oracle/`; no skill, API, wiki entry, CI
+  check or logger has been built.
 - Phase 2's wiki, knowledge API, identity/drift gate and template
   **do not yet exist**; do not imply they have been implemented.
 - The core should be Git/files plus a small read-only local API
@@ -78,15 +80,17 @@ dependency or the project's purpose.
 sets the accepted Phase 2/3 direction. This roadmap refinement changes
 **sequencing and proposed scope, not the accepted architectural decision**.
 
-**Next action:** human review and approval of this planning-only PR.
-**Stage 2.1's own exit evidence is now complete** (durable, reviewed
-oracle evidence; frozen behavioural contract; Stage 2.4 handoff —
-`planning/phase-02-stage-2.1-plan.md` §5) and ready for human
-confirmation per `docs/development-lifecycle.md`'s phase-acceptance
-procedure — this session recommends it, but does not itself change
-`planning/ROADMAP.md`'s status to Completed, since that edit is a
-human-approval-boundary action (`AGENTS.md` §11). **Stage 2.2**
-(introducing the actual Claude Code skill, minimal configuration and
-read-only `get`/`find` into Ledgerkit) is the next stage, and has
-**not** been approved to begin — no implementation in Ledgerkit
-starts before explicit human approval of that stage boundary.
+**Next action:** human review and approval of this closeout/planning/
+licensing PR. `planning/ROADMAP.md` already states Stage 2.1 Completed
+and this file already reflects it — per this round's own explicit
+authorisation, naming the specific merged PR (#4) and the explicit
+instruction to mark the status, which together constitute the
+recorded evidence of owner acceptance (`docs/phase-archiving.md`'s
+phase-completion procedure, applied at stage granularity for the
+first time). **Stage 2.2** (introducing the actual Claude Code skill,
+minimal configuration and read-only `get`/`find` into Ledgerkit) is
+the next stage, and has **not** been approved to begin — no
+implementation in either Axiom Dev's own `src/axiom_knowledge/` or
+Ledgerkit starts before explicit human approval of that stage
+boundary and its own two-PR plan
+(`planning/phase-02-stage-2.2-plan.md`).

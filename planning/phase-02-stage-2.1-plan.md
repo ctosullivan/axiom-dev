@@ -1,6 +1,16 @@
 # Stage 2.1 implementation-ready plan — Ledgerkit balance-assignment elision
 
-**Status: Planned. Not authorisation to implement.** This plan
+**Status: Stage 2.1 Completed** (owner decision 2026-11-25, following
+the merge of [PR #4](https://github.com/ctosullivan/axiom-dev/pull/4) —
+see [the archive entry](archive/phase-02-stage-2.1/README.md) for the
+closeout record). **§6 below ("Handoff to Stage 2.4") remains active
+and unarchived** — Stage 2.4 reads this same file for its own
+implementation contract; nothing below this point is rewritten to
+read as historical only. The rest of this document is preserved
+exactly as reviewed and accepted, below.
+
+**Status at original authorship: Planned. Not authorisation to
+implement.** This plan
 establishes the development **contract** for fixing Ledgerkit's
 EC-022 — it does not fix it. Per `AGENTS.md` §2/§11 and
 `docs/development-lifecycle.md`'s SPECIFY exit criterion, this plan

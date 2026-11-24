@@ -547,3 +547,37 @@ test existed for the gate's merge-decision logic, violating
   native-register identity/reference integrity checking for Stage 2.3
   (deferred — out of scope for this round, recorded in
   `planning/phase-02-planning-review.md` §10, not silently dropped).
+
+## Stage 2.1 closeout, Stage 2.2 planning, Apache 2.0 relicensing
+
+### Added
+
+- `planning/archive/phase-02-stage-2.1/README.md`: Stage 2.1 closeout
+  record (achievements, limitations, deferred EC-022 implementation),
+  the first stage-level archive entry — logical archiving, same
+  convention as Phase 1's, extended to stage granularity. Registered
+  under `schemas/governed-documents.txt` with a mirrored schema.
+- `planning/phase-02-stage-2.2-plan.md`: implementation-ready Stage
+  2.2 plan — a two-PR split (Axiom Dev's reusable `get`/`find`
+  library and tests; Ledgerkit's adoption of the skill/wiki/config),
+  reusing the existing adoption/knowledge-API/measurement designs
+  rather than duplicating them. Independent acceptance criteria,
+  negative tests and measurable-overhead questions predeclared before
+  any implementation.
+- `decisions/0009-apache-2.0-licensing.md`: ADR recording the MIT →
+  Apache 2.0 relicensing decision, its rationale and consequences.
+- `NOTICE`: carries the project's copyright line, preserved unchanged
+  from the prior MIT notice (2026, Cormac O' Sullivan).
+
+### Changed
+
+- **`LICENSE`**: replaced MIT with the complete, unmodified standard
+  Apache License 2.0 text. No vendored third-party code was found
+  during inspection; nothing else is relicensed by this change.
+- `README.md`'s licence section, `planning/ROADMAP.md` (Stage 2.1 →
+  Completed, archived; Stage 2.2 → Planned), `planning/archive/README.md`
+  (new "Archived stages" section), `planning/CONTEXT.md` and
+  `planning/phase-02-template.md` (document map, §2.1/§2.2 pointers)
+  reconciled to the above. No Stage 2.2 functionality implemented; no
+  changes to Ledgerkit; no accepted ADR altered in place; PR not
+  merged by this change.

@@ -123,4 +123,7 @@ real content — none remain deliberately empty.
 
 ## Licence
 
-MIT — see [`LICENSE`](LICENSE).
+Apache License, Version 2.0 — see [`LICENSE`](LICENSE) and
+[`NOTICE`](NOTICE). Changed from MIT on 2026-11-25 by repository-owner
+decision (`decisions/0009-apache-2.0-licensing.md`); the copyright
+holder and year are unchanged.

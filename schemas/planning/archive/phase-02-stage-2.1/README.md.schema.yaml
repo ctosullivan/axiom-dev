@@ -1,0 +1,8 @@
+audience: contributors and reviewers examining Stage 2.1's closed-out record
+purpose: index the canonical Stage 2.1 plan, oracle evidence and review history without moving or duplicating them, and record achievements and deferred work
+required_sections: [Status and accepted scope, Canonical record, Decisions and contracts, Achievements, Limitations and deferred work]
+authoritative_sources: [planning/ROADMAP.md, planning/phase-02-stage-2.1-plan.md, docs/phase-archiving.md]
+acceptance_criteria:
+  - Stage 2.1 remains visible as Completed in planning/ROADMAP.md
+  - the archive links to the canonical Stage 2.1 plan and oracle evidence rather than moving or duplicating them
+  - EC-022's deferred implementation and the native-register integrity gap are both stated as open, not silently resolved
