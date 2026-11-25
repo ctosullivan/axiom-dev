@@ -81,6 +81,80 @@ class LoggingFailureHandlingTests(unittest.TestCase):
             axiom_local.chmod(0o700)
 
 
+class FindEventPayloadTests(unittest.TestCase):
+    """Regression for native Codex review of PR #6 (commit 9d23a4f): the
+    knowledge_find event must distinguish a zero-match search from a hit,
+    and record which claims (if any) were returned, with deterministic
+    ordering -- per `planning/phase-02-measurement-design.md` SS0's
+    distinction between "API invocation" and "retrieval". A zero-match
+    search is a valid, successful result (result: "ok"), not an error:
+    retrieval is not evidence of subsequent use."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_path = Path(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+        self.repo = sup.make_repo(self.tmp_path)
+
+    def _last_event(self):
+        lines = (self.repo / ".axiom-local" / "events.jsonl").read_text(encoding="utf-8").splitlines()
+        return json.loads(lines[-1])
+
+    def test_zero_results_is_ok_with_empty_claim_list_and_zero_count(self):
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-001", status="proposed", area="parser")
+        ak.find(str(self.repo), "area:nonexistent-area", task_id="t1")
+        event = self._last_event()
+        self.assertEqual(event["result"], "ok")
+        self.assertEqual(event["result_count"], 0)
+        self.assertEqual(event["returned_claim_ids"], [])
+
+    def test_one_result_records_its_claim_id_and_count_of_one(self):
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-002", status="proposed", area="parser")
+        ak.find(str(self.repo), "LK-COMPAT-FIND-002", task_id="t1")
+        event = self._last_event()
+        self.assertEqual(event["result"], "ok")
+        self.assertEqual(event["result_count"], 1)
+        self.assertEqual(event["returned_claim_ids"], ["LK-COMPAT-FIND-002"])
+
+    def test_multiple_results_record_all_claim_ids_in_deterministic_order(self):
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-010", status="proposed", area="parser")
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-003", status="proposed", area="parser")
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-099", status="proposed", area="parser")
+        ak.find(str(self.repo), "area:parser", task_id="t1")
+        event = self._last_event()
+        self.assertEqual(event["result"], "ok")
+        self.assertEqual(event["result_count"], 3)
+        self.assertEqual(
+            event["returned_claim_ids"],
+            sorted(["LK-COMPAT-FIND-010", "LK-COMPAT-FIND-003", "LK-COMPAT-FIND-099"]),
+        )
+
+    def test_zero_match_search_is_not_logged_as_an_error(self):
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-004", status="proposed", area="parser")
+        ak.find(str(self.repo), "area:no-such-area", task_id="t1")
+        event = self._last_event()
+        self.assertNotEqual(event["result"], "error")
+        self.assertNotIn("error_class", event)
+
+    def test_find_event_opt_out_still_covers_the_new_fields(self):
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-005", status="proposed", area="parser")
+        with mock.patch.dict(os.environ, {"AXIOM_DISABLE_LOGGING": "1"}):
+            ak.find(str(self.repo), "area:parser", task_id="t1")
+        self.assertFalse((self.repo / ".axiom-local" / "events.jsonl").exists())
+
+    def test_find_logging_failure_does_not_block_a_zero_match_result(self):
+        sup.write_claim(self.repo, "LK-COMPAT-FIND-006", status="proposed", area="parser")
+        axiom_local = self.repo / ".axiom-local"
+        axiom_local.mkdir()
+        axiom_local.chmod(0o500)
+        self.addCleanup(axiom_local.chmod, 0o700)
+        try:
+            results = ak.find(str(self.repo), "area:no-such-area", task_id="t1")
+        finally:
+            axiom_local.chmod(0o700)
+        self.assertEqual(results, [])
+
+
 class TaskIdAndSessionIdTests(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()

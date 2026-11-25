@@ -184,6 +184,8 @@ def find(repo_root: str | None, query: str, task_id: str | None = None) -> list[
         operation="find",
         result="ok",
         evidence_class="direct",
+        result_count=len(matched_ids),
+        returned_claim_ids=list(matched_ids),
     )
     return results
 
