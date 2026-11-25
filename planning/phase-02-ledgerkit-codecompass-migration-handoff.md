@@ -243,16 +243,33 @@ this is exactly the class of defect this correction fixes, not a
 requirement specific to the exact path named here. This
 environment is Axiom's own development tooling, entirely separate from
 Ledgerkit's own runtime/install environment — it changes none of
-Ledgerkit's own dependencies (§7). A fresh agent or contributor then
-invokes `dev-docs/tools/axiom_knowledge/axiom-knowledge get <id>`
-directly, with the
-venv bootstrap documented as a one-time setup step in the installed
-skill (§B.1) and/or a short README note beside the launcher. This
-launcher is **not** added to Ledgerkit's `pyproject.toml`
-`[project.scripts]` (that table is `ledgerkit`'s own installed console
-entry point; adding `axiom-knowledge` there would make Axiom's dev
-tooling part of the installed package, which
-`planning/phase-02-stage-2.2-plan.md` §7 explicitly rules out).
+Ledgerkit's own dependencies (§7). This launcher is **not** added to
+Ledgerkit's `pyproject.toml` `[project.scripts]` (that table is
+`ledgerkit`'s own installed console entry point; adding
+`axiom-knowledge` there would make Axiom's dev tooling part of the
+installed package, which `planning/phase-02-stage-2.2-plan.md` §7
+explicitly rules out).
+
+**PATH setup, required — gap found this round** (native Codex review
+of PR #8 round 3, commit `76143ec`: §B.1's verbatim-copied skill body
+(`planning/phase-02-adoption-design.md` §6) invokes the **bare**
+command `axiom-knowledge` for every operation it names — `get`,
+`find`, `task-start`, `task-accepted` — not the repository-local
+launcher path. Without a `PATH` entry, every one of the skill's own
+documented commands fails with `command not found` even after the
+venv bootstraps correctly, which is a materially worse failure than
+the §0 friction already noted, since it breaks the installed skill's
+entire worked interface, not merely a usage subtlety. **Do not edit
+the skill's own commands** — §6's content is already-reviewed,
+accepted design, copied verbatim by §B.1 for a reason. Instead, add
+one one-time environment step, documented in the `CLAUDE.md` "Axiom"
+section (§B.8) and in a short note beside the launcher: `export
+PATH="$PWD/dev-docs/tools/axiom_knowledge:$PATH"` (or the equivalent
+for the contributor's own shell/session), so the bare `axiom-knowledge`
+name the skill invokes resolves to the launcher at
+`dev-docs/tools/axiom_knowledge/axiom-knowledge`. A fresh agent or
+contributor then runs that one `export` once per session before
+following the skill's own commands as written.
 
 **B.4 — `knowledge/README.md`.** Add the discovery marker (confirmed
 collision-free with Ledgerkit's existing `knowledge/` files, §0) with
@@ -281,11 +298,13 @@ its real register ID.
 **B.8 — `CLAUDE.md`.** Replace the removed `## CodeCompass` section
 (§A.1) with a short `## Axiom` section of equivalent weight: what it
 is, the skill name, the `get`/`find` commands, the pinned revision
-note's location (§B.2), and the same "Ledgerkit's own tests,
-compat-register and `knowledge/DECISIONS.md` remain authoritative
-regardless of what Axiom surfaces" framing the CodeCompass section
-used — the same epistemic caution, carried over, not dropped. Update
-the folder-structure diagram per §A.1's own table.
+note's location (§B.2), **the one-time `PATH` export §B.3 requires**
+(so the skill's own bare `axiom-knowledge` invocations resolve), and
+the same "Ledgerkit's own tests, compat-register and
+`knowledge/DECISIONS.md` remain authoritative regardless of what Axiom
+surfaces" framing the CodeCompass section used — the same epistemic
+caution, carried over, not dropped. Update the folder-structure
+diagram per §A.1's own table.
 
 **Explicitly not introduced**: new accounting-runtime dependencies,
 duplicate knowledge stores, MCP, orchestration infrastructure, a
