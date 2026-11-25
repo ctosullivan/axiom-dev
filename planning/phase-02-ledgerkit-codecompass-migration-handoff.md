@@ -62,7 +62,7 @@ subdirectory, introduced no naming conflict.
 | No CodeCompass needed | confirmed `vendor.toml`/`context-graph.db` absent from the clone (gitignored, never cloned) | `get`/`find` worked with neither present — Axiom's knowledge path has zero dependency on CodeCompass's generated state |
 | `task-start`/`task-accepted` events | ran both | `.axiom-local/events.jsonl` recorded `task_start`, `task_accepted`, plus the `knowledge_get`/`knowledge_find` events from the checks above, in order |
 | Ledgerkit's own test suite | `~/projects/ledgerkit/.venv/bin/python3 -m pytest -q` (run against the scratch clone, using the real repo's own venv) | **935 passed**, 1 pre-existing warning — unaffected by anything added for Axiom |
-| Python/dependency boundary | `python3 --version` → 3.13.5 (system and Ledgerkit's own venv agree); `pyyaml` already present system-wide | Ledgerkit's `pyproject.toml` (`requires-python = ">=3.8"`, `dependencies = []`) untouched; axiom_knowledge never imported by the `ledgerkit` package |
+| Python/dependency boundary | `python3 --version` → 3.13.5 (system and Ledgerkit's own venv agree); `pyyaml` already present system-wide | Ledgerkit's `pyproject.toml` (`requires-python = ">=3.8"`, `dependencies = []`) untouched; axiom_knowledge never imported by the `ledgerkit` package. **Caveat, added this round** (native Codex review, PR #8 round 1): this scratch host happened to already have PyYAML available system-wide — that is not itself a demonstration of §C.2's clean-clone criterion, which requires a *genuinely* clean clone with no such pre-existing dependency; §B.3's dedicated venv addresses this for the real migration, not demonstrated again here |
 
 **Friction and limitations found** (real, not hypothetical):
 
@@ -192,24 +192,55 @@ the exact pinned Axiom Dev commit SHA in a short note alongside the
 copied library (e.g. `dev-docs/tools/axiom_knowledge/PINNED-REVISION.md`,
 one line: commit SHA + date) — the same spirit as CodeCompass's own now-
 removed `PINNED-REVISIONS.md`, reused as a pattern, not as a file.
-Each copied file keeps Axiom's own Apache 2.0 header/notice intact
-(Apache License 2.0 §4) — do not strip it, do not relicense it, do not
-edit Ledgerkit's own `LICENSE` (`GPL-3.0-or-later`, confirmed compatible
-for one-directional inclusion by `planning/phase-02-stage-2.2-plan.md`
-§7; unaffected either way).
+**Attribution, corrected this round** (native Codex review, PR #8
+round 1 — genuine finding): Axiom Dev's `src/axiom_knowledge/` source
+files carry no per-file copyright headers of their own; their
+attribution is the repository-root `NOTICE` and `LICENSE` files
+(confirmed by direct inspection — `NOTICE` names the copyright holder
+and year and points to `LICENSE` for the Apache License 2.0 full
+text). "Keep the existing files' contents unmodified" does not, on its
+own, preserve that attribution, since there is no per-file notice to
+keep. **Copy Axiom Dev's root `NOTICE` and `LICENSE` alongside the
+library** (e.g. `dev-docs/tools/axiom_knowledge/NOTICE`,
+`dev-docs/tools/axiom_knowledge/LICENSE`, copied verbatim from Axiom
+Dev's repository root at the pinned commit) — this is what Apache
+License 2.0 §4 actually requires when redistributing the source, not
+an edit to the copied `.py` files themselves. Do not relicense
+anything, and do not edit Ledgerkit's own `LICENSE`
+(`GPL-3.0-or-later`, confirmed compatible for one-directional inclusion
+by `planning/phase-02-stage-2.2-plan.md` §7; unaffected either way).
 
 **B.3 — A minimal launcher** (new in this amendment — §0 found none
-exists). A small wrapper, e.g. `dev-docs/tools/axiom-knowledge` (a
-short shell script, or a Python entry file), that sets `PYTHONPATH` to
-the copied library's own parent directory and execs
-`python3 -m axiom_knowledge "$@"` — so a fresh agent or contributor
-invokes `dev-docs/tools/axiom-knowledge get <id>` without needing to
-know or construct the right `PYTHONPATH` by hand. This launcher is
-**not** added to Ledgerkit's `pyproject.toml` `[project.scripts]` (that
-table is `ledgerkit`'s own installed console entry point; adding
-`axiom-knowledge` there would make Axiom's dev tooling part of the
-installed package, which `planning/phase-02-stage-2.2-plan.md` §7
-explicitly rules out).
+exists). **Dependency/environment setup, corrected this round** (native
+Codex review, PR #8 round 1 — genuine finding): Axiom Dev's own
+supported environment is Python 3.13 with `pyyaml>=6.0,<7.0` pinned in
+its `requirements.txt` (confirmed by direct inspection); `axiom_knowledge`
+imports `yaml` and fails immediately without it. §0's own scratch
+evaluation happened to work because this machine had PyYAML available
+system-wide — that is **not** a demonstration of §C.2's clean-clone
+criterion, and a literal reading of this section without a dependency
+step would leave a genuinely clean clone failing on import. The
+launcher must therefore ensure a **separate, dedicated Python
+environment** for Axiom's own tooling — e.g. a small venv at
+`dev-docs/tools/axiom_knowledge/.venv/` (bootstrapped once via
+`python3.13 -m venv .venv && .venv/bin/pip install 'pyyaml>=6.0,<7.0'`,
+**gitignored**, never committed) — and the launcher script (e.g.
+`dev-docs/tools/axiom-knowledge`, a short shell script) execs that
+environment's own interpreter, not an unqualified `python3` that may
+or may not have PyYAML: `exec
+"$(dirname "$0")/.venv/bin/python3" -m axiom_knowledge "$@"` with
+`PYTHONPATH` set to the copied library's own parent directory. This
+environment is Axiom's own development tooling, entirely separate from
+Ledgerkit's own runtime/install environment — it changes none of
+Ledgerkit's own dependencies (§7). A fresh agent or contributor then
+invokes `dev-docs/tools/axiom-knowledge get <id>` directly, with the
+venv bootstrap documented as a one-time setup step in the installed
+skill (§B.1) and/or a short README note beside the launcher. This
+launcher is **not** added to Ledgerkit's `pyproject.toml`
+`[project.scripts]` (that table is `ledgerkit`'s own installed console
+entry point; adding `axiom-knowledge` there would make Axiom's dev
+tooling part of the installed package, which
+`planning/phase-02-stage-2.2-plan.md` §7 explicitly rules out).
 
 **B.4 — `knowledge/README.md`.** Add the discovery marker (confirmed
 collision-free with Ledgerkit's existing `knowledge/` files, §0) with
@@ -263,9 +294,13 @@ asserted claims:
    nothing (if removed), never a live command/config/hook reference.
 2. **A clean clone operates with Axiom installed and without
    CodeCompass installed** — a fresh `git clone` of the migrated
-   Ledgerkit, with no `codecompass` binary on `PATH` and no prior
-   `vendor.toml`/`context-graph.db`, successfully runs
-   `get`/`find` against the real register via the new launcher (§B.3).
+   Ledgerkit, on a machine with **no pre-existing PyYAML or other
+   Axiom-tooling dependency already present** (the genuinely clean
+   case; §0's own scratch evaluation did not establish this — its host
+   happened to already have PyYAML system-wide), with no `codecompass`
+   binary on `PATH` and no prior `vendor.toml`/`context-graph.db`,
+   successfully bootstraps §B.3's dedicated venv and runs `get`/`find`
+   against the real register via the new launcher.
 3. **A fresh agent** (a genuinely new Claude Code session, not the
    implementing session re-describing its own work) **successfully
    retrieves actual Ledgerkit claims and correctly explains native
