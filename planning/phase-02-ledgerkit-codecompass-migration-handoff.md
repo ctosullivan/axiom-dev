@@ -224,16 +224,28 @@ launcher must therefore ensure a **separate, dedicated Python
 environment** for Axiom's own tooling — e.g. a small venv at
 `dev-docs/tools/axiom_knowledge/.venv/` (bootstrapped once via
 `python3.13 -m venv .venv && .venv/bin/pip install 'pyyaml>=6.0,<7.0'`,
-**gitignored**, never committed) — and the launcher script (e.g.
-`dev-docs/tools/axiom-knowledge`, a short shell script) execs that
-environment's own interpreter, not an unqualified `python3` that may
-or may not have PyYAML: `exec
-"$(dirname "$0")/.venv/bin/python3" -m axiom_knowledge "$@"` with
-`PYTHONPATH` set to the copied library's own parent directory. This
+**gitignored**, never committed) — and the launcher script, **placed
+inside that same `dev-docs/tools/axiom_knowledge/` directory** (e.g.
+`dev-docs/tools/axiom_knowledge/axiom-knowledge`, a short shell
+script, not a sibling of it — found as a genuine path bug in this
+amendment's own first draft of this fix, native Codex review of PR #8
+round 2, commit `dd339c1`: a launcher at `dev-docs/tools/axiom-knowledge`
+resolves `$(dirname "$0")/.venv/` to `dev-docs/tools/.venv/`, not
+`dev-docs/tools/axiom_knowledge/.venv/`, where the venv actually is),
+execs that environment's own interpreter, not an unqualified `python3`
+that may or may not have PyYAML: `exec
+"$(dirname "$0")/.venv/bin/python3" -m axiom_knowledge "$@"`, now
+correctly resolving relative to the launcher's own, corrected location,
+with `PYTHONPATH` set to the copied library's own parent directory.
+If the Ledgerkit orchestrator places the launcher anywhere else at
+BUILD time, they must keep its path relative to the venv consistent —
+this is exactly the class of defect this correction fixes, not a
+requirement specific to the exact path named here. This
 environment is Axiom's own development tooling, entirely separate from
 Ledgerkit's own runtime/install environment — it changes none of
 Ledgerkit's own dependencies (§7). A fresh agent or contributor then
-invokes `dev-docs/tools/axiom-knowledge get <id>` directly, with the
+invokes `dev-docs/tools/axiom_knowledge/axiom-knowledge get <id>`
+directly, with the
 venv bootstrap documented as a one-time setup step in the installed
 skill (§B.1) and/or a short README note beside the launcher. This
 launcher is **not** added to Ledgerkit's `pyproject.toml`
