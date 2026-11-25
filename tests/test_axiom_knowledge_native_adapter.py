@@ -327,6 +327,19 @@ class UnresolvedReferenceTests(unittest.TestCase):
         self.assertEqual(len(diagnostics), 1)
         self.assertEqual(diagnostics[0]["field"], "tests")
 
+    def test_empty_path_or_qualifier_component_is_flagged(self):
+        # Regression for native Codex review of PR #6 (commit 36ff18d):
+        # an entry containing the separator but with an empty path or
+        # qualifier ("pkg/mod.py:", "::") previously passed with no
+        # diagnostic, since the check only looked for the separator's
+        # presence, not whether both sides of it were non-empty.
+        native = {"implementation": ["pkg/mod.py:"], "tests": ["::"]}
+        diagnostics = extract_unresolved_references(native)
+        self.assertEqual(len(diagnostics), 2)
+        reasons = {d["field"]: d["reason"] for d in diagnostics}
+        self.assertIn("empty", reasons["implementation"])
+        self.assertIn("empty", reasons["tests"])
+
     def test_wellformed_entries_produce_no_diagnostics(self):
         native = {
             "implementation": ["pkg/mod.py:function"],

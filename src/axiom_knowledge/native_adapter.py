@@ -174,28 +174,55 @@ def _translate_relationship(relationship: str | None) -> tuple[str, str | None, 
     return "unknown", None, True
 
 
-_REFERENCE_FIELD_SEPARATORS = {
-    "implementation": ":",
-    "tests": "::",
-}
+def _check_reference_entries(field_name: str, entries, split) -> list[dict]:
+    diagnostics: list[dict] = []
+    for entry in entries or []:
+        if not isinstance(entry, str) or not split["separator"] in entry:
+            diagnostics.append(
+                {
+                    "field": field_name,
+                    "value": entry,
+                    "reason": f"does not contain the expected '{split['separator']}' separator",
+                }
+            )
+            continue
+        path, _, qualifier = split["fn"](entry, split["separator"])
+        if not path or not qualifier:
+            # A separator-containing entry with an empty path or qualifier
+            # (e.g. "pkg/mod.py:", "::") previously passed the separator-
+            # only check with no diagnostic, even though it still cannot
+            # resolve to a real file:qualifier reference. Found by native
+            # Codex review of PR #6, commit 36ff18d.
+            diagnostics.append(
+                {
+                    "field": field_name,
+                    "value": entry,
+                    "reason": "path or qualifier component is empty",
+                }
+            )
+    return diagnostics
 
 
 def extract_unresolved_references(native: dict) -> list[dict]:
     """Shape-only check of SS3f's local-reference fields -- does each entry
-    parse into <path><sep><qualifier>? Does not check file existence
-    against any consumer-repository revision; that is impacted()'s own
-    deferred Stage 2.3 job (SS3f), not duplicated here."""
+    parse into a non-empty <path><sep><qualifier>? Does not check file
+    existence against any consumer-repository revision; that is
+    impacted()'s own deferred Stage 2.3 job (SS3f), not duplicated here."""
     diagnostics: list[dict] = []
-    for field_name, separator in _REFERENCE_FIELD_SEPARATORS.items():
-        for entry in native.get(field_name) or []:
-            if not isinstance(entry, str) or separator not in entry:
-                diagnostics.append(
-                    {
-                        "field": field_name,
-                        "value": entry,
-                        "reason": f"does not contain the expected '{separator}' separator",
-                    }
-                )
+    # implementation[]: split on the LAST ':' (SS3f).
+    diagnostics.extend(
+        _check_reference_entries(
+            "implementation", native.get("implementation"),
+            {"separator": ":", "fn": lambda s, sep: s.rpartition(sep)},
+        )
+    )
+    # tests[]: split on the FIRST '::' (SS3f).
+    diagnostics.extend(
+        _check_reference_entries(
+            "tests", native.get("tests"),
+            {"separator": "::", "fn": lambda s, sep: s.partition(sep)},
+        )
+    )
     return diagnostics
 
 
