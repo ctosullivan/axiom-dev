@@ -182,6 +182,37 @@ class RelationshipMappingTests(unittest.TestCase):
         self.assertEqual(result["derived"]["mapping_result"], "unknown")
         self.assertTrue(result["derived"]["translation_gap"])
 
+    def test_unrecognised_relationship_forces_overall_status_to_uncertain(self):
+        # Regression for native Codex review of PR #6 (commit 6819c45): a
+        # verified claim with reviewer metadata AND a passing scope
+        # manifest must still be downgraded to UNCERTAIN overall when its
+        # relationship value is unrecognised -- knowledge-api-design.md
+        # SS6 test 7 names this as one combined rule, not a sub-field-only
+        # annotation that leaves derived.status untouched.
+        sup.write_claim(
+            self.repo, "LK-COMPAT-R-007", relationship="novel-future-value",
+            status="verified", verified_by="compat-differential-tester",
+            verified_date="2026-01-01",
+        )
+        sup.write_scope_manifest(self.repo, "LK-COMPAT-R-007")
+        result = ak.get(str(self.repo), "LK-COMPAT-R-007")
+        self.assertEqual(result["derived"]["status"], "UNCERTAIN")
+        self.assertTrue(result["derived"]["translation_gap"])
+        self.assertIsNone(result["derived"]["scope"])
+
+    def test_conflicting_evidence_still_takes_precedence_over_relationship_gap(self):
+        evidence = [
+            {"kind": "executable", "ref": "run A", "pinned_at": "1.52.4", "result": "pass"},
+            {"kind": "executable", "ref": "run B", "pinned_at": "1.52.4", "result": "fail"},
+        ]
+        sup.write_claim(
+            self.repo, "LK-COMPAT-R-008", relationship="novel-future-value",
+            status="verified", verified_by="compat-differential-tester",
+            verified_date="2026-01-01", evidence=evidence,
+        )
+        result = ak.get(str(self.repo), "LK-COMPAT-R-008")
+        self.assertEqual(result["derived"]["status"], "CONTESTED")
+
 
 class MalformedAndDuplicateTests(unittest.TestCase):
     """Malformed native YAML and duplicate identifiers must be reported as
@@ -225,6 +256,23 @@ class MalformedAndDuplicateTests(unittest.TestCase):
     def test_nonexistent_claim_is_notfound_not_malformed(self):
         with self.assertRaises(NotFoundError):
             ak.get(str(self.repo), "LK-COMPAT-NOPE-999")
+
+    def test_non_string_id_field_raises_malformed_not_a_crash(self):
+        # Regression for native Codex review of PR #6 (commit 6819c45):
+        # `id: [bad, id]` is valid YAML but a list is unhashable, so an
+        # unguarded dict-membership check on it crashes with TypeError
+        # instead of failing cleanly as Malformed. Must not prevent
+        # retrieval of other, valid claims in the same register either.
+        register_dir = self.repo / "dev-docs" / "compat-register"
+        (register_dir / "LK-COMPAT-BADIDTYPE-001.yaml").write_text(
+            "id: [bad, id]\nstatus: proposed\n", encoding="utf-8"
+        )
+        sup.write_claim(self.repo, "LK-COMPAT-GOOD-001", status="proposed")
+        with self.assertRaises(MalformedError):
+            ak.get(str(self.repo), "LK-COMPAT-BADIDTYPE-001")
+        # The malformed record must not break retrieval of a sibling claim.
+        result = ak.get(str(self.repo), "LK-COMPAT-GOOD-001")
+        self.assertEqual(result["id"], "LK-COMPAT-GOOD-001")
 
 
 class UnresolvedReferenceTests(unittest.TestCase):

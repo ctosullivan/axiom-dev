@@ -10,6 +10,7 @@ this invocation.
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import sys
 
@@ -17,8 +18,21 @@ from . import api
 from .errors import AxiomKnowledgeError
 
 
+def _json_default(obj):
+    """PyYAML's safe_load parses an unquoted YAML date (e.g.
+    `verified_date: 2026-11-25`) into a datetime.date/datetime object --
+    not every compat-register entry quotes its dates (schema.md's own
+    illustration doesn't). The native block preserves whatever safe_load
+    produced (SS3a: "exactly as read"), so the JSON boundary, not the
+    adapter, is where this is made serializable again. Found by native
+    Codex review of PR #6, commit 6819c45."""
+    if isinstance(obj, (datetime.date, datetime.datetime)):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
+
 def _print_json(obj) -> None:
-    print(json.dumps(obj, indent=2, sort_keys=True))
+    print(json.dumps(obj, indent=2, sort_keys=True, default=_json_default))
 
 
 def _print_error(exc: Exception) -> None:

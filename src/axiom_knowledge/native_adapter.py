@@ -78,8 +78,15 @@ def load_register(register_root: Path) -> RegisterIndex:
             continue
 
         record_id = raw.get("id")
-        if not record_id:
-            malformed_by_stem[stem] = f"{path}: missing required 'id' field"
+        if not isinstance(record_id, str) or not record_id:
+            # A non-string id (e.g. `id: [bad, id]`, valid YAML, invalid
+            # here) must be rejected before any dict-key use -- a list is
+            # unhashable and would raise TypeError on membership checks
+            # below, not fail cleanly as Malformed. Found by native Codex
+            # review of PR #6, commit 6819c45.
+            malformed_by_stem[stem] = (
+                f"{path}: missing or invalid (non-string) 'id' field: {record_id!r}"
+            )
             continue
 
         if record_id in duplicate_ids:
@@ -200,6 +207,28 @@ def translate(native: dict, scope_outcome: ScopeManifestOutcome | None) -> Deriv
             scope=None,
             reviewer=reviewer,
             translation_gap=relationship_gap,
+        )
+
+    if relationship_gap:
+        # knowledge-api-design.md SS6 test 7 names "a relationship OR
+        # status value outside the known enums" as ONE combined rule
+        # producing derived.status: UNCERTAIN -- an unrecognised
+        # relationship must downgrade the overall status exactly like an
+        # unrecognised status does, not just annotate mapping_result,
+        # even when the status/scope gates below would otherwise pass.
+        # Found by native Codex review of PR #6, commit 6819c45: a
+        # verified claim with a passing scope manifest and an unknown
+        # relationship value was returning VERIFIED, contradicting this
+        # rule. Conflicting evidence (above) still takes precedence, as
+        # a strictly stronger signal than an unrecognised enum value.
+        return DerivedResult(
+            status="UNCERTAIN",
+            status_basis=f"unrecognised native relationship '{relationship}'",
+            mapping_result=mapping_result,
+            mapping_scope=mapping_scope,
+            scope=None,
+            reviewer=reviewer,
+            translation_gap=True,
         )
 
     if status == "proposed":

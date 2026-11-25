@@ -72,6 +72,25 @@ class CLITests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out)["task_id"], "demo-task")
 
+    def test_get_with_unquoted_yaml_date_serializes_cleanly(self):
+        # Regression for native Codex review of PR #6 (commit 6819c45):
+        # yaml.safe_load parses an unquoted date scalar into a
+        # datetime.date, which json.dumps cannot serialize by default.
+        # schema.md's own illustration shows verified_date unquoted, so
+        # a real consumer entry could easily hit this.
+        register_dir = self.repo / "dev-docs" / "compat-register"
+        (register_dir / "LK-COMPAT-DATE-001.yaml").write_text(
+            "id: LK-COMPAT-DATE-001\n"
+            "status: verified\n"
+            "verified_by: tester\n"
+            "verified_date: 2026-11-25\n",  # deliberately unquoted
+            encoding="utf-8",
+        )
+        code, out, err = self._run("--repo-root", str(self.repo), "get", "LK-COMPAT-DATE-001")
+        self.assertEqual(code, 0, msg=err)
+        parsed = json.loads(out)
+        self.assertEqual(parsed["native"]["verified_date"], "2026-11-25")
+
     def test_task_id_propagates_into_the_event_log(self):
         self._run("--repo-root", str(self.repo), "get", "LK-COMPAT-CLI-001", "--task-id", "demo-task")
         events_path = self.repo / ".axiom-local" / "events.jsonl"
