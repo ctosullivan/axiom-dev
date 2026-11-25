@@ -21,11 +21,17 @@ put a **real Ledgerkit/hledger vertical slice first**: establish
 an independent behavioural oracle (done, Stage 2.1); create only the
 evidence-backed comparative knowledge, stable IDs, minimal local
 knowledge API and deterministic checks required for that slice
-(**Stage 2.2 PR 2a BUILD underway** — `src/axiom_knowledge/`, against
+(**Stage 2.2 PR 2a merged into `main`** — `src/axiom_knowledge/`, against
 `planning/phase-02-stage-2.2-plan.md` — PR 2b/Ledgerkit adoption not yet
-started, gated on 2a merging); then demonstrate drift, reconciliation and
+started, separately unauthorised; Stage 2.2 itself not yet marked
+Completed); then demonstrate drift, reconciliation and
 fresh-session reuse before extracting the template. **No Phase 2 A/B
-test of the template.**
+test of the template.** PR 2b has also just been **redefined**: the
+repository owner decided to retire CodeCompass (Ledgerkit's prior
+dependency/code-comprehension tool) entirely as part of adopting
+Axiom, rather than installing Axiom alongside it — see
+`planning/phase-02-stage-2.2-plan.md` §9 and
+`planning/phase-02-ledgerkit-codecompass-migration-handoff.md`.
 
 **Phase 3 — Proposed:** deliver a thin MCP adapter over Phase 2's API
 (required Phase 3 deliverable under ADR 0008, but optional for
@@ -40,14 +46,25 @@ dependency or the project's purpose.
   `AGENTS.md` §14's bounded corrective cycle) merged into `main` on
   2026-11-22 by the repository owner.
   [PR #5](https://github.com/ctosullivan/axiom-dev/pull/5) (Stage 2.1
-  closeout, Stage 2.2 planning, Apache 2.0 relicensing) remains **open**,
-  CI green, native Codex review clean. **Current branch:**
-  `phase-2/stage-2.2-pr2a-knowledge-library`, stacked on top of PR #5's
-  own branch (`phase-2/stage-2.1-closeout-and-licensing`) — per PR #5
-  not yet being merged, this is a clearly identified stacked PR, not a
-  branch from `main`. Inspect actual HEAD and PR state rather than
-  trusting this text.
-- PR #5's branch: (1) marks **Stage 2.1 Completed** and archives it
+  closeout, Stage 2.2 planning, Apache 2.0 relicensing) merged into
+  `main` (merge commit `d144aba`) on 2026-11-25 by the repository
+  owner, after a clean final native Codex review and green CI at its
+  merged head (`810b87a`).
+  [PR #6](https://github.com/ctosullivan/axiom-dev/pull/6) (Stage 2.2
+  PR 2a, `src/axiom_knowledge/`), originally a stacked PR on PR #5's own
+  branch, was retargeted to `main` once PR #5 merged and itself merged
+  into `main` (merge commit `1dbb0ab`) on 2026-11-25 by the repository
+  owner, after CI passed at its head (`1cfc3ef`) and an explicitly
+  authorised, narrowly scoped 4th corrective round against native Codex
+  review returned no further material findings. A small
+  [PR #7](https://github.com/ctosullivan/axiom-dev/pull/7) recording
+  these two merges in this file and `ROADMAP.md` was opened but is
+  **superseded by this round's own CodeCompass-retirement planning
+  amendment PR**, whose CONTEXT.md/ROADMAP.md changes carry the same
+  content plus the new amendment — close PR #7 without merging once
+  this round's PR is confirmed, rather than merging both. Inspect
+  actual HEAD and PR state rather than trusting this text.
+- PR #5 (merged): (1) marks **Stage 2.1 Completed** and archives it
   (`planning/archive/phase-02-stage-2.1/README.md`) without moving or
   duplicating its canonical plan/evidence — the cross-cutting designs
   (`planning/phase-02-adoption-design.md`,
@@ -68,16 +85,26 @@ dependency or the project's purpose.
   unaffected); (3) **relicenses to Apache 2.0**
   (`decisions/0009-apache-2.0-licensing.md`, `LICENSE`, `NOTICE`),
   preserving the existing copyright holder and year.
-- This stacked branch (PR 2a, Stage 2.2 BUILD, authorised directly by
-  the repository owner): implements `src/axiom_knowledge/` -- the
-  `get`/`find` library, the Ledgerkit native-register adapter, the
-  scope-manifest gate, repository/register discovery and the CLI, all
-  against synthetic fixtures, **no live Ledgerkit checkout touched**.
-  75 new deterministic tests, all passing; see `CHANGELOG.md`'s "Stage
-  2.2 PR 2a" entry for the full list. PR 2b (Ledgerkit adoption) has
-  **not** started -- it depends on this PR merging first, which itself
-  depends on PR #5 merging first. **Stage 2.2 is not marked
-  Completed.**
+- PR #6 (merged, Stage 2.2 PR 2a BUILD, authorised directly by the
+  repository owner, including one exceptional 4th corrective round):
+  implements `src/axiom_knowledge/` -- the `get`/`find` library, the
+  Ledgerkit native-register adapter, the scope-manifest gate,
+  repository/register discovery, the CLI and `knowledge_find`'s
+  result-count/returned-claim-ID telemetry, all against synthetic
+  fixtures, **no live Ledgerkit checkout touched**. 85 new deterministic
+  tests (173 total with `axiom_validator`'s own suite), all passing; see
+  `CHANGELOG.md`'s "Stage 2.2 PR 2a" entry for the full list.
+- **PR 2b is redefined, this round (`planning/phase-02-stage-2.2-plan.md`
+  §9):** the repository owner decided to retire CodeCompass entirely
+  from Ledgerkit as part of adopting Axiom, not alongside it. Axiom
+  Dev performed an isolated scratch-clone feasibility evaluation
+  against Ledgerkit's real `dev-docs/compat-register/` (never the real
+  checkout, confirmed unmodified afterward) and produced a precise
+  removal/adoption specification and a self-contained handoff for
+  Ledgerkit's own orchestrator:
+  `planning/phase-02-ledgerkit-codecompass-migration-handoff.md`.
+  PR 2b itself has **not** started -- it remains separately
+  unauthorised. **Stage 2.2 is not marked Completed.**
 - Phase 2's wiki, knowledge API, identity/drift gate and template
   **do not yet exist**; do not imply they have been implemented.
 - The core should be Git/files plus a small read-only local API
@@ -101,18 +128,26 @@ dependency or the project's purpose.
 sets the accepted Phase 2/3 direction. This roadmap refinement changes
 **sequencing and proposed scope, not the accepted architectural decision**.
 
-**Next action:** human review and approval of two open PRs: #5
-(closeout/planning/licensing, unmerged) and the new stacked PR 2a
-(`phase-2/stage-2.2-pr2a-knowledge-library`, this implementation).
-`planning/ROADMAP.md` already states Stage 2.1 Completed and this file
-already reflects it — per the prior round's own explicit authorisation,
-naming the specific merged PR (#4) and the explicit instruction to mark
-the status, which together constitute the recorded evidence of owner
-acceptance (`docs/phase-archiving.md`'s phase-completion procedure,
-applied at stage granularity for the first time). **PR 2a's own BUILD
-was explicitly authorised directly by the repository owner** (a
-separate prompt from PR #5's own authorisation) and is implemented on
-this stacked branch; PR 2b (Ledgerkit adoption) remains unauthorised and
-unstarted, gated on 2a merging, per
-`planning/phase-02-stage-2.2-plan.md` §8. Neither open PR is merged; no
-PR 2a functionality has been copied into Ledgerkit.
+**Next action:** both PR #5 (closeout/planning/licensing, merge commit
+`d144aba`) and PR #6 (Stage 2.2 PR 2a, merge commit `1dbb0ab`) are
+merged into `main`, by explicit repository-owner authorisation, after
+final verification of latest-head CI and Codex-review disposition on
+each. Local `main` is fast-forwarded to `1dbb0ab` and the full
+deterministic test suite (173 tests) and governed-document validator
+(13/13 PASS) pass against it. `planning/ROADMAP.md` already states
+Stage 2.1 Completed and this file already reflects it — per the prior
+round's own explicit authorisation, naming the specific merged PR (#4)
+and the explicit instruction to mark the status, which together
+constitute the recorded evidence of owner acceptance
+(`docs/phase-archiving.md`'s phase-completion procedure, applied at
+stage granularity for the first time). **Stage 2.2 itself is not
+marked Completed**, and **PR 2b (Ledgerkit, now redefined to include
+CodeCompass's full retirement, §9) remains unauthorised and
+unstarted**, per `planning/phase-02-stage-2.2-plan.md` §8 — both
+require separate, explicit owner authorisation. The Ledgerkit
+migration handoff
+(`planning/phase-02-ledgerkit-codecompass-migration-handoff.md`) is a
+specification for Ledgerkit's own orchestrator to pick up under that
+separate authorisation, not an authorisation itself. No PR 2a
+functionality, and no CodeCompass removal, has been applied to
+Ledgerkit's real checkout.
