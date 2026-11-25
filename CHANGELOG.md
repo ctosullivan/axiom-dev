@@ -547,3 +547,119 @@ test existed for the gate's merge-decision logic, violating
   native-register identity/reference integrity checking for Stage 2.3
   (deferred — out of scope for this round, recorded in
   `planning/phase-02-planning-review.md` §10, not silently dropped).
+
+## Stage 2.1 closeout, Stage 2.2 planning, Apache 2.0 relicensing
+
+### Added
+
+- `planning/archive/phase-02-stage-2.1/README.md`: Stage 2.1 closeout
+  record (achievements, limitations, deferred EC-022 implementation),
+  the first stage-level archive entry — logical archiving, same
+  convention as Phase 1's, extended to stage granularity. Registered
+  under `schemas/governed-documents.txt` with a mirrored schema.
+- `planning/phase-02-stage-2.2-plan.md`: implementation-ready Stage
+  2.2 plan — a two-PR split (Axiom Dev's reusable `get`/`find`
+  library and tests; Ledgerkit's adoption of the skill/wiki/config),
+  reusing the existing adoption/knowledge-API/measurement designs
+  rather than duplicating them. Independent acceptance criteria,
+  negative tests and measurable-overhead questions predeclared before
+  any implementation.
+- `decisions/0009-apache-2.0-licensing.md`: ADR recording the MIT →
+  Apache 2.0 relicensing decision, its rationale and consequences.
+- `NOTICE`: carries the project's copyright line, preserved unchanged
+  from the prior MIT notice (2026, Cormac O' Sullivan).
+
+### Changed
+
+- **`LICENSE`**: replaced MIT with the complete, unmodified standard
+  Apache License 2.0 text. No vendored third-party code was found
+  during inspection; nothing else is relicensed by this change.
+- `README.md`'s licence section, `planning/ROADMAP.md` (Stage 2.1 →
+  Completed, archived; Stage 2.2 → Planned), `planning/archive/README.md`
+  (new "Archived stages" section), `planning/CONTEXT.md` and
+  `planning/phase-02-template.md` (document map, §2.1/§2.2 pointers)
+  reconciled to the above. No Stage 2.2 functionality implemented; no
+  changes to Ledgerkit; no accepted ADR altered in place; PR not
+  merged by this change.
+
+### Fixed (native Codex review, PR #5)
+
+- The skill template (`planning/phase-02-adoption-design.md` §6)
+  instructed running `axiom-knowledge impacted` and a dedicated
+  test-runner wrapper — neither of which Stage 2.2 actually delivers
+  (`get`/`find` only; `impacted` is Stage 2.3's work). An agent
+  following the skill verbatim after Stage 2.2's own adoption PR
+  would have been told to run commands that don't exist yet. Fixed by
+  annotating both steps with their actual availability and an
+  explicit "skip and say so" instruction, rather than leaving the
+  skill to silently fail or an agent to guess at a substitute.
+
+Re-review on that fix (commit `762614d`): **0 findings — clean.**
+
+## Stage 2.2 final planning amendment
+
+Corrective amendment to `planning/phase-02-stage-2.2-plan.md`; no
+Stage 2.2 functionality implemented, no Ledgerkit changes, no
+accepted ADR altered.
+
+### Fixed
+
+- **Positive `VERIFIED` demonstration added**: the plan named no
+  concrete claim showing `derived.status: VERIFIED` is actually
+  reachable. Now names `LK-COMPAT-PARSER-TAG-COMMODITY-001` (real,
+  native `status: verified`, with one independently reviewed scope
+  manifest to be written at BUILD time) as the positive case, and
+  `LK-COMPAT-QUERY-TAG-001` (same native status, deliberately no
+  manifest) as the contrasting `UNCERTAIN` case — both real register
+  entries, not synthetic fixtures.
+- **CLI repository-discovery mechanism specified**: `--repo-root`
+  argument with a `knowledge/README.md`-based current-directory
+  walk-up default; no configuration framework. Required test cases:
+  repo root, subdirectory, outside a recognised repository,
+  explicit-argument override.
+- **Logging/hook scope clarified**: Stage 2.2 delivers CLI-owned
+  `task-start`/`task-accepted`/`knowledge_get`/`knowledge_find`
+  events only; the `SessionStart`/`SessionEnd` hook pair, a
+  test-runner wrapper, and `knowledge_impact` are explicitly deferred
+  — `session_id` is `null` throughout Stage 2.2, the design's own
+  already-specified fallback, not a new gap. Construction-overhead
+  measurement before the CLI exists is manual, not CLI-logged.
+- **Python/licensing boundaries defined**: confirmed (direct
+  inspection) Ledgerkit's `pyproject.toml` declares
+  `requires-python = ">=3.8"`, `dependencies = []`, and
+  `GPL-3.0-or-later`; Axiom's CLI runs under its own Python
+  environment and `pyyaml` dependency as optional dev tooling, never
+  imported by the `ledgerkit` package; Apache-2.0-authored files
+  copied into Ledgerkit retain their own notice without altering
+  Ledgerkit's licence.
+- **Minimal initial corpus**: replaced the illustrative 10–20-claim
+  target with 4 real, named, already-existing compat-register claims
+  (two EC-022-related, two forming the VERIFIED/UNCERTAIN
+  demonstration pair) — no new claims authored, no duplication of
+  authoritative knowledge. The native adapter is prioritised; the
+  generic default-schema adapter's implementation is deferred,
+  interface unchanged.
+- Fresh-context acceptance test strengthened: must retrieve the four
+  named claims, state native/derived status for each, explain one
+  verified scope and one unresolved limitation with cited evidence,
+  independently verified by a reviewer against the original records
+  and Stage 2.1 oracle evidence, not the agent's own restatement.
+
+Two-PR sequencing (Axiom Dev library; Ledgerkit adoption, gated on
+the first) is unchanged. `planning/ROADMAP.md`, `planning/CONTEXT.md`
+reconciled.
+
+Independent review (fresh context, same-operator/machine/model —
+named honestly) of this amendment found no blocking issues; every
+real-data claim (the four compat-register claims' exact fields, the
+49-entry register count, Ledgerkit's Python/licence metadata) checked
+out against direct file inspection. 2 material-nonblocking findings,
+both fixed: the `knowledge/README.md` discovery marker's prior-
+specification claim was overstated (the cited section left that
+choice open; corrected to state this plan makes the choice, not that
+one already existed); the `--repo-root`-given-but-missing-the-marker
+failure case was specified in prose but had no required test (added
+as a 5th discovery test case).
+
+Native Codex review on the resulting commit (`a8274e4`): **0
+findings — clean.**

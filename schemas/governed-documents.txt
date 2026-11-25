@@ -16,3 +16,4 @@ contracts/documentation-schema-validator.md
 contracts/codex-gate-policy-evaluator.md
 planning/archive/README.md
 planning/archive/phase-01/README.md
+planning/archive/phase-02-stage-2.1/README.md

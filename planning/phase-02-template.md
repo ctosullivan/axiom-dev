@@ -20,7 +20,9 @@ an aspiration):
 2. **This document** — objective, six-stage sequence, non-goals,
    architectural boundaries. Stop here if you only need orientation.
 3. The **one** stage plan you are executing (currently
-   [`planning/phase-02-stage-2.1-plan.md`](phase-02-stage-2.1-plan.md)) —
+   [`planning/phase-02-stage-2.2-plan.md`](phase-02-stage-2.2-plan.md) —
+   Stage 2.1 is Completed and archived,
+   [`planning/archive/phase-02-stage-2.1/README.md`](archive/phase-02-stage-2.1/README.md)) —
    self-contained for that stage's own scope.
 4. **Only the cross-cutting contract(s) that stage plan actually
    references** — it names them explicitly, you do not need to read
@@ -129,6 +131,13 @@ Before any implementation or knowledge-tool expansion:
 independent oracle, negative case and value/overhead measures.
 
 ### 2.2 — Build only the comparative knowledge the problem requires
+
+**Planned in full detail — see `planning/phase-02-stage-2.2-plan.md`.**
+That plan specifies the exact two-PR split (Axiom Dev's reusable
+`get`/`find` library, Ledgerkit's adoption of the skill/wiki/config),
+reusing the already-reviewed adoption/knowledge-API/measurement
+designs rather than duplicating them. What follows in this section is
+retained as the general requirement that concrete plan satisfies.
 
 Create a readable **Ledgerkit ↔ hledger semantic wiki slice**, first
 with perhaps 10–20 materially useful, independently testable claims
