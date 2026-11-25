@@ -1,8 +1,9 @@
 name: deterministic-checks
 
-# Runs the credential-free policy, validator, governed-document and whitespace
-# checks on every push and PR. The ci-required summary job depends on all four:
-# it fails if any required dependency failed, was skipped or was cancelled.
+# Runs the credential-free policy, validator (+ axiom_knowledge, same job,
+# same tests/ tree), governed-document and whitespace checks on every push
+# and PR. The ci-required summary job depends on all four: it fails if any
+# required dependency failed, was skipped or was cancelled.
 #
 # IMPORTANT: a green workflow alone does NOT enforce merge safety.
 # The repository owner must configure main's GitHub branch rules to require
@@ -47,6 +48,12 @@ jobs:
           PYTHONPATH=.github/scripts python3 -m unittest discover -s .github/scripts/tests -v
 
   axiom-validator-tests:
+    # Job id kept unchanged (REQUIRED_JOBS/branch protection reference it by
+    # id, not display name) even though `-s tests` discovery now also picks
+    # up tests/test_axiom_knowledge_*.py (PR 2a, Stage 2.2) -- both suites
+    # live flat under tests/, matching this project's existing convention
+    # (no subpackage), so one discovery run naturally covers both.
+    name: python-unit-tests (axiom_validator + axiom_knowledge)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,7 +62,7 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run axiom_validator test suite
+      - name: Run axiom_validator + axiom_knowledge test suites
         run: |
           PYTHONPATH=src python3 -m unittest discover -s tests -v
 

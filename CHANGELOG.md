@@ -663,3 +663,63 @@ as a 5th discovery test case).
 
 Native Codex review on the resulting commit (`a8274e4`): **0
 findings — clean.**
+
+## Stage 2.2 PR 2a — axiom_knowledge library and CLI (BUILD)
+
+**Added**, in `src/axiom_knowledge/`, against
+`planning/phase-02-stage-2.2-plan.md` SS2a/SS3 and
+`planning/phase-02-knowledge-api-design.md` SS3a-SS3f/SS4:
+
+- `get(id)`/`find(query)`, the Ledgerkit compat-register native adapter
+  (status/reviewer-identity/scope-gate/relationship translation, SS3b-SS3c),
+  the SS3f shape-only unresolved-reference diagnostic (`impacted()` itself
+  remains Stage 2.3's deferred deliverable), and the scope-manifest
+  five-check gate (SS3b.1).
+- Repository/register discovery per the plan's correction B: `--repo-root`
+  with a `knowledge/README.md`-based walk-up default, plus the one
+  BUILD-time decision the plan deferred to this PR -- a single optional
+  `register: <path>` directive line inside that same marker file
+  (`planning/phase-02-stage-2.2-plan.md` SS2a.2 updated in the same
+  change to record this, per `AGENTS.md` SS5).
+- The CLI (`python3 -m axiom_knowledge`, matching `axiom_validator`'s own
+  no-packaging convention): `get`, `find`, `task-start`, `task-accepted`,
+  each with machine-readable JSON output and named JSON errors.
+- The four Stage-2.2-scoped CLI-owned JSONL events (`task_start`,
+  `task_accepted`, `knowledge_get`, `knowledge_find`), honouring
+  `AXIOM_DISABLE_LOGGING=1`, non-blocking on write failure, `session_id`
+  always `null` (the hook pair remains deferred, per the plan's correction C).
+- 75 new deterministic tests (`tests/test_axiom_knowledge_*.py`,
+  `tests/axiom_knowledge_support.py`), against synthetic fixtures shaped
+  exactly like Ledgerkit's real `dev-docs/compat-register/schema.md` --
+  no live Ledgerkit checkout. Covers every status/reviewer/scope-gate/
+  relationship translation case, the controlled scope-manifest experiment
+  (same claim, manifest present vs absent, every other input held
+  constant), all six repository/register discovery cases, malformed YAML,
+  duplicate IDs, invalid queries, determinism, and the logging opt-out/
+  failure-handling/task-id/session-id-null requirements.
+- `.github/workflows/deterministic-checks.yml`'s `axiom-validator-tests`
+  job (id unchanged, display name updated) now also runs these tests —
+  both suites live flat under `tests/`, so one `-s tests` discovery
+  naturally covers both; `ci-required`'s `REQUIRED_JOBS` needed no change.
+
+**Documented interpretation choices, not spelled out verbatim by the
+design docs, recorded in code for review** (`src/axiom_knowledge/
+native_adapter.py`, `scope_manifest.py` docstrings): which scope-gate
+check failures count as "absent" (1/3/4) vs "conflict" (2/5); the
+non-schema `evidence[].result` convention used only by this PR's own
+synthetic fixtures to exercise the "genuinely conflicting evidence"
+case, since no real compat-register entry carries such a field.
+
+**Construction overhead (manual note, per the plan's SS2a.3/SS6 — no
+CLI existed yet to log this itself)**: one BUILD session; 9 new source
+files (`src/axiom_knowledge/`); 7 new test files + 1 shared fixture
+helper (75 tests); 2 planning-doc reconciliation edits
+(`phase-02-stage-2.2-plan.md`); 1 CI workflow edit. No live Ledgerkit
+checkout touched; no packaging/dependency changes beyond the existing
+`pyyaml` requirement.
+
+**Deferred, unchanged from the plan**: `related`/`impacted` (Stage 2.3),
+the generic default-schema adapter's implementation (interface
+preserved), the `SessionStart`/`SessionEnd` hook pair, a test-runner
+wrapper, PR 2b (Ledgerkit adoption — depends on this PR merging first).
+Stage 2.2 is **not** marked Completed; this PR is not merged.
