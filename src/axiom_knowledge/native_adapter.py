@@ -1,0 +1,296 @@
+"""Ledgerkit compat-register adapter: native read + derived translation.
+
+Implements `planning/phase-02-knowledge-api-design.md` SSSS3a-3f against the
+real schema at Ledgerkit's `dev-docs/compat-register/schema.md`. The
+`native` block a caller sees is always the record exactly as read; the
+`derived` block is Axiom's own, conservative translation -- never the
+reverse, and never collapsed into one view (SS3a).
+
+Documented interpretation, not written explicitly in SS3b/SS3b.1 itself:
+Ledgerkit's own schema has no field recording an evidence item's pass/fail
+outcome, so "genuinely conflicting evidence" (knowledge-api-design.md SS6,
+test 5) is detected here via one optional, non-schema convention: two
+`evidence[]` items of the same `kind` and the same `pinned_at` that each
+carry an explicit `result: pass` / `result: fail` field, disagreeing. No
+real Ledgerkit compat-register entry currently sets `result` on an evidence
+item -- this path is exercised only by this PR's own synthetic fixtures,
+and is documented here so an independent reviewer can judge whether the
+interpretation is sound, not left as an unexplained implementation detail.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
+
+from .errors import MalformedError, NotFoundError
+from .scope_manifest import ScopeManifestOutcome
+
+REGISTER_FILE_SUFFIX = ".yaml"
+
+_RELATIONSHIP_MAP = {
+    "equivalent": ("equivalent", None),
+    "superset": (
+        "equivalent",
+        "equivalent for hledger-defined behaviour only; Ledgerkit's extension "
+        "behaviour (kind: extension) is additional and out of scope for this "
+        "comparison",
+    ),
+    "subset": (
+        "partial",
+        "partial -- Ledgerkit intentionally covers less than hledger for this "
+        "area; see native.reason for which cases are excluded",
+    ),
+    "incomparable": ("divergent", None),
+}
+
+
+@dataclass(frozen=True)
+class RegisterIndex:
+    """The result of scanning a register directory once."""
+
+    records: dict[str, dict] = field(default_factory=dict)
+    record_paths: dict[str, str] = field(default_factory=dict)
+    malformed_by_stem: dict[str, str] = field(default_factory=dict)
+    duplicate_ids: dict[str, list[str]] = field(default_factory=dict)
+
+
+def load_register(register_root: Path) -> RegisterIndex:
+    """Parse every *.yaml file directly in register_root (non-recursive --
+    matches schema.md's own "one file per entry" convention; a nested
+    examples/ directory, if present, is never descended into)."""
+    records: dict[str, dict] = {}
+    record_paths: dict[str, str] = {}
+    malformed_by_stem: dict[str, str] = {}
+    duplicate_ids: dict[str, list[str]] = {}
+
+    for path in sorted(register_root.glob(f"*{REGISTER_FILE_SUFFIX}")):
+        stem = path.stem
+        try:
+            raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            malformed_by_stem[stem] = f"{path}: invalid YAML ({exc})"
+            continue
+
+        if not isinstance(raw, dict):
+            malformed_by_stem[stem] = f"{path}: does not parse to a mapping"
+            continue
+
+        record_id = raw.get("id")
+        if not record_id:
+            malformed_by_stem[stem] = f"{path}: missing required 'id' field"
+            continue
+
+        if record_id in duplicate_ids:
+            duplicate_ids[record_id].append(str(path))
+            continue
+        if record_id in records:
+            duplicate_ids[record_id] = [record_paths[record_id], str(path)]
+            del records[record_id]
+            del record_paths[record_id]
+            continue
+
+        records[record_id] = raw
+        record_paths[record_id] = str(path)
+
+    return RegisterIndex(
+        records=records,
+        record_paths=record_paths,
+        malformed_by_stem=malformed_by_stem,
+        duplicate_ids=duplicate_ids,
+    )
+
+
+def get_native(index: RegisterIndex, claim_id: str) -> dict:
+    """Return the raw native record for claim_id, or raise NotFoundError /
+    MalformedError -- never a silent wrong answer."""
+    if claim_id in index.duplicate_ids:
+        paths = ", ".join(index.duplicate_ids[claim_id])
+        raise MalformedError(f"duplicate id '{claim_id}' declared by: {paths}")
+    if claim_id in index.records:
+        return index.records[claim_id]
+    if claim_id in index.malformed_by_stem:
+        raise MalformedError(index.malformed_by_stem[claim_id])
+    raise NotFoundError(f"no claim with id '{claim_id}' in this register")
+
+
+def _find_conflicting_evidence(evidence: list) -> str | None:
+    seen: dict[tuple, set[str]] = {}
+    for item in evidence or []:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if result not in ("pass", "fail"):
+            continue
+        key = (item.get("kind"), item.get("pinned_at"))
+        seen.setdefault(key, set()).add(result)
+    for (kind, pinned_at), results in seen.items():
+        if {"pass", "fail"} <= results:
+            return (
+                f"evidence of kind '{kind}' at pinned_at '{pinned_at}' contains "
+                "both a passing and a failing result"
+            )
+    return None
+
+
+def _translate_relationship(relationship: str | None) -> tuple[str, str | None, bool]:
+    """Returns (mapping_result, mapping_scope, translation_gap)."""
+    if relationship is None:
+        return "unknown", None, False
+    if relationship in _RELATIONSHIP_MAP:
+        result, scope = _RELATIONSHIP_MAP[relationship]
+        return result, scope, False
+    return "unknown", None, True
+
+
+_REFERENCE_FIELD_SEPARATORS = {
+    "implementation": ":",
+    "tests": "::",
+}
+
+
+def extract_unresolved_references(native: dict) -> list[dict]:
+    """Shape-only check of SS3f's local-reference fields -- does each entry
+    parse into <path><sep><qualifier>? Does not check file existence
+    against any consumer-repository revision; that is impacted()'s own
+    deferred Stage 2.3 job (SS3f), not duplicated here."""
+    diagnostics: list[dict] = []
+    for field_name, separator in _REFERENCE_FIELD_SEPARATORS.items():
+        for entry in native.get(field_name) or []:
+            if not isinstance(entry, str) or separator not in entry:
+                diagnostics.append(
+                    {
+                        "field": field_name,
+                        "value": entry,
+                        "reason": f"does not contain the expected '{separator}' separator",
+                    }
+                )
+    return diagnostics
+
+
+@dataclass(frozen=True)
+class DerivedResult:
+    status: str
+    status_basis: str
+    mapping_result: str
+    mapping_scope: str | None
+    scope: str | None
+    reviewer: str | None
+    translation_gap: bool = False
+
+
+def translate(native: dict, scope_outcome: ScopeManifestOutcome | None) -> DerivedResult:
+    """SS3b/SS3b.1/SS3c -- the full native-to-derived translation."""
+    status = native.get("status")
+    verified_by = native.get("verified_by")
+    verified_date = native.get("verified_date")
+    relationship = (native.get("ledgerkit") or {}).get("relationship")
+
+    mapping_result, mapping_scope, relationship_gap = _translate_relationship(relationship)
+    reviewer = verified_by or None
+
+    conflict = _find_conflicting_evidence(native.get("evidence") or [])
+    if conflict:
+        return DerivedResult(
+            status="CONTESTED",
+            status_basis=conflict,
+            mapping_result=mapping_result,
+            mapping_scope=mapping_scope,
+            scope=None,
+            reviewer=reviewer,
+            translation_gap=relationship_gap,
+        )
+
+    if status == "proposed":
+        return DerivedResult(
+            status="UNCERTAIN",
+            status_basis="native status is 'proposed' -- not yet run against the real binary",
+            mapping_result=mapping_result,
+            mapping_scope=mapping_scope,
+            scope=None,
+            reviewer=reviewer,
+            translation_gap=relationship_gap,
+        )
+
+    if status == "self-verified":
+        return DerivedResult(
+            status="OBSERVED",
+            status_basis=(
+                "native status is 'self-verified' -- a real comparison was run, "
+                "but by the same identity that implemented the fix, not "
+                "independently; OBSERVED has no scope requirement"
+            ),
+            mapping_result=mapping_result,
+            mapping_scope=mapping_scope,
+            scope=None,
+            reviewer=reviewer,
+            translation_gap=relationship_gap,
+        )
+
+    if status in ("verified", "final"):
+        reviewer_gate_ok = bool(verified_by) and bool(verified_date)
+        if not reviewer_gate_ok:
+            return DerivedResult(
+                status="UNCERTAIN",
+                status_basis=(
+                    f"native status is '{status}' but verified_by/verified_date "
+                    "are missing -- treated as missing evidence, not a contradiction"
+                ),
+                mapping_result=mapping_result,
+                mapping_scope=mapping_scope,
+                scope=None,
+                reviewer=reviewer,
+                translation_gap=relationship_gap,
+            )
+
+        if scope_outcome is not None and scope_outcome.status == "conflict":
+            return DerivedResult(
+                status="CONTESTED",
+                status_basis=scope_outcome.conflict_reason or "scope manifest conflict",
+                mapping_result=mapping_result,
+                mapping_scope=mapping_scope,
+                scope=None,
+                reviewer=reviewer,
+                translation_gap=relationship_gap,
+            )
+
+        if scope_outcome is not None and scope_outcome.status == "passes":
+            return DerivedResult(
+                status="VERIFIED",
+                status_basis=(
+                    f"native status '{status}' with verified_by/verified_date "
+                    "present and an independently reviewed, Git-tracked scope "
+                    "manifest that passes all five checks"
+                ),
+                mapping_result=mapping_result,
+                mapping_scope=mapping_scope,
+                scope=scope_outcome.scope,
+                reviewer=reviewer,
+                translation_gap=relationship_gap,
+            )
+
+        return DerivedResult(
+            status="UNCERTAIN",
+            status_basis=(
+                f"native status '{status}' with verified_by/verified_date present, "
+                "but no independently reviewed scope manifest exists -- missing "
+                "evidence, not a contradiction; a claim cannot be VERIFIED with "
+                "a null scope"
+            ),
+            mapping_result=mapping_result,
+            mapping_scope=mapping_scope,
+            scope=None,
+            reviewer=reviewer,
+            translation_gap=relationship_gap,
+        )
+
+    return DerivedResult(
+        status="UNCERTAIN",
+        status_basis=f"unrecognised native status '{status}'",
+        mapping_result=mapping_result,
+        mapping_scope=mapping_scope,
+        scope=None,
+        reviewer=reviewer,
+        translation_gap=True,
+    )

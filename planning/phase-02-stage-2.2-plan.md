@@ -129,6 +129,21 @@ The simplest deterministic mechanism, no configuration framework:
      the wrong directory — this is the specific case the bullet above
      already commits to in prose; it now has its own required test.
 
+**Register-location directive, resolved at BUILD time (recorded here per
+`AGENTS.md` §5, since this is the exact mechanism
+`planning/phase-02-adoption-design.md` §2 explicitly deferred — "chosen
+then, against the real requirement — not pre-decided here" — and PR 2a's
+BUILD is where that happens).** One optional line inside the same
+`knowledge/README.md` marker file: `register: <path-relative-to-repo-root>`
+(e.g. `register: dev-docs/compat-register`). If the line is absent, the
+generic default `knowledge/claims/` path is assumed (its *implementation*
+remains deferred per §2a.1 — this only resolves the path). The resolved
+register directory not existing on disk is `RegisterNotFound`, distinct
+from `RepositoryNotFound` (the marker file was found; the register path it
+names, or the default, was not) — this is required test case 6 of the
+authorising prompt's part 3C. PR 2b's own `knowledge/README.md` for
+Ledgerkit must include `register: dev-docs/compat-register`.
+
 #### 2a.3 — Logging and hook footprint, clarified (correction C)
 
 **Stage 2.2 delivers exactly these event producers, nothing broader**:
@@ -191,8 +206,10 @@ this plan or this round:
 - Add `knowledge/README.md` pointing the CLI's source configuration at
   Ledgerkit's own `dev-docs/compat-register/` (the deferral decision
   `planning/phase-02-stage-2.1-plan.md` §7 already made — **not** a
-  new `knowledge/claims/` directory) — and now also the discovery
-  marker §2a.2 specifies.
+  new `knowledge/claims/` directory) — both the discovery marker §2a.2
+  specifies, and, on the exact same file, a `register:
+  dev-docs/compat-register` directive line (§2a.2's own BUILD-time
+  resolution of this path, implemented by PR 2a).
 
 #### 2b.1 — Minimal initial knowledge corpus: ~3–4 real claims, not an illustrative 10–20 (correction E, first half)
 
