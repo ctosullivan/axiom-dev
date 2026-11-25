@@ -33,6 +33,20 @@ removal/adoption specification and Ledgerkit-orchestrator handoff; it
 does **not** authorise modifying Ledgerkit, opening Ledgerkit's PR 2b,
 or marking Stage 2.2 Completed.
 
+**Four further corrections, this amendment's final round (PR #8,
+independently reviewed before human merge approval)**: the installed
+skill is tracked in Git via a precise `.gitignore` exception rather
+than being silently dropped by Ledgerkit's existing `.claude/*` rule
+(A1); the installed skill invokes the launcher by an explicit,
+repository-root-relative path rather than relying on a persistent
+shell `PATH` export (A2); the handoff names the exact source
+repository, its own approved PR #8 revision and the pinned PR 2a
+commit (`1dbb0ab`), executable without prior-conversation context (A3);
+and the affected planning documents are reconciled to state precisely
+what is and is not yet demonstrated, without claiming scratch
+retrieval shows improved development effectiveness (A4). Full detail
+in the handoff document itself, not duplicated here.
+
 ## 1. Objective and baseline
 
 Per `planning/ROADMAP.md`'s Stage 2.2 row and `planning/phase-02-template.md`

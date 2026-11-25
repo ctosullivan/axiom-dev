@@ -1,6 +1,7 @@
 # Ledgerkit migration handoff — CodeCompass retirement, Axiom adoption
 
-**Status: Planning amendment artifact. Authorises nothing in Ledgerkit.**
+**Status: Planning amendment artifact. Authorises nothing in Ledgerkit
+by itself.**
 Produced by the Axiom Dev orchestrator under the Stage 2.2 PR 2b
 planning-amendment prompt (this revision of
 `planning/phase-02-stage-2.2-plan.md` §9). This document is the
@@ -10,6 +11,31 @@ repository owner**. Nothing in this document modifies Ledgerkit;
 Axiom Dev's own scratch evaluation (§0) used a disposable clone, never
 Ledgerkit's real checkout, which was confirmed unmodified (`git status`
 clean, `git diff --stat` empty) after that evaluation.
+
+**Exact provenance, pinned (correction A3, this revision).** Source
+repository: `ctosullivan/axiom-dev`. This handoff's own approved
+revision: Axiom Dev PR [#8](https://github.com/ctosullivan/axiom-dev/pull/8)
+(`docs(phase-2): Stage 2.2 PR 2b amendment -- retire CodeCompass, adopt
+Axiom`), at whatever commit that PR's own final reviewed revision
+carries once accepted — read the PR's current head commit directly
+rather than assuming any specific SHA stays current, since further
+corrective rounds may still land before human merge approval. The
+pinned PR 2a implementation this handoff specifies copying (§B.2) is
+Axiom Dev's `main` at merge commit `1dbb0ab` (PR
+[#6](https://github.com/ctosullivan/axiom-dev/pull/6), confirmed by
+direct inspection, this revision, still `main`'s current head — no
+intervening commits). **Re-confirm both before executing §D**: check
+`git -C <axiom-dev-checkout> log -1 --format='%H %s' main` and that it
+still resolves to or descends from `1dbb0ab`; if `main` has advanced
+since, treat `1dbb0ab` as the specific commit to copy from (via `git
+show 1dbb0ab:src/axiom_knowledge` or a checkout of that commit), not
+whatever `main` has become, since this handoff's own evidence (§0, §C)
+was produced against that exact commit's code, not a later one. This
+handoff is designed to be executable without access to the prior
+conversation that produced it or to any undocumented local path — every
+path named below is either a path inside the Ledgerkit repository
+itself or an explicit Axiom Dev repository/PR/commit reference, never
+an implicit "as discussed" pointer.
 
 Architectural decision, made by the repository owner, not re-opened
 here: CodeCompass development has been discontinued; its use in
@@ -173,7 +199,45 @@ amendment except as noted). This is PR 2b's entire scope:
 
 **B.1 — The skill.** Copy `.claude/skills/axiom-work/SKILL.md` verbatim
 from `planning/phase-02-adoption-design.md` §6 into Ledgerkit's
-`.claude/skills/axiom-work/`.
+`.claude/skills/axiom-work/`, **adapted minimally** per B.1a below —
+the generic skill body itself (its UNDERSTAND/SPECIFY/BUILD/VERIFY/
+RECONCILE steps) is not edited; only its command invocations are made
+concrete for this installation.
+
+**B.1a — Invoke the repository-local launcher, not a bare command
+(correction A2, this revision — supersedes the PATH-export workaround
+below).** The generic skill's steps 2/3/9 invoke the bare command name
+`axiom-knowledge` (`get`, `find`, `task-start`, `task-accepted`). A
+persistent shell `PATH` modification is fragile (session-specific,
+easy to forget, invisible to a fresh agent that didn't run the earlier
+export) — do not rely on it. Instead, when copying the skill into
+Ledgerkit's own `.claude/skills/axiom-work/SKILL.md` (this is
+Ledgerkit's own installed, repository-specific copy, not Axiom Dev's
+generic source skill at `planning/phase-02-adoption-design.md` §6,
+which stays untouched as the reusable template for other consumers),
+replace each bare `axiom-knowledge` invocation with the explicit,
+repository-root-relative launcher path, resolved dynamically rather
+than hardcoded to a working directory assumption:
+
+```
+$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge get <id> --task-id <id>
+$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge find "<query>" --task-id <id>
+$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge task-start --task-id <id>
+$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge task-accepted --task-id <id>
+```
+
+`git rev-parse --show-toplevel` resolves the Ledgerkit repository root
+regardless of the caller's current working directory — the same
+discovery discipline `axiom-knowledge` itself already uses internally
+(`planning/phase-02-stage-2.2-plan.md` §2a.2), applied here at the
+shell level since the launcher must be found before the CLI's own
+`--repo-root` walk-up ever runs. This makes the skill independently
+executable from the repository root, any nested subdirectory, or a
+fresh clone with no prior session state — required test cases, §C.2a
+below. If the Ledgerkit orchestrator places the launcher at a
+different path at BUILD time (§B.2's own allowance), update these four
+lines to match; the mechanism (repository-root-relative, no `PATH`
+dependency) is the requirement, not this exact path string.
 
 **B.2 — The library/CLI, pinned.** Template-copy `src/axiom_knowledge/`
 from Axiom Dev's `main` at the exact merged commit
@@ -250,26 +314,63 @@ Ledgerkit's `pyproject.toml` `[project.scripts]` (that table is
 installed package, which `planning/phase-02-stage-2.2-plan.md` §7
 explicitly rules out).
 
-**PATH setup, required — gap found this round** (native Codex review
-of PR #8 round 3, commit `76143ec`: §B.1's verbatim-copied skill body
-(`planning/phase-02-adoption-design.md` §6) invokes the **bare**
-command `axiom-knowledge` for every operation it names — `get`,
-`find`, `task-start`, `task-accepted` — not the repository-local
-launcher path. Without a `PATH` entry, every one of the skill's own
-documented commands fails with `command not found` even after the
-venv bootstraps correctly, which is a materially worse failure than
-the §0 friction already noted, since it breaks the installed skill's
-entire worked interface, not merely a usage subtlety. **Do not edit
-the skill's own commands** — §6's content is already-reviewed,
-accepted design, copied verbatim by §B.1 for a reason. Instead, add
-one one-time environment step, documented in the `CLAUDE.md` "Axiom"
-section (§B.8) and in a short note beside the launcher: `export
-PATH="$PWD/dev-docs/tools/axiom_knowledge:$PATH"` (or the equivalent
-for the contributor's own shell/session), so the bare `axiom-knowledge`
-name the skill invokes resolves to the launcher at
-`dev-docs/tools/axiom_knowledge/axiom-knowledge`. A fresh agent or
-contributor then runs that one `export` once per session before
-following the skill's own commands as written.
+**PATH setup — superseded, this revision (correction A2).** An earlier
+revision of this document (native Codex review of PR #8 round 3,
+commit `76143ec`) addressed the installed skill's bare `axiom-knowledge`
+invocations with a required one-time `export PATH=...` step. That
+approach is **replaced, not merely supplemented**, by B.1a above: the
+Ledgerkit-specific installed skill now invokes the launcher by its
+explicit, repository-root-relative path directly, so no `PATH`
+modification, persistent or per-session, is required at all. This
+removes a fragile, easy-to-forget manual step and makes the skill's
+own documented commands work unmodified in a fresh shell, a fresh
+clone, or a subprocess with no inherited environment customisation —
+required test cases, §C.2a.
+
+**B.3a — Track the installed skill in Git (correction A1, this
+revision).** Ledgerkit's `.gitignore` currently reads:
+
+```
+.claude/*
+!.claude/agents/
+```
+
+This ignores everything under `.claude/` except the `agents/`
+subdirectory — including the new `.claude/skills/axiom-work/SKILL.md`
+(confirmed by direct inspection and by `git check-ignore -v
+.claude/skills/axiom-work/SKILL.md` against a disposable scratch clone
+with that file created, this revision: it matches `.claude/*` and is
+ignored). Without a fix, the installed skill would silently never be
+committed — present in the implementer's own working tree, absent from
+a fresh clone, defeating §C.2's own clean-clone acceptance criterion.
+Replace those two lines with:
+
+```
+.claude/*
+!.claude/agents/
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/axiom-work/
+```
+
+This re-includes the `skills/` directory itself (so Git descends into
+it), re-excludes everything directly under it (so `.claude/skills/
+codecompass/`, once removed per §A.1, and any other future local-only
+skill subdirectory stay ignored by default), then re-includes
+specifically `axiom-work/`. **Verified, this revision**, in a
+disposable scratch clone (never Ledgerkit's real checkout): after this
+change, `git check-ignore -v .claude/skills/axiom-work/SKILL.md` reports
+no match (not ignored); `git check-ignore -v
+.claude/skills/codecompass/SKILL.md` still matches (ignored, moot once
+§A.1 removes it); a simulated `.claude/settings.local.json` still
+matches `.claude/*` (ignored, as intended — this is exactly the
+"unrelated local Claude files" case the authorising prompt warns
+against capturing). **Required verification at BUILD time**: after
+adding `.claude/skills/axiom-work/SKILL.md` and running `git add`, run
+both `git check-ignore -v .claude/skills/axiom-work/SKILL.md` (expect:
+no output, exit 1 — not ignored) and `git ls-files .claude/skills`
+(expect: `.claude/skills/axiom-work/SKILL.md` listed) to confirm the
+file is actually tracked, not merely unignored-but-forgotten.
 
 **B.4 — `knowledge/README.md`.** Add the discovery marker (confirmed
 collision-free with Ledgerkit's existing `knowledge/` files, §0) with
@@ -297,14 +398,16 @@ its real register ID.
 
 **B.8 — `CLAUDE.md`.** Replace the removed `## CodeCompass` section
 (§A.1) with a short `## Axiom` section of equivalent weight: what it
-is, the skill name, the `get`/`find` commands, the pinned revision
-note's location (§B.2), **the one-time `PATH` export §B.3 requires**
-(so the skill's own bare `axiom-knowledge` invocations resolve), and
-the same "Ledgerkit's own tests, compat-register and
-`knowledge/DECISIONS.md` remain authoritative regardless of what Axiom
-surfaces" framing the CodeCompass section used — the same epistemic
-caution, carried over, not dropped. Update the folder-structure
-diagram per §A.1's own table.
+is, the skill name, the `get`/`find` commands invoked via the
+repository-root-relative launcher path (§B.1a — no `PATH` export is
+needed or described, correction A2), the pinned revision note's
+location (§B.2), and the same "Ledgerkit's own tests, compat-register
+and `knowledge/DECISIONS.md` remain authoritative regardless of what
+Axiom surfaces" framing the CodeCompass section used — the same
+epistemic caution, carried over, not dropped. Update the
+folder-structure diagram per §A.1's own table, and note the `.gitignore`
+exception pattern (§B.3a) alongside wherever `.claude/` is documented
+in that diagram.
 
 **Explicitly not introduced**: new accounting-runtime dependencies,
 duplicate knowledge stores, MCP, orchestration infrastructure, a
@@ -331,7 +434,15 @@ asserted claims:
    happened to already have PyYAML system-wide), with no `codecompass`
    binary on `PATH` and no prior `vendor.toml`/`context-graph.db`,
    successfully bootstraps §B.3's dedicated venv and runs `get`/`find`
-   against the real register via the new launcher.
+   against the real register via the new launcher. **Required
+   sub-cases (correction A1/A2, this revision)**: (a) `git ls-files
+   .claude/skills` lists `.claude/skills/axiom-work/SKILL.md` in the
+   fresh clone — confirms §B.3a's `.gitignore` exception actually
+   tracked it, not merely unignored it locally; (b) the launcher
+   invokes correctly from the repository root, from a nested
+   subdirectory (e.g. `ledgerkit/query/`), and with no shell `PATH`
+   modification of any kind — confirms §B.1a's repository-root-relative
+   invocation works without the superseded `PATH`-export step.
 3. **A fresh agent** (a genuinely new Claude Code session, not the
    implementing session re-describing its own work) **successfully
    retrieves actual Ledgerkit claims and correctly explains native
@@ -382,28 +493,42 @@ read this whole handoff first, though it should.
 
 > You are the Ledgerkit orchestrator. Execute the CodeCompass-to-Axiom
 > migration specified in Axiom Dev's handoff,
-> `planning/phase-02-ledgerkit-codecompass-migration-handoff.md`
-> (commit-pin it when you read it, since Axiom Dev's own `main` may
-> have advanced since). This prompt authorises implementing that
-> migration in Ledgerkit, under Ledgerkit's own governance
-> (`CLAUDE.md`).
+> `planning/phase-02-ledgerkit-codecompass-migration-handoff.md`, at
+> its approved revision (Axiom Dev PR #8's final reviewed head commit —
+> read `ctosullivan/axiom-dev` PR #8's current state directly, do not
+> assume a specific SHA stays current). The pinned PR 2a implementation
+> to copy (§B.2) is Axiom Dev `main` at commit `1dbb0ab`
+> (`ctosullivan/axiom-dev` PR #6's merge commit) — re-confirm with `git
+> -C <axiom-dev-checkout> log -1 --format='%H %s' main` that this is
+> still current or an ancestor of the current head before copying; if
+> `main` has advanced, copy from commit `1dbb0ab` specifically (e.g.
+> `git show 1dbb0ab:src/axiom_knowledge`), not from whatever `main` has
+> since become, since this handoff's own evidence was produced against
+> that exact commit. This prompt authorises implementing that migration
+> in Ledgerkit, under Ledgerkit's own governance (`CLAUDE.md`).
 >
 > 1. **Baseline and isolate.** Inspect Ledgerkit's actual current
 >    branch, diff and CodeCompass footprint directly — do not trust
 >    the handoff's inventory (§A) as current without re-verifying it
 >    against the real tree, since time may have passed. Do the removal
->    and installation work on a dedicated feature branch, never
->    directly on `main`, and never by force-pushing or discarding any
->    uncommitted work you find.
-> 2. **Flag the folder-structure change before touching it.**
+>    and installation work in an isolated scratch clone or dedicated
+>    Git worktree, on a feature branch, never directly on the existing
+>    `main` checkout, and never by force-pushing or discarding any
+>    uncommitted work you find there.
+> 2. **The folder-structure change is pre-authorised for the documented
+>    set; confirm scope, do not re-request blanket approval.**
 >    Ledgerkit's own `CLAUDE.md` "Unauthorised Change Rule" requires
 >    explicit user approval before changing the documented folder
->    structure, `pyproject.toml`, or `dev-docs/api-spec.md`. This
->    migration changes the folder structure (§A.1/§B). State exactly
->    what will change (the §A.1 removal list, the §B addition list) and
->    get the user's explicit confirmation **before** making any of
->    these changes, even though the overall migration direction is
->    already authorised at the planning level.
+>    structure. The repository owner's own authorising instruction for
+>    this migration round explicitly covers "the documented
+>    CodeCompass-specific folder removals and Axiom additions" — i.e.
+>    exactly §A.1's removal list and §B's addition list, nothing
+>    broader. State both lists back before acting, as a scope
+>    confirmation, and if execution reveals any removal or addition
+>    **not** already named in §A.1/§B, stop and get fresh explicit
+>    confirmation for that specific deviation before proceeding — the
+>    pre-authorisation covers the documented set, not open-ended
+>    folder-structure changes.
 > 3. **Remove, per §A.1.** Delete the CodeCompass tooling/generated-
 >    state/skill/command/agent/validation-findings paths named there.
 >    Confirm each is genuinely CodeCompass-exclusive by reading it
@@ -416,11 +541,16 @@ read this whole handoff first, though it should.
 >    remove those docs from the active tree, fix or annotate every
 >    citation in the same change — a dangling path reference is a
 >    documentation defect, not an acceptable side effect.
-> 5. **Install, per §B.** The skill, the pinned library/launcher, the
+> 5. **Install, per §B.** The skill (adapted per §B.1a — invoked via
+>    the repository-root-relative launcher path, no `PATH` export),
+>    the pinned library/launcher (§B.2/§B.3), the `.gitignore`
+>    exception for `.claude/skills/axiom-work/` (§B.3a — verify with
+>    `git check-ignore -v` and `git ls-files` as that section requires,
+>    not merely assumed from the pattern looking right), the
 >    `knowledge/README.md` register directive, the one genuine scope
 >    manifest (not Axiom Dev's own disposable scratch-eval placeholder
->    — write a real one), the four-claim wiki, the `.gitignore`
->    addition, and the `CLAUDE.md` replacement section.
+>    — write a real one), the four-claim wiki, the `.axiom-local/`
+>    `.gitignore` addition, and the `CLAUDE.md` replacement section.
 > 6. **Reconcile documentation and knowledge.** Add the CodeCompass-
 >    retirement decision and its rationale to `knowledge/DECISIONS.md`
 >    in the same change (Ledgerkit's own standing rule). Resolve or
