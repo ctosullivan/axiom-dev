@@ -220,10 +220,10 @@ repository-root-relative launcher path, resolved dynamically rather
 than hardcoded to a working directory assumption:
 
 ```
-$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge get <id> --task-id <id>
-$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge find "<query>" --task-id <id>
-$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge task-start --task-id <id>
-$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge task-accepted --task-id <id>
+"$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge" get <id> --task-id <id>
+"$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge" find "<query>" --task-id <id>
+"$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge" task-start --task-id <id>
+"$(git rev-parse --show-toplevel)/dev-docs/tools/axiom_knowledge/axiom-knowledge" task-accepted --task-id <id>
 ```
 
 `git rev-parse --show-toplevel` resolves the Ledgerkit repository root
@@ -231,10 +231,16 @@ regardless of the caller's current working directory — the same
 discovery discipline `axiom-knowledge` itself already uses internally
 (`planning/phase-02-stage-2.2-plan.md` §2a.2), applied here at the
 shell level since the launcher must be found before the CLI's own
-`--repo-root` walk-up ever runs. This makes the skill independently
-executable from the repository root, any nested subdirectory, or a
-fresh clone with no prior session state — required test cases, §C.2a
-below. If the Ledgerkit orchestrator places the launcher at a
+`--repo-root` walk-up ever runs. **The resolved executable path must
+be quoted** (`"$(git rev-parse --show-toplevel)/.../axiom-knowledge"`,
+not the bare, unquoted substitution) — found as a genuine gap by
+native Codex review of PR #8's first draft of this correction: an
+unquoted substitution word-splits on a repository path containing a
+space (e.g. a clone at `ledgerkit checkout/`), failing with exit 127
+before ever reaching the launcher. This makes the skill independently
+executable from the repository root, any nested subdirectory, a
+repository path containing spaces, or a fresh clone with no prior
+session state — required test cases, §C.2a below. If the Ledgerkit orchestrator places the launcher at a
 different path at BUILD time (§B.2's own allowance), update these four
 lines to match; the mechanism (repository-root-relative, no `PATH`
 dependency) is the requirement, not this exact path string.
