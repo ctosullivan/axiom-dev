@@ -89,6 +89,29 @@ def load_register(register_root: Path) -> RegisterIndex:
             )
             continue
 
+        # A record can be syntactically valid YAML with a good id, yet
+        # have `upstream`/`ledgerkit` written as something other than a
+        # mapping (e.g. `upstream: hledger`) -- both get() (via
+        # api._record_to_result's upstream.get(...)) and translate()
+        # (via native.get("ledgerkit").get("relationship")) dereference
+        # these with .get(), which crashes with AttributeError on a
+        # non-dict instead of failing cleanly as Malformed. Checked here,
+        # at load time, so both get() AND find() (which reads straight
+        # from `records`, never re-validating) are covered the same way.
+        # Found by native Codex review of PR #6, commit f231b19.
+        structural_error = None
+        for nested_field in ("upstream", "ledgerkit"):
+            nested_value = raw.get(nested_field)
+            if nested_value is not None and not isinstance(nested_value, dict):
+                structural_error = (
+                    f"{path}: '{nested_field}' field must be a mapping, "
+                    f"got {type(nested_value).__name__}"
+                )
+                break
+        if structural_error is not None:
+            malformed_by_stem[stem] = structural_error
+            continue
+
         if record_id in duplicate_ids:
             duplicate_ids[record_id].append(str(path))
             continue

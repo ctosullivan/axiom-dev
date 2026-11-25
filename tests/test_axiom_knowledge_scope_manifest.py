@@ -112,6 +112,26 @@ class ScopeManifestEdgeCaseTests(unittest.TestCase):
         result = ak.get(str(self.repo), CLAIM_ID)
         self.assertEqual(result["derived"]["status"], "UNCERTAIN")
 
+    def test_stale_pin_is_contested_even_when_reviewer_also_missing(self):
+        # Regression for native Codex review of PR #6 (commit f231b19): a
+        # manifest with BOTH a stale source_pin AND missing reviewer
+        # metadata must still surface the known pin conflict as CONTESTED
+        # -- not be silently downgraded to "absent" because an unrelated
+        # field also happens to be missing.
+        sup.write_scope_manifest(
+            self.repo, CLAIM_ID, source_pin="1.52.3", reviewed_by=None, reviewed_date=None
+        )
+        result = ak.get(str(self.repo), CLAIM_ID)
+        self.assertEqual(result["derived"]["status"], "CONTESTED")
+
+    def test_mismatched_claim_id_is_contested_even_when_reviewer_also_missing(self):
+        sup.write_scope_manifest(
+            self.repo, CLAIM_ID, manifest_claim_id="LK-COMPAT-WRONGID-999",
+            reviewed_by=None, reviewed_date=None,
+        )
+        result = ak.get(str(self.repo), CLAIM_ID)
+        self.assertEqual(result["derived"]["status"], "CONTESTED")
+
 
 if __name__ == "__main__":
     unittest.main()

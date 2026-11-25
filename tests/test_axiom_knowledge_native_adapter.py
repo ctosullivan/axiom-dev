@@ -257,6 +257,42 @@ class MalformedAndDuplicateTests(unittest.TestCase):
         with self.assertRaises(NotFoundError):
             ak.get(str(self.repo), "LK-COMPAT-NOPE-999")
 
+    def test_non_mapping_upstream_field_raises_malformed_not_a_crash(self):
+        # Regression for native Codex review of PR #6 (commit f231b19):
+        # `upstream: hledger` (a string, not a mapping) is valid YAML but
+        # crashes api._record_to_result's upstream.get(...) with
+        # AttributeError instead of failing cleanly as Malformed. Must
+        # not break retrieval of a sibling claim in the same register.
+        register_dir = self.repo / "dev-docs" / "compat-register"
+        (register_dir / "LK-COMPAT-BADUPSTREAM-001.yaml").write_text(
+            "id: LK-COMPAT-BADUPSTREAM-001\nstatus: proposed\nupstream: hledger\n",
+            encoding="utf-8",
+        )
+        sup.write_claim(self.repo, "LK-COMPAT-GOOD-002", status="proposed")
+        with self.assertRaises(MalformedError):
+            ak.get(str(self.repo), "LK-COMPAT-BADUPSTREAM-001")
+        result = ak.get(str(self.repo), "LK-COMPAT-GOOD-002")
+        self.assertEqual(result["id"], "LK-COMPAT-GOOD-002")
+
+    def test_non_mapping_ledgerkit_field_raises_malformed_not_a_crash(self):
+        register_dir = self.repo / "dev-docs" / "compat-register"
+        (register_dir / "LK-COMPAT-BADLEDGERKIT-001.yaml").write_text(
+            "id: LK-COMPAT-BADLEDGERKIT-001\nstatus: proposed\nledgerkit: equivalent\n",
+            encoding="utf-8",
+        )
+        with self.assertRaises(MalformedError):
+            ak.get(str(self.repo), "LK-COMPAT-BADLEDGERKIT-001")
+
+    def test_find_excludes_a_structurally_malformed_record_without_crashing(self):
+        register_dir = self.repo / "dev-docs" / "compat-register"
+        (register_dir / "LK-COMPAT-BADUPSTREAM-002.yaml").write_text(
+            "id: LK-COMPAT-BADUPSTREAM-002\narea: parser.example\nstatus: proposed\nupstream: hledger\n",
+            encoding="utf-8",
+        )
+        sup.write_claim(self.repo, "LK-COMPAT-GOOD-003", area="parser.example", status="proposed")
+        results = ak.find(str(self.repo), "area:parser.example")
+        self.assertEqual([r["id"] for r in results], ["LK-COMPAT-GOOD-003"])
+
     def test_non_string_id_field_raises_malformed_not_a_crash(self):
         # Regression for native Codex review of PR #6 (commit 6819c45):
         # `id: [bad, id]` is valid YAML but a list is unhashable, so an

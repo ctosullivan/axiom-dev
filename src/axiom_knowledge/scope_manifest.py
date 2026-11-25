@@ -94,6 +94,16 @@ def evaluate_scope_manifest(
     if not isinstance(raw, dict):
         return ScopeManifestOutcome(status="absent")
 
+    # Checks 2 (claim_id) and 5 (source_pin) are genuine *conflicts* and
+    # must be evaluated -- and reported -- before checks 1/3/4's "missing
+    # evidence" outcomes, even when both kinds of defect are present on
+    # the same manifest. An earlier version of this function returned
+    # "absent" as soon as it found a missing reviewed_by/reviewed_date,
+    # which could mask an already-detected stale source_pin: a manifest
+    # with BOTH a stale pin AND a missing reviewer was reported as merely
+    # absent, silently dropping the known contradiction SS3b.1 says must
+    # surface as CONTESTED. Found by native Codex review of PR #6, commit
+    # f231b19.
     manifest_claim_id = raw.get("claim_id")
     if manifest_claim_id is not None and manifest_claim_id != claim_id:
         return ScopeManifestOutcome(
@@ -103,17 +113,6 @@ def evaluate_scope_manifest(
                 f"'{manifest_claim_id}', not '{claim_id}'"
             ),
         )
-    if manifest_claim_id is None:
-        return ScopeManifestOutcome(status="absent")
-
-    scope = raw.get("scope")
-    if not isinstance(scope, str) or not scope.strip():
-        return ScopeManifestOutcome(status="absent")
-
-    reviewed_by = raw.get("reviewed_by")
-    reviewed_date = raw.get("reviewed_date")
-    if not reviewed_by or not reviewed_date:
-        return ScopeManifestOutcome(status="absent")
 
     source_pin = raw.get("source_pin")
     if (
@@ -129,5 +128,17 @@ def evaluate_scope_manifest(
                 f"upstream.compatibility_target '{native_compatibility_target}'"
             ),
         )
+
+    if manifest_claim_id is None:
+        return ScopeManifestOutcome(status="absent")
+
+    scope = raw.get("scope")
+    if not isinstance(scope, str) or not scope.strip():
+        return ScopeManifestOutcome(status="absent")
+
+    reviewed_by = raw.get("reviewed_by")
+    reviewed_date = raw.get("reviewed_date")
+    if not reviewed_by or not reviewed_date:
+        return ScopeManifestOutcome(status="absent")
 
     return ScopeManifestOutcome(status="passes", scope=scope)
