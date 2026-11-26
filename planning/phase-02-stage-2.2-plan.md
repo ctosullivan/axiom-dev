@@ -19,6 +19,34 @@ architecture (two-PR split, `get`/`find` only, native-register
 adapter) — see `AGENTS.md` §3 on why this is a plan correction, not a
 new ADR.
 
+**CodeCompass-retirement amendment, this revision (§9).** Since the
+above, **PR 2a has merged into `main`**
+([PR #6](https://github.com/ctosullivan/axiom-dev/pull/6), merge
+commit `1dbb0ab`) — `src/axiom_knowledge/` exists and is reviewable
+directly, not merely designed. Separately, the repository owner has
+decided CodeCompass (Ledgerkit's prior dependency/code-comprehension
+tool) is discontinued and is to be retired from Ledgerkit entirely as
+part of PR 2b's own adoption work, rather than installing Axiom
+alongside it. §9 is a planning amendment only — it authorises an
+isolated scratch feasibility evaluation and produces a precise
+removal/adoption specification and Ledgerkit-orchestrator handoff; it
+does **not** authorise modifying Ledgerkit, opening Ledgerkit's PR 2b,
+or marking Stage 2.2 Completed.
+
+**Four further corrections, this amendment's final round (PR #8,
+independently reviewed before human merge approval)**: the installed
+skill is tracked in Git via a precise `.gitignore` exception rather
+than being silently dropped by Ledgerkit's existing `.claude/*` rule
+(A1); the installed skill invokes the launcher by an explicit,
+repository-root-relative path rather than relying on a persistent
+shell `PATH` export (A2); the handoff names the exact source
+repository, its own approved PR #8 revision and the pinned PR 2a
+commit (`1dbb0ab`), executable without prior-conversation context (A3);
+and the affected planning documents are reconciled to state precisely
+what is and is not yet demonstrated, without claiming scratch
+retrieval shows improved development effectiveness (A4). Full detail
+in the handoff document itself, not duplicated here.
+
 ## 1. Objective and baseline
 
 Per `planning/ROADMAP.md`'s Stage 2.2 row and `planning/phase-02-template.md`
@@ -193,7 +221,17 @@ Includes, otherwise unchanged from the previous draft:
 - Reviewable, testable and mergeable entirely within Axiom Dev's own
   CI (`ci-required`), independently of Ledgerkit.
 
-### 2b. Ledgerkit PR — adoption (depends on 2a being merged)
+### 2b. Ledgerkit PR — adoption and CodeCompass retirement (depends on 2a being merged; this revision)
+
+**Redefined, this revision (§9).** PR 2b is no longer purely additive.
+The repository owner has decided CodeCompass is discontinued and is to
+be removed entirely from Ledgerkit's active working tree in the same
+PR that installs Axiom — one coherent migration, not parallel
+operation, not a transitional compatibility layer. §9 below carries
+the full revised architectural decision, the scratch-evaluation
+evidence supporting feasibility, and the complete removal/adoption
+contract; this section's own bullets (unchanged from the prior
+revision) remain PR 2b's *adoption* half only.
 
 A **separate, later, Ledgerkit-targeted PR**, not built or opened by
 this plan or this round:
@@ -439,19 +477,115 @@ complexity-budget discipline.
 2. PR 2a (Axiom Dev): independent review, `ci-required` green,
    fresh-head native Codex review dispositioned, then human merge
    approval — the same bounded cycle `AGENTS.md` §14 already governs.
-3. PR 2b (Ledgerkit): **cannot open before 2a is merged** (it depends
-   on 2a's CLI/skill artifacts). Reviewed under Ledgerkit's own
-   repository governance, which this plan does not assume mirrors
-   Axiom Dev's (`planning/phase-02-adoption-design.md` §3, capability
-   4: "use existing project governance... without duplicating or
-   replacing it"). Separate human merge approval on that repository.
+   **Done**: merged into `main`, merge commit `1dbb0ab`.
+3. PR 2b (Ledgerkit, now including §9's CodeCompass-retirement
+   migration): **cannot open before 2a is merged** (done) **and
+   requires its own separate authorisation**, not granted by this
+   amendment (§9's handoff document is a specification, not that
+   authorisation). Reviewed under Ledgerkit's own repository
+   governance, which this plan does not assume mirrors Axiom Dev's
+   (`planning/phase-02-adoption-design.md` §3, capability 4: "use
+   existing project governance... without duplicating or replacing
+   it") — including Ledgerkit's own `CLAUDE.md` "Unauthorised Change
+   Rule" for the folder-structure change §9's removal/adoption
+   contract entails. Separate human merge approval on that
+   repository.
 4. Stage 2.2 is marked Completed in `planning/ROADMAP.md` only after
    both sub-PRs are merged and independent acceptance criteria (§4)
    are demonstrated — an agent prepares that status change, a human
    confirms it, per `docs/development-lifecycle.md`'s phase-acceptance
-   procedure, same as Stage 2.1's own closeout.
+   procedure, same as Stage 2.1's own closeout. **Amended, §9: this now
+   additionally requires PR 2b's CodeCompass-retirement migration to
+   be independently verified, not merely Axiom's own installation.**
+
+## 9. CodeCompass retirement and PR 2b migration (this revision)
+
+**Architectural decision (owner, not re-opened here).** CodeCompass
+development is discontinued; its use in Ledgerkit has not demonstrated
+sufficient advantage to justify ongoing maintenance. Axiom replaces it
+as Ledgerkit's active development knowledge and evidence framework.
+CodeCompass-specific tooling, generated state, skills, hooks,
+configuration, agent dependencies and obsolete documentation are
+removed entirely from Ledgerkit's active working tree in the same PR
+that installs Axiom — no parallel operation, no compatibility layer,
+no permanent fallback. The migration must leave Ledgerkit simpler to
+operate, not merely exchange one tool for another. Ledgerkit's
+existing authoritative knowledge, compatibility register, independent
+verification practices and Git history are preserved; impact analysis
+(`related`/`impacted`) remains out of scope, deferred to Stage 2.3
+unchanged.
+
+**What this amendment authorises.** An isolated scratch feasibility
+evaluation of the merged PR 2a implementation against Ledgerkit's real
+register (performed, evidence below); production of a precise
+CodeCompass removal/Axiom adoption specification; production of a
+self-contained handoff for Ledgerkit's own orchestrator. **It does not
+authorise** modifying Ledgerkit's real checkout, opening Ledgerkit's PR
+2b, or marking Stage 2.2 Completed — those remain separate, later,
+human-authorised actions (§8.3/§8.4, amended).
+
+**Scratch-evaluation evidence (summary; full detail and reproducible
+commands in the handoff document).** A disposable `git clone` of
+Ledgerkit (never the real checkout, confirmed unmodified afterward)
+confirmed, against real data: `get(LK-COMPAT-PARSER-TAG-COMMODITY-001)`
+and `get(LK-COMPAT-QUERY-TAG-001)` both correctly return
+`derived.status: UNCERTAIN` with no scope manifest present; writing
+one genuinely scoped manifest for the former flips it to
+`derived.status: VERIFIED` with the manifest as the only changed
+input; `find()` is deterministic across repeated runs; discovery
+resolves correctly from a nested subdirectory; `NotFoundError`/
+`RepositoryNotFoundError` are both named, non-crashing; no CodeCompass
+binary, configuration or generated state (`vendor.toml`,
+`context-graph.db`) is needed anywhere in this path; Ledgerkit's own
+935-test suite passes unchanged against the scratch clone; Ledgerkit's
+`pyproject.toml` (`requires-python = ">=3.8"`, `dependencies = []`) is
+untouched. Friction found and recorded, not glossed over: `--repo-root`
+must precede the subcommand; no launcher exists yet for
+`python3 -m axiom_knowledge` (addressed by the handoff's own minimal
+addition, not deferred); one real claim's `implementation[]` entry
+does not parse under the `path:symbol` convention and is correctly
+flagged as `unresolved_reference`, not silently dropped or crashed on;
+`.axiom-local/` is not yet in Ledgerkit's `.gitignore`.
+
+**CodeCompass retirement inventory and minimal Axiom adoption
+contract.** Produced by direct inspection of Ledgerkit's actual
+working tree and `git log` — real paths, not illustrative ones,
+classified as remove / preserve-or-adapt / historical-only, per the
+authorising prompt's own distinction (not a blanket "delete anything
+mentioning CodeCompass"). The full inventory, the minimal adoption
+specification (skill, pinned library, launcher, register directive,
+one genuine scope manifest, four-claim wiki, `.gitignore`,
+`CLAUDE.md` reconciliation), the explicit acceptance criteria, and the
+executable implementation prompt for Ledgerkit's own orchestrator are
+in
+[`planning/phase-02-ledgerkit-codecompass-migration-handoff.md`](phase-02-ledgerkit-codecompass-migration-handoff.md) —
+self-contained there rather than duplicated here, to keep this plan
+readable. That document also names three open questions this
+amendment does not resolve (the pending `ROADMAP.md`
+CodeCompass-upgrade-initiative confirmation; whether to retain the
+general-purpose clean-room methodology apparatus independent of this
+migration; whether to remove or retain CodeCompass-specific historical
+planning/retro records in Ledgerkit's active tree) — each belongs to
+Ledgerkit's own repository owner, not pre-decided here.
+
+**Division of responsibility, explicit.** Axiom Dev orchestrator:
+performs the scratch evaluation, amends this plan, produces the
+removal inventory and the Ledgerkit handoff, independently reviews
+these planning changes, opens this Axiom Dev planning PR — and does
+not modify Ledgerkit's real checkout or open its implementation PR.
+Ledgerkit orchestrator (separately authorised later): performs the
+actual CodeCompass removal and Axiom installation as one coherent
+migration, retains independently valuable Ledgerkit knowledge and
+verification practice without retaining CodeCompass infrastructure,
+runs deterministic and fresh-agent acceptance tests, reconciles
+Ledgerkit's own documentation/agent-instructions/roadmap, obtains
+independent review and bounded corrections, opens Ledgerkit's own
+implementation PR, and does not merge it without Ledgerkit's own
+repository owner's explicit approval.
 
 Next: Stage 2.3 (deterministic integrity and drift, including the
 native-register identity/reference integrity gap
 `planning/archive/phase-02-stage-2.1/README.md` already flagged as
-unresolved) remains out of scope for this plan.
+unresolved) remains out of scope for this plan. PR 2b (Ledgerkit,
+including this amendment's CodeCompass-retirement migration) remains
+unauthorised and unstarted.
